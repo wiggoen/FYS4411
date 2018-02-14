@@ -9,7 +9,7 @@ int runCatchTests() {
 }
 
 int main() {
-    if (TEST){
+    if (TEST) {
         std::cout << "Running tests" << std::endl;
         return runCatchTests();
     } else {
