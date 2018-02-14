@@ -1,4 +1,4 @@
-#include "hamiltonian.h"
+#include "inc/hamiltonian.h"
 
 Hamiltonian::Hamiltonian()
 {

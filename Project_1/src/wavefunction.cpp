@@ -1,4 +1,4 @@
-#include "wavefunction.h"
+#include "inc/wavefunction.h"
 
 Wavefunction::Wavefunction()
 {

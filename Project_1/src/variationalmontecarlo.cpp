@@ -1,4 +1,4 @@
-#include "variationalmontecarlo.h"
+#include "inc/variationalmontecarlo.h"
 
 variationalMonteCarlo::variationalMonteCarlo()
 {

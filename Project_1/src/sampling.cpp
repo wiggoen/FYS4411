@@ -1,4 +1,4 @@
-#include "sampling.h"
+#include "inc/sampling.h"
 
 Sampling::Sampling()
 {
