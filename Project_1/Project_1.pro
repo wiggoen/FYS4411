@@ -6,10 +6,12 @@ CONFIG -= qt
 SOURCES += main.cpp \
     src/hamiltonian.cpp \
     src/sampling.cpp \
+    src/unit_test.cpp \
     src/variationalmontecarlo.cpp \
-    src/wavefunction.cpp \
+    src/wavefunction.cpp
 
-HEADERS += inc/hamiltonian.h \
+HEADERS += inc/catch.hpp \
+    inc/hamiltonian.h \
     inc/sampling.h \
     inc/variationalmontecarlo.h \
-    inc/wavefunction.h \
+    inc/wavefunction.h
