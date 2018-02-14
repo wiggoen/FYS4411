@@ -6,6 +6,7 @@ class variationalMonteCarlo
 {
 public:
     variationalMonteCarlo();
+    ~variationalMonteCarlo();
 };
 
 #endif // VARIATIONALMONTECARLO_H

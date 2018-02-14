@@ -6,6 +6,7 @@ class Wavefunction
 {
 public:
     Wavefunction();
+    ~Wavefunction();
 };
 
 #endif // WAVEFUNCTION_H

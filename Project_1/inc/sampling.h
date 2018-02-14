@@ -6,6 +6,7 @@ class Sampling
 {
 public:
     Sampling();
+    ~Sampling();
 };
 
 #endif // SAMPLING_H

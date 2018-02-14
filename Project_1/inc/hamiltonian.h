@@ -6,6 +6,7 @@ class Hamiltonian
 {
 public:
     Hamiltonian();
+    ~Hamiltonian();
 };
 
 #endif // HAMILTONIAN_H
