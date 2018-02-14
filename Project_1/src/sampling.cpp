@@ -4,3 +4,8 @@ Sampling::Sampling()
 {
 
 }
+
+Sampling::~Sampling()
+{
+
+}

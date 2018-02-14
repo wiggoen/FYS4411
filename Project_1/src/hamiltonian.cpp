@@ -4,3 +4,8 @@ Hamiltonian::Hamiltonian()
 {
 
 }
+
+Hamiltonian::~Hamiltonian()
+{
+
+}

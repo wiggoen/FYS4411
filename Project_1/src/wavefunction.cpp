@@ -4,3 +4,8 @@ Wavefunction::Wavefunction()
 {
 
 }
+
+Wavefunction::~Wavefunction()
+{
+
+}

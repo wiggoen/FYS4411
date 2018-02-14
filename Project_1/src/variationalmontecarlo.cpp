@@ -4,3 +4,8 @@ variationalMonteCarlo::variationalMonteCarlo()
 {
 
 }
+
+variationalMonteCarlo::~variationalMonteCarlo()
+{
+
+}
