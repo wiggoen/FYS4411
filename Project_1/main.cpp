@@ -1,5 +1,6 @@
 #define CATCH_CONFIG_RUNNER // Configure Catch to use this main, and not its own.
 #include "inc/catch.hpp"
+#include "inc/variationalmontecarlo.h"
 #include <iostream>
 
 #define TEST false // Change to true when testing and to false when running the program.
@@ -14,6 +15,7 @@ int main() {
         return runCatchTests();
     } else {
         std::cout << "Hello World!" << std::endl;
+        variationalMonteCarlo* sys = new variationalMonteCarlo(5, 3);
         return 0;
     }
 }
