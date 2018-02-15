@@ -8,10 +8,12 @@ SOURCES += main.cpp \
     src/sampling.cpp \
     src/variationalmontecarlo.cpp \
     src/wavefunction.cpp \
-    src/tests.cpp
+    src/tests.cpp \
+    src/matrix.cpp
 
 HEADERS += inc/catch.hpp \
     inc/hamiltonian.h \
     inc/sampling.h \
     inc/variationalmontecarlo.h \
-    inc/wavefunction.h
+    inc/wavefunction.h \
+    inc/matrix.h
