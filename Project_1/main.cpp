@@ -13,7 +13,7 @@ int main() {
         std::cout << "Running tests" << std::endl;
         return runCatchTests();
     } else {
-        std::cout << "Hello World!" << std::endl;
+        std::cout << "Hello Trond!" << std::endl;
         return 0;
     }
 }
