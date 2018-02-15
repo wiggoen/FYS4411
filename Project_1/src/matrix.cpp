@@ -1,46 +1,35 @@
-#include "inc/variationalmontecarlo.h"
+#include "inc/matrix.h"
 #include <random>
 #include <iomanip>
 #include <iostream>
 
-variationalMonteCarlo::variationalMonteCarlo(int rows, int columns)
+Matrix::Matrix(int rows, int columns)
 {
-
     int row = rows;
     int col = columns;
-    int **matrix = makeMatrix(row, col);
+    double **matrix = makeMatrix(row, col);
     printMatrix(matrix, row, col);
-
-    // Propose a new position R by moving one boson at the time
-    // Calculate new psi
-    // Pick random number r in [0,1]
-    // Test if r is smaller or equal to |psi_T(R')|^2/|psi_T(R')|^2 ??
-    // If yes: accept new position
-        // Calculate delta E_L(R)
-        // Update E = E + delta E_L
-        // E^2 = E^2 + (delta E_L)^2
-
 }
 
-variationalMonteCarlo::~variationalMonteCarlo()
+Matrix::~Matrix()
 {
 
 }
 
-int **variationalMonteCarlo::makeMatrix(int rows, int columns)
+double **Matrix::makeMatrix(int rows, int columns)
 {
     // Initialize the seed and call the Mersienne algorithm
     std::random_device rd;
     std::mt19937_64 gen(rd());
-
     // Set up the uniform distribution for x in [0, 1]
-    std::uniform_real_distribution<double> RandomNumberGenerator(0.0, 1.0);
+    std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
+    std::normal_distribution<double> Normaldistribution(0.0,1.0);
 
     // Initialize matrix by dynamic memory allocation
-    int **Matrix = new int *[rows];
+    double **matrix = new double *[rows];
     for (int i = 0; i < rows; i++)
     {
-        Matrix[i] = new int[columns];
+        matrix[i] = new double [columns];
     }
     /* Deallocation of matrix
      * for (int i = 0; i < rows; i++) {
@@ -52,30 +41,30 @@ int **variationalMonteCarlo::makeMatrix(int rows, int columns)
     // Random numbers or ground state in matrix
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < columns; j++) {
-            int randomNumber = (int) (RandomNumberGenerator(gen)*2);
+            double randomNumber = UniformNumberGenerator(gen);
             std::cout << "randomNumber = " << randomNumber << std::endl;
             if (randomNumber == 0)
             {
-                Matrix[i][j] = -1;
+                matrix[i][j] = -1;
             } else
             {
-                Matrix[i][j] = randomNumber;
+                matrix[i][j] = randomNumber;
             }
         }
     }
-    return Matrix;
+    return matrix;
 }
 
 // It is not recommended to print large matrices
 // TODO: Set max value of print dimension
-void variationalMonteCarlo::printMatrix(int *Matrix[], int rows, int columns)
+void Matrix::printMatrix(double *matrix[], int rows, int columns)
 {
     std::cout << std::endl;
     for(int i = 0; i < rows; i++)
     {
         for(int j = 0; j < columns; j++)
         {
-            std::cout << std::setw(10) << std::setprecision(3) << Matrix[i][j] << " ";
+            std::cout << std::setw(8) << std::setprecision(5) << matrix[i][j] << " ";
         }
         std::cout << std::endl;
     }
