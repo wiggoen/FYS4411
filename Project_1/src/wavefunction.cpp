@@ -1,4 +1,5 @@
 #include "inc/wavefunction.h"
+#include "inc/matrix.h"
 #include <math.h>
 #include <cmath>
 
@@ -11,8 +12,9 @@ Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
     double* psi = new double(N);
     double** R = positionMatrix;
 
-    double* g = new double*(N);
-    double** f = new double(N);
+    double* g = new double(N);
+    Matrix m;
+    double** f = m.makeMatrix(nParticles, 2);
 
     double a = 1;
     int i = 0;
@@ -29,7 +31,7 @@ Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
                         else {f[i][j] = 0;}
             }
         }
-        psi[i] = g[i]*f[i][j];
+        psi[i] = g*f;
     }
 
 

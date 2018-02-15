@@ -9,8 +9,8 @@ public:
     ~Matrix();
     double **makeMatrix(int rows, int columns);
     void printMatrix(double *matrix[], int rows, int columns);
-private:
     double **matrix;
+private:
     int rows;
     int columns;
 };
