@@ -7,10 +7,10 @@ class Matrix
 public:
     Matrix(int rows, int columns);
     ~Matrix();
-    int **makeMatrix(int rows, int columns);
-    void printMatrix(int *matrix[], int rows, int columns);
+    double **makeMatrix(int rows, int columns);
+    void printMatrix(double *matrix[], int rows, int columns);
 private:
-    int** matrix;
+    double **matrix;
     int rows;
     int columns;
 };

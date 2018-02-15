@@ -75,7 +75,7 @@ void variationalMonteCarlo::printMatrix(int *Matrix[], int rows, int columns)
     {
         for(int j = 0; j < columns; j++)
         {
-            std::cout << std::setw(3) << Matrix[i][j] << " ";
+            std::cout << std::setw(10) << std::setprecision(3) << Matrix[i][j] << " ";
         }
         std::cout << std::endl;
     }
