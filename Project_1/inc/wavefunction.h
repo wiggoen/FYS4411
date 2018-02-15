@@ -5,7 +5,7 @@
 class Wavefunction
 {
 public:
-    Wavefunction();
+    Wavefunction(int nParticles, double** positionMatrix);
     ~Wavefunction();
 };
 
