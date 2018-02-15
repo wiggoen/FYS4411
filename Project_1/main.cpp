@@ -14,6 +14,23 @@ int main() {
         return runCatchTests();
     } else {
         std::cout << "Hello Trond!" << std::endl;
+        double beta = 1;
+        int N = 1;
+
+
+
+        // Timing the algorithm
+        clock_t start, finish;
+        start = clock();
+
+        // Timing finished
+        finish = clock();
+        double time = ( double (finish - start)/CLOCKS_PER_SEC);
+
+        std::cout << std::endl << "Run time: " << time << " sec.";
+
         return 0;
     }
+
+
 }
