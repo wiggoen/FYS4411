@@ -28,8 +28,13 @@ Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
         for (int j=0; j<nParticles; j++)
         {
             r[j] = sqrt(R[j][0]*R[j][0]+R[j][1]*R[j][1]+R[j][2]*R[j][2]);
-            if (std::abs(r[i]-r[j])>a) {f[i][j] = 1-a/std::abs(r[i]-r[j]);}
-            else {f[i][j] = 0;}
+            if (std::abs(r[i]-r[j])>a)
+            {
+                f[i][j] = 1-a/std::abs(r[i]-r[j]);
+            } else
+            {
+                f[i][j] = 0;
+            }
         }
     }
     //psi[i] = g*f;

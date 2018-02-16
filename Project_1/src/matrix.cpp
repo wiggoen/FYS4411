@@ -40,8 +40,10 @@ double **Matrix::makeMatrix(int rows, int columns)
     */
 
     // Random numbers or ground state in matrix
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < columns; j++) {
+    for(int i = 0; i < rows; i++)
+    {
+        for(int j = 0; j < columns; j++)
+        {
             double randomNumber = UniformNumberGenerator(gen);
             //std::cout << "randomNumber = " << randomNumber << std::endl;
             if (randomNumber == 0)
@@ -63,7 +65,8 @@ void Matrix::printMatrix(double *matrix[])
     if (rows > 10 || columns > 10)
     {
         std::cout << "printMatrix will not print matrices larger than 10x10." << std::endl;
-    } else {
+    } else
+    {
         for(int i = 0; i < rows; i++)
         {
             for(int j = 0; j < columns; j++)

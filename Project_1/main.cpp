@@ -5,16 +5,19 @@
 
 #define TEST false // Change to true when testing and to false when running the program.
 
-int runCatchTests() {
+int runCatchTests()
+{
     return Catch::Session().run();
 }
 
-int main() {
-    if (TEST) {
+int main()
+{
+    if (TEST)
+    {
         std::cout << "Running tests" << std::endl;
         return runCatchTests();
-    } else {
-
+    } else
+    {
         std::cout << "Hello World!" << std::endl;
 
         // Initialize matrix
@@ -38,6 +41,4 @@ int main() {
 
         return 0;
     }
-
-
 }
