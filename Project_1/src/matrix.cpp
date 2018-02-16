@@ -43,7 +43,7 @@ double **Matrix::makeMatrix(int rows, int columns)
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < columns; j++) {
             double randomNumber = UniformNumberGenerator(gen);
-            std::cout << "randomNumber = " << randomNumber << std::endl;
+            //std::cout << "randomNumber = " << randomNumber << std::endl;
             if (randomNumber == 0)
             {
                 matrix[i][j] = -1;  // change this, or remove it
