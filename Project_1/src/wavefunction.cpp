@@ -31,7 +31,7 @@ Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
                         else {f[i][j] = 0;}
             }
         }
-        psi[i] = g*f;
+        //psi[i] = g*f;
     }
 
 

@@ -16,7 +16,11 @@ int main() {
     } else {
 
         std::cout << "Hello World!" << std::endl;
-        Matrix* sys = new Matrix(5, 3);
+
+        // Initialize matrix
+        Matrix mat;
+        double **t = mat.makeMatrix(5, 3);
+        mat.printMatrix(t);
 
         double beta = 1;
         int N = 1;
@@ -28,7 +32,7 @@ int main() {
 
         // Timing finished
         finish = clock();
-        double time = ( double (finish - start)/CLOCKS_PER_SEC);
+        double time = (double (finish - start)/CLOCKS_PER_SEC);
 
         std::cout << std::endl << "Run time: " << time << " sec.";
 

@@ -5,10 +5,10 @@
 class Matrix
 {
 public:
-    Matrix(int rows, int columns);
+    Matrix();
     ~Matrix();
     double **makeMatrix(int rows, int columns);
-    void printMatrix(double *matrix[], int rows, int columns);
+    void printMatrix(double *matrix[]);
     double **matrix;
 private:
     int rows;
