@@ -18,9 +18,9 @@ int main() {
         std::cout << "Hello World!" << std::endl;
 
         // Initialize matrix
-        Matrix mat;
-        double **t = mat.makeMatrix(5, 3);
-        mat.printMatrix(t);
+        Matrix matrix;
+        double **t = matrix.makeMatrix(5, 3);
+        matrix.printMatrix(t);
 
         double beta = 1;
         int N = 1;

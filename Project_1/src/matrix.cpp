@@ -15,7 +15,7 @@ Matrix::~Matrix()
 
 double **Matrix::makeMatrix(int rows, int columns)
 {
-    // Telling
+    // Telling Matrix class that these values are the private values
     this->rows = rows;
     this->columns = columns;
 
