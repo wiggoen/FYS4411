@@ -21,13 +21,22 @@ variationalMonteCarlo::variationalMonteCarlo(int rows, int columns)
     }
 
     // Calculate new psi
-
+    double psi = Wavefunction(row,matrix);
     // Pick random number r in [0,1]
+    double r = random_double(1);
     // Test if r is smaller or equal to |psi_T(R')|^2/|psi_T(R')|^2 ??
+    double test_func = 1; //change this to be actual function above
     // If yes: accept new position
+    if (r<test_func)
+    {
         // Calculate delta E_L(R)
         // Update E = E + delta E_L
         // E^2 = E^2 + (delta E_L)^2
+    }else
+    {
+        new_position = old_position;
+    }
+    return new_postition;
 
 }
 
@@ -39,7 +48,7 @@ variationalMonteCarlo::~variationalMonteCarlo(int rows, int columns)
 double random_double(fMax)
 {
     double f = (double)rand() / RAND_MAX;
-    return f*fMax
+    return f*fMax;
 }
 
 int **variationalMonteCarlo::makeMatrix(int rows, int columns)
