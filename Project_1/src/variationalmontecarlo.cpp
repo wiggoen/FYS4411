@@ -5,17 +5,33 @@
 #include <iomanip>
 #include <iostream>
 
-VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns)
+VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns, double** positionMatrix)
 {
-    N = 1;
-    Matrix matrix;
 
-    Wavefunction wavefunc(N,matrix);
+}
+
+VariationalMonteCarlo::~VariationalMonteCarlo()
+{
+
+}
+
+double random_double(double fMax)
+{
+    double f = (double)rand() / RAND_MAX;
+    return f*fMax;
+}
+
+void vmc(int rows, int columns, double** positionMatrix)
+{
 
     int row = rows;     //number of particles
     int col = columns;  //dimensions
-    int **matrix = makeMatrix(row, col);
-    printMatrix(matrix, row, col);
+    //int **matrix = makeMatrix(row, col);
+    //printMatrix(matrix, row, col);
+
+    Wavefunction wavefunc(row,positionMatrix);
+    double* old_position = new double[col];
+    double* new_position;
 
     // Propose a new position R by moving one boson at the time
     // * Pick random boson
@@ -23,11 +39,14 @@ VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns)
     // * Move boson
     for (int i = 0; i<col; i++)
     {
-        matrix[random_boson][i] = random_double(1);
+        old_position[i] = positionMatrix[random_boson][i];
+        positionMatrix[random_boson][i] = random_double(1);
+        new_position[i] = positionMatrix[random_boson][i];
     }
 
     // Calculate new psi
-    double psi = wavefunc(row,matrix);
+    double psi = wavefunc(row,positionMatrix);
+
     // Pick random number r in [0,1]
     double r = random_double(1);
     // Test if r is smaller or equal to |psi_T(R')|^2/|psi_T(R')|^2 ??
@@ -42,20 +61,9 @@ VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns)
     {
         new_position = old_position;
     }
-    return new_postition;
-
 }
 
-VariationalMonteCarlo::~VariationalMonteCarlo(int rows, int columns)
-{
 
-}
-
-double random_double(fMax)
-{
-    double f = (double)rand() / RAND_MAX;
-    return f*fMax;
-}
 
 int **VariationalMonteCarlo::makeMatrix(int rows, int columns)
 {

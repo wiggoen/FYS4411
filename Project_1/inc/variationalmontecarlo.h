@@ -5,7 +5,7 @@
 class VariationalMonteCarlo
 {
 public:
-    VariationalMonteCarlo(int rows, int columns);
+    VariationalMonteCarlo(int rows, int columns, double** positionMatrix);
     ~VariationalMonteCarlo();
 private:
 

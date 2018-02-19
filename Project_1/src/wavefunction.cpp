@@ -20,6 +20,7 @@ Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
             psi *= g*f;
         }
     }
+    return psi;
 }
 
 double g(double* position)
