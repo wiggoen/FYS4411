@@ -6,13 +6,22 @@
 variationalMonteCarlo::variationalMonteCarlo(int rows, int columns)
 {
 
-    int row = rows;
-    int col = columns;
+    int row = rows;     //number of particles
+    int col = columns;  //dimensions
     int **matrix = makeMatrix(row, col);
     printMatrix(matrix, row, col);
 
     // Propose a new position R by moving one boson at the time
+    // * Pick random boson
+    int random_boson = rand() % row;
+    // * Move boson
+    for (int i = 0; i<col; i++)
+    {
+        matrix[random_boson][i] = random_double(1);
+    }
+
     // Calculate new psi
+
     // Pick random number r in [0,1]
     // Test if r is smaller or equal to |psi_T(R')|^2/|psi_T(R')|^2 ??
     // If yes: accept new position
@@ -22,9 +31,15 @@ variationalMonteCarlo::variationalMonteCarlo(int rows, int columns)
 
 }
 
-variationalMonteCarlo::~variationalMonteCarlo()
+variationalMonteCarlo::~variationalMonteCarlo(int rows, int columns)
 {
 
+}
+
+double random_double(fMax)
+{
+    double f = (double)rand() / RAND_MAX;
+    return f*fMax
 }
 
 int **variationalMonteCarlo::makeMatrix(int rows, int columns)
