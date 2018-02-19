@@ -1,10 +1,16 @@
 #include "inc/variationalmontecarlo.h"
+#include "inc/wavefunction.h"
+#include "inc/matrix.h"
 #include <random>
 #include <iomanip>
 #include <iostream>
 
-variationalMonteCarlo::variationalMonteCarlo(int rows, int columns)
+VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns)
 {
+    N = 1;
+    Matrix matrix;
+
+    Wavefunction wavefunc(N,matrix);
 
     int row = rows;     //number of particles
     int col = columns;  //dimensions
@@ -21,7 +27,7 @@ variationalMonteCarlo::variationalMonteCarlo(int rows, int columns)
     }
 
     // Calculate new psi
-    double psi = Wavefunction(row,matrix);
+    double psi = wavefunc(row,matrix);
     // Pick random number r in [0,1]
     double r = random_double(1);
     // Test if r is smaller or equal to |psi_T(R')|^2/|psi_T(R')|^2 ??
@@ -40,7 +46,7 @@ variationalMonteCarlo::variationalMonteCarlo(int rows, int columns)
 
 }
 
-variationalMonteCarlo::~variationalMonteCarlo(int rows, int columns)
+VariationalMonteCarlo::~VariationalMonteCarlo(int rows, int columns)
 {
 
 }
@@ -51,7 +57,7 @@ double random_double(fMax)
     return f*fMax;
 }
 
-int **variationalMonteCarlo::makeMatrix(int rows, int columns)
+int **VariationalMonteCarlo::makeMatrix(int rows, int columns)
 {
     // Initialize the seed and call the Mersienne algorithm
     std::random_device rd;
@@ -92,7 +98,7 @@ int **variationalMonteCarlo::makeMatrix(int rows, int columns)
 
 // It is not recommended to print large matrices
 // TODO: Set max value of print dimension
-void variationalMonteCarlo::printMatrix(int *Matrix[], int rows, int columns)
+void VariationalMonteCarlo::printMatrix(int *Matrix[], int rows, int columns)
 {
     std::cout << std::endl;
     for(int i = 0; i < rows; i++)

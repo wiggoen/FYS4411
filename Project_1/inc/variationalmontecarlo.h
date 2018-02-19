@@ -2,11 +2,11 @@
 #define VARIATIONALMONTECARLO_H
 
 
-class variationalMonteCarlo
+class VariationalMonteCarlo
 {
 public:
-    variationalMonteCarlo();
-    ~variationalMonteCarlo();
+    VariationalMonteCarlo(int rows, int columns);
+    ~VariationalMonteCarlo();
 private:
 
 };
