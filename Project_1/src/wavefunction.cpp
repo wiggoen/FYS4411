@@ -5,30 +5,21 @@
 
 Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
 {
-    //psi = prod(i){g(alpha,beta,r_i)}
-    // * prod(i<j){f(a,|r_i-r_j|}
-
     Matrix matrix;
-
     int N = 100;
-    double* psi = new double(N);
-
     double** R = positionMatrix;
-    double* g = new double(N);
-    double** f = matrix.makeMatrix(nParticles, 2);
-
     double a = 1;
-    int i = 0;
-    double* r = new double(nParticles);
+    double psi;
 
     for (int i=0; i<nParticles; i++)
     {
+        double g = g(R[i]);
         for (int j=0; j<nParticles; j++)
         {
-
+            double f = f(R[i],R[j],a);
+            psi *= g*f;
         }
     }
-    //psi[i] = g*f;
 }
 
 double g(double* position)
