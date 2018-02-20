@@ -9,7 +9,8 @@ public:
     ~Wavefunction();
     //double Wavefunction(int nParticles, double** positionMatrix);
     double calculate_psi(int nParticles, double** positionMatrix);
-
+    double g(double* position);
+    double f(double* position1, double* position2, double a);
 
 };
 

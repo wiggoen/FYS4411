@@ -3,56 +3,24 @@
 #include <math.h>
 #include <cmath>
 
-double Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
+Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
 {
-    Matrix matrix;
+    //Matrix matrix;
     double calculate_psi(int nParticles, double** positionMatrix);
-
-    int N = 100;
-    double** R = positionMatrix;
-    double a = 1;
-    double psi;
-
-    for (int i=0; i<nParticles; i++)
-    {
-        double g = g(R[i]);
-        for (int j=0; j<nParticles; j++)
-        {
-            double f = f(R[i],R[j],a);
-            psi *= g*f;
-        }
-    }
-    return psi;
+    double g(double* position);
+    double f(double* position1, double* position2, double a);
 }
 
-double calculate_psi(int nParticles, double** positionMatrix)
-{
-    Matrix matrix;
-    int N = 100;
-    double** R = positionMatrix;
-    double a = 1;
-    double psi;
 
-    for (int i=0; i<nParticles; i++)
-    {
-        double g = g(R[i]);
-        for (int j=0; j<nParticles; j++)
-        {
-            double f = f(R[i],R[j],a);
-            psi *= g*f;
-        }
-    }
-    return psi;
-}
 
-double g(double* position)
+double Wavefunction::g(double* position)
 {
     double* p = position;
     double r = sqrt(p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
     return exp(r*r);
 }
 
-double f(double* position1, double* position2, double a)
+double Wavefunction::f(double* position1, double* position2, double a)
 {
     double* p1 = position1;
     double* p2 = position2;
@@ -62,6 +30,25 @@ double f(double* position1, double* position2, double a)
     {
         return 1-a/(std::abs(r1-r2));
     } else {return 0;}
+}
+
+double Wavefunction::calculate_psi(int nParticles, double** positionMatrix)
+{
+    //Matrix matrix;
+    double** R = positionMatrix;
+    double a = 1;
+    double psi;
+
+    for (int i=0; i<nParticles; i++)
+    {
+        double g_i = g(R[i]);
+        for (int j=0; j<nParticles; j++)
+        {
+            double f_ij = f(R[i],R[j],a);
+            psi *= g_i*f_ij;
+        }
+    }
+    return psi;
 }
 
 
