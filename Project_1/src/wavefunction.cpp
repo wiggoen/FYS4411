@@ -51,6 +51,25 @@ double Wavefunction::calculate_psi(int nParticles, double** positionMatrix)
     return psi;
 }
 
+double Wavefunction::Hamiltonian(int nParticles, double** positionMatrix)
+{
+    // For now this only calculates the spherical potential
+    double sum1, sum2;
+    int N = nParticles;
+    for (int i=0; i<N; i++)
+    {
+
+    }
+}
+
+double Wavefunction::localEnergy(int nParticles, double** positionMatrix)
+{
+    // (1/psi)*H*psi
+    int N = nParticles;
+    double psi = calculate_psi(N,positionMatrix);
+
+}
+
 
 Wavefunction::~Wavefunction()
 {
