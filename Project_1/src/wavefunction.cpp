@@ -3,7 +3,7 @@
 #include <math.h>
 #include <cmath>
 
-Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
+double Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
 {
     Matrix matrix;
     int N = 100;
