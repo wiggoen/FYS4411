@@ -6,6 +6,28 @@
 double Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
 {
     Matrix matrix;
+    double calculate_psi(int nParticles, double** positionMatrix);
+
+    int N = 100;
+    double** R = positionMatrix;
+    double a = 1;
+    double psi;
+
+    for (int i=0; i<nParticles; i++)
+    {
+        double g = g(R[i]);
+        for (int j=0; j<nParticles; j++)
+        {
+            double f = f(R[i],R[j],a);
+            psi *= g*f;
+        }
+    }
+    return psi;
+}
+
+double calculate_psi(int nParticles, double** positionMatrix)
+{
+    Matrix matrix;
     int N = 100;
     double** R = positionMatrix;
     double a = 1;

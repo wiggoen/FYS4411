@@ -29,7 +29,7 @@ void vmc(int rows, int columns, double** positionMatrix)
     //int **matrix = makeMatrix(row, col);
     //printMatrix(matrix, row, col);
 
-    //Wavefunction wavefunc(row,positionMatrix);
+    Wavefunction wavefunc(row,positionMatrix);
     double* old_position = new double[col];
     double* new_position;
 
@@ -45,7 +45,8 @@ void vmc(int rows, int columns, double** positionMatrix)
     }
 
     // Calculate new psi
-    double psi = Wavefunction::Wavefunction(row,positionMatrix);
+    double psi;
+    psi = wavefunc.calculate_psi(row,positionMatrix);
 
     // Pick random number r in [0,1]
     double r = random_double(1);
@@ -59,7 +60,10 @@ void vmc(int rows, int columns, double** positionMatrix)
         // E^2 = E^2 + (delta E_L)^2
     }else
     {
-        new_position = old_position;
+        for (int i=0; i<col; i++)
+        {
+            positionMatrix[random_boson][i]=old_position[i];
+        }
     }
 }
 
