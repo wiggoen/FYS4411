@@ -10,7 +10,9 @@ Sampling::~Sampling()
 
 }
 
-Sampling::Metropolis_brute_force(double *)
+// TODO: FIX THIS
+/*
+Sampling::Metropolis_brute_force(double *matrix)
 {
     // Loop over matrix
     for(int i = 0; i < rows; i++)
@@ -35,3 +37,4 @@ Sampling::Metropolis_brute_force(double *)
     }
     return matrix;
 }
+*/
