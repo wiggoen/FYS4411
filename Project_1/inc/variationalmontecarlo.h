@@ -1,5 +1,6 @@
 #ifndef VARIATIONALMONTECARLO_H
 #define VARIATIONALMONTECARLO_H
+#include "armadillo"
 
 
 class VariationalMonteCarlo
@@ -13,6 +14,8 @@ public:
     ~VariationalMonteCarlo();
     static void printMatrix(int *Matrix[], int rows, int columns);
     int **makeMatrix(int rows, int columns);// {return Matrix;}
+    static void vmc(int rows, int columns, const arma::mat &);
+
 
 };
 

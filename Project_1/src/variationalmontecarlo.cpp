@@ -4,6 +4,7 @@
 #include <random>
 #include <iomanip>
 #include <iostream>
+#include "armadillo"
 
 VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns, double** positionMatrix)
 {
@@ -21,17 +22,19 @@ double random_double(double fMax)
     return f*fMax;
 }
 
-void vmc(int rows, int columns, double** positionMatrix)
+void VariationalMonteCarlo::vmc(int rows, int columns, const arma::mat &)
 {
 
     int row = rows;     //number of particles
     int col = columns;  //dimensions
     //int **matrix = makeMatrix(row, col);
     //printMatrix(matrix, row, col);
+    arma::mat positionMatrix = arma::zeros<arma::mat>(row,col);
+
 
     Wavefunction wavefunc(row,positionMatrix);
-    double* old_position = new double[col];
-    double* new_position;
+    arma::vec old_position = arma::zeros<arma::vec>(col);
+    arma::vec new_position = arma::zeros<arma::vec>(col);
 
     // Propose a new position R by moving one boson at the time
     // * Pick random boson
@@ -39,9 +42,9 @@ void vmc(int rows, int columns, double** positionMatrix)
     // * Move boson
     for (int i = 0; i<col; i++)
     {
-        old_position[i] = positionMatrix[random_boson][i];
-        positionMatrix[random_boson][i] = random_double(1);
-        new_position[i] = positionMatrix[random_boson][i];
+        old_position(i) = positionMatrix(random_boson,i);
+        positionMatrix(random_boson,i) = random_double(1);
+        new_position(i) = positionMatrix(random_boson,i);
     }
 
     // Calculate new psi
