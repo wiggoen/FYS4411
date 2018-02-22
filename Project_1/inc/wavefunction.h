@@ -5,7 +5,7 @@
 class Wavefunction
 {
 public:
-    Wavefunction(int nParticles, double** positionMatrix);
+    Wavefunction(int nParticles, const arma::mat &);
     ~Wavefunction();
     //double Wavefunction(int nParticles, double** positionMatrix);
     double calculate_psi(int nParticles, double** positionMatrix);

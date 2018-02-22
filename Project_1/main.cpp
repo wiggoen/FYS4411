@@ -5,18 +5,25 @@
 
 #define TEST false // Change to true when testing and to false when running the program.
 
-int runCatchTests() {
+int runCatchTests()
+{
     return Catch::Session().run();
 }
 
-int main() {
-    if (TEST) {
+int main()
+{
+    if (TEST)
+    {
         std::cout << "Running tests" << std::endl;
         return runCatchTests();
-    } else {
-
+    } else
+    {
         std::cout << "Hello World!" << std::endl;
-        Matrix* sys = new Matrix(5, 3);
+
+        // Initialize matrix
+        Matrix matrix;
+        double **t = matrix.makeMatrix(5, 3);
+        matrix.printMatrix(t);
 
         double beta = 1;
         int N = 1;
@@ -28,12 +35,10 @@ int main() {
 
         // Timing finished
         finish = clock();
-        double time = ( double (finish - start)/CLOCKS_PER_SEC);
+        double time = (double (finish - start)/CLOCKS_PER_SEC);
 
         std::cout << std::endl << "Run time: " << time << " sec.";
 
         return 0;
     }
-
-
 }

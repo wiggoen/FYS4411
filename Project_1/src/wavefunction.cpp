@@ -2,8 +2,9 @@
 #include "inc/matrix.h"
 #include <math.h>
 #include <cmath>
+#include "armadillo"
 
-Wavefunction::Wavefunction(int nParticles, double** positionMatrix)
+Wavefunction::Wavefunction(int nParticles, const arma::mat &)
 {
     //Matrix matrix;
     double calculate_psi(int nParticles, double** positionMatrix);
