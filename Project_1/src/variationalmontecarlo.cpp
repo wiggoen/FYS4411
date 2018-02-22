@@ -22,6 +22,8 @@ double random_double(double fMax)
     return f*fMax;
 }
 
+// Trond er kul
+
 void VariationalMonteCarlo::vmc(int rows, int columns, const arma::mat &)
 {
 
