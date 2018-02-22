@@ -53,16 +53,7 @@ double Wavefunction::calculate_psi(int nParticles, const arma::mat &positionMatr
     return psi;
 }
 
-double Wavefunction::Hamiltonian(int nParticles, const arma::mat &)
-{
-    // For now this only calculates the spherical potential
-    double sum1, sum2;
-    int N = nParticles;
-    for (int i=0; i<N; i++)
-    {
-        //wtf, don't know how to implement this...
-    }
-}
+
 
 double Wavefunction::localEnergy(int nParticles, const arma::mat &positionMatrix)
 {
