@@ -1,5 +1,6 @@
 #ifndef WAVEFUNCTION_H
 #define WAVEFUNCTION_H
+#include "armadillo"
 
 
 class Wavefunction
@@ -8,11 +9,11 @@ public:
     Wavefunction(int nParticles, const arma::mat &);
     ~Wavefunction();
     //double Wavefunction(int nParticles, double** positionMatrix);
-    double calculate_psi(int nParticles, double** positionMatrix);
-    double g(double* position);
-    double f(double* position1, double* position2, double a);
-    double Hamiltonian(int nParticles, double** positionMatrix);
-    double localEnergy(int nParticles, double** positionMatrix);
+    double calculate_psi(int nParticles, const arma::mat &);
+    double g(const arma::vec &position);
+    double f(const arma::vec &position1, const arma::vec &position2, double a);
+    double Hamiltonian(int nParticles, const arma::mat &);
+    double localEnergy(int nParticles, const arma::mat &positionMatrix);
 
 
 

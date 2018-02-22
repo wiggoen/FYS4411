@@ -6,7 +6,7 @@
 #include <iostream>
 #include "armadillo"
 
-VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns, double** positionMatrix)
+VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns, const arma::mat &)
 {
 
 }
@@ -21,8 +21,6 @@ double random_double(double fMax)
     double f = (double)rand() / RAND_MAX;
     return f*fMax;
 }
-
-// Trond er kul
 
 void VariationalMonteCarlo::vmc(int rows, int columns, const arma::mat &)
 {
@@ -67,7 +65,7 @@ void VariationalMonteCarlo::vmc(int rows, int columns, const arma::mat &)
     {
         for (int i=0; i<col; i++)
         {
-            positionMatrix[random_boson][i]=old_position[i];
+            positionMatrix(random_boson,i)=old_position(i);
         }
     }
 }
@@ -115,6 +113,7 @@ int **VariationalMonteCarlo::makeMatrix(int rows, int columns)
 
 // It is not recommended to print large matrices
 // TODO: Set max value of print dimension
+/*
 void VariationalMonteCarlo::printMatrix(int *Matrix[], int rows, int columns)
 {
     std::cout << std::endl;
@@ -128,3 +127,4 @@ void VariationalMonteCarlo::printMatrix(int *Matrix[], int rows, int columns)
     }
     std::cout << std::endl;
 }
+*/

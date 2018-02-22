@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <iostream>
 
+/*
 Matrix::Matrix()
 {
 
@@ -12,7 +13,7 @@ Matrix::~Matrix()
 {
 
 }
-
+/*
 double **Matrix::makeMatrix(int rows, int columns)
 {
     // Telling Matrix class that these values are the private values
@@ -38,6 +39,8 @@ double **Matrix::makeMatrix(int rows, int columns)
      * delete [] Matrix;
      * }
     */
+
+/*
 
     // Random numbers or ground state in matrix
     for(int i = 0; i < rows; i++)
@@ -78,3 +81,4 @@ void Matrix::printMatrix(double *matrix[])
     }
     std::cout << std::endl;
 }
+*/
