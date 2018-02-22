@@ -58,7 +58,7 @@ double Wavefunction::Hamiltonian(int nParticles, double** positionMatrix)
     int N = nParticles;
     for (int i=0; i<N; i++)
     {
-
+        //wtf, don't know how to implement this...
     }
 }
 
