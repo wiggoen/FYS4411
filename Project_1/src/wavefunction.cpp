@@ -14,10 +14,12 @@ Wavefunction::Wavefunction(int nParticles, const arma::mat &)
 
 
 
-double Wavefunction::g(const arma::vec &position)
+double Wavefunction::g(double position)
 {
-    arma::vec p = position;
-    double r = sqrt(p(0)*p(0)+p(1)*p(1)+p(2)*p(2));
+    //arma::vec p = position;
+    //double r = sqrt(p(0)*p(0)+p(1)*p(1)+p(2)*p(2));
+    //return exp(r*r);
+    double r = abs(position);
     return exp(r*r);
 }
 
@@ -33,6 +35,7 @@ double Wavefunction::f(const arma::vec &position1, const arma::vec &position2, d
     } else {return 0;}
 }
 
+/*
 double Wavefunction::calculate_psi(int nParticles, const arma::mat &positionMatrix)
 {
     //Matrix matrix;
@@ -53,13 +56,13 @@ double Wavefunction::calculate_psi(int nParticles, const arma::mat &positionMatr
     return psi;
 }
 
-
+*/
 
 double Wavefunction::localEnergy(int nParticles, const arma::mat &positionMatrix)
 {
     // (1/psi)*H*psi
     int N = nParticles;
-    double psi = calculate_psi(N,positionMatrix);
+    //double psi = calculate_psi(N,positionMatrix);
 
 }
 

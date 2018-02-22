@@ -49,7 +49,7 @@ void VariationalMonteCarlo::vmc(int rows, int columns, const arma::mat &)
 
     // Calculate new psi
     double psi;
-    psi = wavefunc.calculate_psi(row,positionMatrix);
+    //psi = wavefunc.calculate_psi(row,positionMatrix);
 
     // Pick random number r in [0,1]
     double r = random_double(1);
