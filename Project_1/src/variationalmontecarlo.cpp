@@ -1,12 +1,16 @@
 #include "inc/variationalmontecarlo.h"
 #include "inc/wavefunction.h"
-#include "inc/matrix.h"
 #include <random>
 #include <iomanip>
 #include <iostream>
-#include "armadillo"
+#include <armadillo>
 
-VariationalMonteCarlo::VariationalMonteCarlo(int rows, int columns, const arma::mat &)
+VariationalMonteCarlo::VariationalMonteCarlo() : // TODO: put as command line arguments
+    nDimensions(1),
+    nParticles(1),
+    nCycles(1e6),
+    alpha(0.5),
+    stepLength(0.1)
 {
 
 }
@@ -16,115 +20,108 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 
 }
 
-double random_double(double fMax)
+
+void VariationalMonteCarlo::runMonteCarloIntegration()
 {
-    double f = (double)rand() / RAND_MAX;
-    return f*fMax;
-}
+    // TODO: Move random to main?
 
-void VariationalMonteCarlo::vmc(int rows, int columns, const arma::mat &)
-{
-
-    int row = rows;     //number of particles
-    int col = columns;  //dimensions
-    //int **matrix = makeMatrix(row, col);
-    //printMatrix(matrix, row, col);
-    arma::mat positionMatrix = arma::zeros<arma::mat>(row,col);
-
-
-    Wavefunction wavefunc(row,positionMatrix);
-    arma::vec old_position = arma::zeros<arma::vec>(col);
-    arma::vec new_position = arma::zeros<arma::vec>(col);
-
-    // Propose a new position R by moving one boson at the time
-    // * Pick random boson
-    int random_boson = rand() % row;
-    // * Move boson
-    for (int i = 0; i<col; i++)
-    {
-        old_position(i) = positionMatrix(random_boson,i);
-        positionMatrix(random_boson,i) = random_double(1);
-        new_position(i) = positionMatrix(random_boson,i);
-    }
-
-    // Calculate new psi
-    double psi;
-    //psi = wavefunc.calculate_psi(row,positionMatrix);
-
-    // Pick random number r in [0,1]
-    double r = random_double(1);
-    // Test if r is smaller or equal to |psi_T(R')|^2/|psi_T(R')|^2 ??
-    double test_func = 1; //change this to be actual function above
-    // If yes: accept new position
-    if (r<test_func)
-    {
-        // Calculate delta E_L(R)
-        // Update E = E + delta E_L
-        // E^2 = E^2 + (delta E_L)^2
-    }else
-    {
-        for (int i=0; i<col; i++)
-        {
-            positionMatrix(random_boson,i)=old_position(i);
-        }
-    }
-}
-
-
-
-int **VariationalMonteCarlo::makeMatrix(int rows, int columns)
-{
-    // Initialize the seed and call the Mersienne algorithm
+    // Initialize the seed and call the Mersenne Twister algorithm
     std::random_device rd;
     std::mt19937_64 gen(rd());
-
     // Set up the uniform distribution for x in [0, 1]
-    std::uniform_real_distribution<double> RandomNumberGenerator(0.0, 1.0);
+    std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
+    // Set up the normal distribution for x in [0, 1]
+    //std::normal_distribution<double> NormalDistribution(0.0,1.0);         // Will be used later
 
-    // Initialize matrix by dynamic memory allocation
-    int **Matrix = new int *[rows];
-    for (int i = 0; i < rows; i++)
+
+    rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
+    rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
+    QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
+    QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
+
+    double waveFunctionOld = 0;
+    double waveFunctionNew = 0;
+
+    double energySum = 0;
+    double energySquaredSum = 0;
+
+    double deltaEnergy;
+
+    double acceptanceWeight = 0;
+
+    // initial trial positions
+    for (int i = 0; i < nParticles; i++)
     {
-        Matrix[i] = new int[columns];
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rOld(i, j) = (UniformNumberGenerator(gen) - 0.5) * stepLength;
+        }
     }
-    /* Deallocation of matrix
-     * for (int i = 0; i < rows; i++) {
-     *     delete [] Matrix[i];
-     * delete [] Matrix;
-     * }
-    */
+    rNew = rOld;
 
-    // Random numbers or ground state in matrix
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < columns; j++) {
-            int randomNumber = (int) (RandomNumberGenerator(gen)*2);
-            std::cout << "randomNumber = " << randomNumber << std::endl;
-            if (randomNumber == 0)
+    // TODO: make own function for mcc?
+
+    // loop over Monte Carlo cycles
+    for (int cycle = 0; cycle < nCycles; cycle++)
+    {
+        // Store the current value of the wave function
+        waveFunctionOld = waveFunction(rOld);
+        QuantumForce(rOld, QForceOld);
+
+        // New position to test
+        for (int i = 0; i < nParticles; i++)
+        {
+            for (int j = 0; j < nDimensions; j++)
             {
-                Matrix[i][j] = -1;
+                rNew(i, j) = rOld(i, j) + (UniformNumberGenerator(gen) - 0.5) * stepLength;
+            }
+            //  for the other particles we need to set the position to the old position since
+            //  we move only one particle at the time
+            for (int k = 0; k < nParticles; k++) {
+                if ( k != i)
+                {
+                    for (int j = 0; j < nDimensions; j++)
+                    {
+                        rNew(k, j) = rOld(k, j);
+                    }
+                }
+            }
+            // Recalculate the value of the wave function and the quantum force
+            waveFunctionNew = waveFunction(rNew);
+            QuantumForce(rNew, QForceNew);
+
+            // TODO: Move sampling
+
+            // Metropolis brute force
+            // test is performed by moving one particle at the time
+            // accept or reject this move
+            acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+
+            //std::cout << acceptanceWeight << std::endl;
+
+            if (UniformNumberGenerator(gen) <= acceptanceWeight)
+            {
+                for (int j = 0; j < nDimensions; j++)
+                {
+                    rOld(i, j) = rNew(i, j);
+                    QForceOld(i, j) = QForceNew(i, j);
+                    waveFunctionOld = waveFunctionNew;
+                }
             } else
             {
-                Matrix[i][j] = randomNumber;
+                for (int j = 0; j < nDimensions; j++)
+                {
+                    rNew(i, j) = rOld(i, j);
+                    QForceNew(i, j) = QForceOld(i, j);
+                }
             }
+            // update energies
+            deltaEnergy = localEnergy(rNew);
+            energySum += deltaEnergy;
+            energySquaredSum += deltaEnergy*deltaEnergy;
         }
     }
-    return Matrix;
+    double energy = energySum/(nCycles * nParticles);
+    double energySquared = energySquaredSum/(nCycles * nParticles);
+    std::cout << "Energy: " << energy << "   &   Energy squared: " << energySquared << std::endl;
 }
-
-// It is not recommended to print large matrices
-// TODO: Set max value of print dimension
-/*
-void VariationalMonteCarlo::printMatrix(int *Matrix[], int rows, int columns)
-{
-    std::cout << std::endl;
-    for(int i = 0; i < rows; i++)
-    {
-        for(int j = 0; j < columns; j++)
-        {
-            std::cout << std::setw(10) << std::setprecision(3) << Matrix[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-}
-*/

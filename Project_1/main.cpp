@@ -1,7 +1,10 @@
 #define CATCH_CONFIG_RUNNER // Configure Catch to use this main, and not its own.
+#include "inc/variationalmontecarlo.h"
 #include "inc/catch.hpp"
-#include "inc/matrix.h"
+#include "time.h"
 #include <iostream>
+#include <vector>
+#include <chrono>  // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
 
 #define TEST false // Change to true when testing and to false when running the program.
 
@@ -18,24 +21,42 @@ int main()
         return runCatchTests();
     } else
     {
-        std::cout << "Hello World!" << std::endl;
+        VariationalMonteCarlo *solver = new VariationalMonteCarlo();
 
-        // Initialize matrix
-
-
-        double beta = 1;
-        int N = 1;
-
+        std::vector<double> timing = {};
+        std::vector<double> timing_chrono = {};
+        int trials = 10;
 
         // Timing the algorithm
         clock_t start, finish;
-        start = clock();
 
-        // Timing finished
-        finish = clock();
-        double time = (double (finish - start)/CLOCKS_PER_SEC);
+        for (int i = 0; i < trials; i++)
+        {
+            // Start timing
+            start = clock();
+            auto start_time = std::chrono::high_resolution_clock::now();
 
-        std::cout << std::endl << "Run time: " << time << " sec.";
+            solver->runMonteCarloIntegration();
+
+            // Timing finished
+            finish = clock();
+            auto end_time = std::chrono::high_resolution_clock::now();
+
+            timing.push_back(double (finish - start)/CLOCKS_PER_SEC);
+            timing_chrono.push_back(std::chrono::duration<double> (end_time - start_time).count());
+        }
+        double sum = 0;
+        double sum_chrono = 0;
+        for (int i = 0; i < trials; i++)
+        {
+            sum += timing.at(i);
+            sum_chrono += timing_chrono.at(i);
+        }
+        double averageTime = sum/timing.size();
+        double averageTime_chrono = sum_chrono/timing_chrono.size();
+
+        std::cout << std::endl << "Average run time (CPU time): " << averageTime << " sec." << std::endl;
+        std::cout << "Average run time_chrono (Wall clock time): " << averageTime_chrono << " sec." << std::endl;
 
         return 0;
     }

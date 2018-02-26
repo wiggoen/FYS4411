@@ -15,3 +15,7 @@ HEADERS += inc/catch.hpp \
     inc/sampling.h \
     inc/variationalmontecarlo.h \
     inc/wavefunction.h
+
+INCLUDEPATH += /usr/local/Cellar/armadillo/8.400.0/include/
+
+LIBS += -L/usr/local/Cellar/armadillo/8.400.0/lib/ -larmadillo

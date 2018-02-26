@@ -5,18 +5,22 @@
 
 class VariationalMonteCarlo
 {
+public:
+    VariationalMonteCarlo();
+    ~VariationalMonteCarlo();
+    void runMonteCarloIntegration();
 
 private:
-    int** Matrix = new int*[10];
+    int nDimensions;
+    int nParticles;
+    int nCycles;
+    double alpha;
+    double stepLength;
 
-public:
-    VariationalMonteCarlo(int rows, int columns, const arma::mat &);
-    ~VariationalMonteCarlo();
-    //static void printMatrix(int *Matrix[], int rows, int columns);
-    int **makeMatrix(int rows, int columns);// {return Matrix;}
-    static void vmc(int rows, int columns, const arma::mat &);
-
-
+    arma::mat rOld;
+    arma::mat rNew;
+    arma::mat QForceOld;
+    arma::mat QForceNew;
 };
 
 #endif // VARIATIONALMONTECARLO_H
