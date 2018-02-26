@@ -6,12 +6,11 @@
 class Hamiltonian
 {
 public:
-    Hamiltonian(int nParticles, const arma::vec &x);
+    Hamiltonian();
     ~Hamiltonian();
-    double Derivative(int nParticles, double h, arma::vec x);
-    double DoubleDerivative(int nParticles, double h, arma::vec x);
-    class Wavefunction*  wf = nullptr;
+    double localEnergy(const arma::mat &r);
 
 };
 
 #endif // HAMILTONIAN_H
+
