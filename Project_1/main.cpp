@@ -32,7 +32,7 @@ int main()
 
         std::vector<double> timing = {};
         std::vector<double> timing_chrono = {};
-        int trials = 1;
+        int trials = 10;
 
         // Timing the algorithm
         clock_t start, finish;

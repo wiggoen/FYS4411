@@ -1,6 +1,7 @@
 #include "inc/variationalmontecarlo.h"
 #include "inc/wavefunction.h"
 #include "inc/hamiltonian.h"
+#include "inc/sampling.h"
 #include <random>
 #include <iomanip>
 #include <iostream>
@@ -29,22 +30,22 @@ void VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimens
     // Set up the normal distribution for x in [0, 1]
     //std::normal_distribution<double> NormalDistribution(0.0,1.0);         // Will be used later
 
-
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
 
-    double waveFunctionOld = 0;
+    double waveFunctionOld = 0; // TODO: move to wavefunction?
     double waveFunctionNew = 0;
 
-    double energySum = 0;
+    double energySum = 0; // TODO: move to hamiltonian?
     double energySquaredSum = 0;
 
     double deltaEnergy;
 
     double acceptanceWeight = 0;
 
+    Sampling sampling;
     Wavefunction waveFunction;
     Hamiltonian hamiltonian;
 
@@ -89,7 +90,9 @@ void VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimens
             waveFunctionNew = waveFunction.trialWaveFunction(rNew, nParticles, nDimensions, alpha);
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
-            // TODO: Move sampling
+
+
+            // TODO: Move sampling to own function
 
             // Metropolis brute force
             // test is performed by moving one particle at the time
@@ -114,6 +117,7 @@ void VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimens
                     QForceNew(i, j) = QForceOld(i, j);
                 }
             }
+
             // update energies
             deltaEnergy = hamiltonian.localEnergy(rNew, nParticles, nDimensions, alpha);
             energySum += deltaEnergy;
