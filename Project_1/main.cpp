@@ -8,6 +8,7 @@
 
 #define TEST false // Change to true when testing and to false when running the program.
 
+
 int runCatchTests()
 {
     return Catch::Session().run();
@@ -21,11 +22,17 @@ int main()
         return runCatchTests();
     } else
     {
+        int nDimensions = 1;
+        int nParticles = 1;
+        int nCycles = 1e6;
+        double alpha = 0.5;
+        double stepLength = 0.1;
+
         VariationalMonteCarlo *solver = new VariationalMonteCarlo();
 
         std::vector<double> timing = {};
         std::vector<double> timing_chrono = {};
-        int trials = 10;
+        int trials = 1;
 
         // Timing the algorithm
         clock_t start, finish;
@@ -36,7 +43,7 @@ int main()
             start = clock();
             auto start_time = std::chrono::high_resolution_clock::now();
 
-            solver->runMonteCarloIntegration();
+            solver->runMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength);
 
             // Timing finished
             finish = clock();

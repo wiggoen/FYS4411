@@ -1,16 +1,12 @@
 #include "inc/variationalmontecarlo.h"
 #include "inc/wavefunction.h"
+#include "inc/hamiltonian.h"
 #include <random>
 #include <iomanip>
 #include <iostream>
-#include <armadillo>
 
-VariationalMonteCarlo::VariationalMonteCarlo() : // TODO: put as command line arguments
-    nDimensions(1),
-    nParticles(1),
-    nCycles(1e6),
-    alpha(0.5),
-    stepLength(0.1)
+
+VariationalMonteCarlo::VariationalMonteCarlo()
 {
 
 }
@@ -21,7 +17,7 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 }
 
 
-void VariationalMonteCarlo::runMonteCarloIntegration()
+void VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
 {
     // TODO: Move random to main?
 
@@ -49,6 +45,9 @@ void VariationalMonteCarlo::runMonteCarloIntegration()
 
     double acceptanceWeight = 0;
 
+    Wavefunction waveFunction;
+    Hamiltonian hamiltonian;
+
     // initial trial positions
     for (int i = 0; i < nParticles; i++)
     {
@@ -65,8 +64,8 @@ void VariationalMonteCarlo::runMonteCarloIntegration()
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
         // Store the current value of the wave function
-        waveFunctionOld = waveFunction(rOld);
-        QuantumForce(rOld, QForceOld);
+        waveFunctionOld = waveFunction.trialWaveFunction(rOld, nParticles, nDimensions, alpha);
+        waveFunction.QuantumForce(rOld, QForceOld, alpha);
 
         // New position to test
         for (int i = 0; i < nParticles; i++)
@@ -87,8 +86,8 @@ void VariationalMonteCarlo::runMonteCarloIntegration()
                 }
             }
             // Recalculate the value of the wave function and the quantum force
-            waveFunctionNew = waveFunction(rNew);
-            QuantumForce(rNew, QForceNew);
+            waveFunctionNew = waveFunction.trialWaveFunction(rNew, nParticles, nDimensions, alpha);
+            waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
             // TODO: Move sampling
 
@@ -116,7 +115,7 @@ void VariationalMonteCarlo::runMonteCarloIntegration()
                 }
             }
             // update energies
-            deltaEnergy = localEnergy(rNew);
+            deltaEnergy = hamiltonian.localEnergy(rNew, nParticles, nDimensions, alpha);
             energySum += deltaEnergy;
             energySquaredSum += deltaEnergy*deltaEnergy;
         }

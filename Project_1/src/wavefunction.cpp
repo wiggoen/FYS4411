@@ -1,14 +1,17 @@
 #include "inc/wavefunction.h"
-#include "inc/matrix.h"
-#include <math.h>
-#include <cmath>
 
-Wavefunction::Wavefunction(const arma::mat &r)
+
+Wavefunction::Wavefunction()
 {
 
 }
 
-double Wavefunction::waveFunction(const arma::mat &r)
+Wavefunction::~Wavefunction()
+{
+
+}
+
+double Wavefunction::trialWaveFunction(const arma::mat &r, int nParticles, int nDimensions, double alpha)
 {
     double argument = 0;
     for (int i = 0; i < nParticles; i++)
@@ -23,7 +26,7 @@ double Wavefunction::waveFunction(const arma::mat &r)
     return exp(-argument * alpha);
 }
 
-void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce)
+void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, double alpha)
 {
     QForce = -4 * alpha * r;
 }
