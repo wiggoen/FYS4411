@@ -14,7 +14,7 @@ int runCatchTests()
     return Catch::Session().run();
 }
 
-int main()
+int main(int numberOfArguments, char **arguments)
 {
     if (TEST)
     {
@@ -22,13 +22,28 @@ int main()
         return runCatchTests();
     } else
     {
+        // Default if there is no command line arguments
         int nDimensions = 1;
         int nParticles = 1;
         int nCycles = 1e6;
         double alpha = 0.5;
         double stepLength = 0.1;
 
-        VariationalMonteCarlo *solver = new VariationalMonteCarlo();
+        // If command line arguments are defined
+        if (numberOfArguments >= 2) { nDimensions = std::atoi(arguments[1]); }
+        if (numberOfArguments >= 3) { nParticles = std::atoi(arguments[2]); }
+        if (numberOfArguments >= 4) { nCycles = std::atoi(arguments[3]); }
+        if (numberOfArguments >= 5) { alpha = std::atof(arguments[4]); }
+        if (numberOfArguments >= 6) { stepLength = std::atof(arguments[5]); }
+
+        std::cout << "Number of dimensions = " << nDimensions << std::endl;
+        std::cout << "Number of particles = " << nParticles << std::endl;
+        std::cout << "Number of cycles = " << nCycles << std::endl;
+        std::cout << "Alpha = " << alpha << std::endl;
+        std::cout << "Step length = " << stepLength << std::endl;
+        std::cout << std::endl;
+
+        VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
 
         std::vector<double> timing = {};
         std::vector<double> timing_chrono = {};
@@ -43,7 +58,7 @@ int main()
             start = clock();
             auto start_time = std::chrono::high_resolution_clock::now();
 
-            solver->runMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength);
+            VMC->runMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength);
 
             // Timing finished
             finish = clock();

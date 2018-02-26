@@ -1,7 +1,6 @@
 #include "inc/variationalmontecarlo.h"
 #include "inc/wavefunction.h"
 #include "inc/hamiltonian.h"
-#include "inc/sampling.h"
 #include <random>
 #include <iomanip>
 #include <iostream>
@@ -45,7 +44,6 @@ void VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimens
 
     double acceptanceWeight = 0;
 
-    Sampling sampling;
     Wavefunction waveFunction;
     Hamiltonian hamiltonian;
 
