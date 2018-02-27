@@ -19,12 +19,6 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 
 double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
 {
-    std::random_device rd;                                                   // Initialize the seed
-    std::mt19937_64 gen(rd());                                               // Call the Mersenne Twister algorithm
-    std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);  // Set up the uniform distribution for x in [0, 1]
-    //std::normal_distribution<double> NormalDistribution(0.0,1.0);            // Set up the normal distribution for x in [0, 1]
-
-
     // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -44,15 +38,17 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
     Wavefunction waveFunction;
     Hamiltonian hamiltonian;
 
-    // initial trial positions
+
+    // Initial trial positions
     for (int i = 0; i < nParticles; i++)
     {
         for (int j = 0; j < nDimensions; j++)
         {
-            rOld(i, j) = (UniformNumberGenerator(gen) - 0.5) * stepLength;
+            rOld(i, j) = stepLength; // (2*UniformNumberGenerator(gen) - 1.0) * stepLength
         }
     }
     rNew = rOld;
+
 
     // TODO: make own function for mcc?
 
@@ -68,7 +64,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
         {
             for (int j = 0; j < nDimensions; j++)
             {
-                rNew(i, j) = rOld(i, j) + (UniformNumberGenerator(gen) - 0.5) * stepLength;
+                rNew(i, j) = 1 + stepLength; // rOld(i, j) + (2*UniformNumberGenerator(gen) - 1.0) * stepLength
             }
             //  for the other particles we need to set the position to the old position since
             //  we move only one particle at the time
@@ -85,7 +81,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
             waveFunctionNew = waveFunction.trialWaveFunction(rNew, nParticles, nDimensions, alpha);
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
-
+            //std::cout << RandomNumber() << std::endl;
 
             // TODO: Move sampling to own function
 
@@ -96,7 +92,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
 
             //std::cout << acceptanceWeight << std::endl;
 
-            if (UniformNumberGenerator(gen) <= acceptanceWeight)
+            if (RandomNumber() <= acceptanceWeight) // UniformNumberGenerator(gen) <= acceptanceWeight
             {
                 for (int j = 0; j < nDimensions; j++)
                 {
@@ -123,4 +119,22 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
     double energySquared = energySquaredSum/(nCycles * nParticles);
     std::cout << "Energy: " << energy << "   &   Energy squared: " << energySquared << std::endl;
     return energy;
+}
+
+
+double VariationalMonteCarlo::RandomNumber()
+{
+    static std::random_device rd;  // Initialize the seed for the random number engine
+    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
+    // Set up the uniform distribution for x in [0, 1]
+    static std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
+    // Set up the normal distribution for x in [0, 1]
+    //std::normal_distribution<double> NormalDistribution(0.0,1.0);     // Will be used later
+    return UniformNumberGenerator(gen);
+}
+
+
+void VariationalMonteCarlo::InitialTrialPositions(const arma::mat &r, int nParticles, int nDimensions)
+{
+
 }
