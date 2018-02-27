@@ -6,19 +6,21 @@
 #include <iostream>
 
 
-VariationalMonteCarlo::VariationalMonteCarlo()
-{
+VariationalMonteCarlo::VariationalMonteCarlo() {}
 
-}
 
-VariationalMonteCarlo::~VariationalMonteCarlo()
-{
-
-}
+VariationalMonteCarlo::~VariationalMonteCarlo() {}
 
 
 double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
 {
+    // Adding variables to member variables
+    this->nParticles = nParticles;
+    this->nDimensions = nDimensions;
+    this->nCycles = nCycles;
+    this->alpha = alpha;
+    this->stepLength = stepLength;
+
     // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -29,10 +31,9 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
     double energySum = 0;
     double energySquaredSum = 0;
     double deltaEnergy;
-    //double acceptanceWeight = 0;
 
     // Initial trial positions
-    InitialTrialPositions(rOld, nParticles, nDimensions, stepLength);
+    InitialTrialPositions(rOld);
     rNew = rOld;
 
     // Initialize classes
@@ -42,7 +43,7 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
 
     // TODO: make own function for mcc?
 
-    // loop over Monte Carlo cycles
+    // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
         // Store the current value of the wave function
@@ -56,8 +57,7 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
             {
                 rNew(i, j) = rOld(i, j) + (RandomNumber() - 0.5) * stepLength;
             }
-            //  for the other particles we need to set the position to the old position since
-            //  we move only one particle at the time
+            // For the other particles we need to set the position to the old position since we move only one particle at the time
             for (int k = 0; k < nParticles; k++) {
                 if ( k != i)
                 {
@@ -72,10 +72,9 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
             // Sampling: Metropolis brute force
-            MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, nDimensions, i);
+            MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
 
-
-            // update energies
+            // Update energies
             deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
             energySum += deltaEnergy;
             energySquaredSum += deltaEnergy*deltaEnergy;
@@ -100,7 +99,7 @@ double VariationalMonteCarlo::RandomNumber()
 }
 
 
-void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r, int nParticles, int nDimensions, int stepLength)
+void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r)
 {
     for (int i = 0; i < nParticles; i++)
     {
@@ -112,14 +111,11 @@ void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r, int nParticles, 
 }
 
 
-void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int nDimensions, int i)
+void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i)
 {
-    // test is performed by moving one particle at the time
-    // accept or reject this move
     double acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
-    //std::cout << acceptanceWeight << std::endl;
-
+    // Test is performed by moving one particle at the time. Accept or reject this move.
     if (RandomNumber() <= acceptanceWeight)
     {
         for (int j = 0; j < nDimensions; j++)
