@@ -26,22 +26,58 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
-    double waveFunctionOld = 0;
-    double waveFunctionNew = 0;
-    double energySum = 0;
-    double energySquaredSum = 0;
-    double deltaEnergy;
 
     // Initial trial positions
     InitialTrialPositions(rOld);
     rNew = rOld;
 
+    // Run Monte Carlo cycles
+    MonteCarloCycles();
+
+    // Calculate energy
+    double energy = energySum/(nCycles * nParticles);
+    double energySquared = energySquaredSum/(nCycles * nParticles);
+    std::cout << "Energy: " << energy << "   &   Energy squared: " << energySquared << std::endl;
+    return energy;
+}
+
+
+double VariationalMonteCarlo::RandomNumber()
+{
+    static std::random_device rd;  // Initialize the seed for the random number engine
+    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
+    // Set up the uniform distribution for x in [0, 1]
+    static std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
+    // Set up the normal distribution for x in [0, 1]
+    //std::normal_distribution<double> NormalDistribution(0.0,1.0);     // Will be used later
+    return UniformNumberGenerator(gen);
+}
+
+
+void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r)
+{
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            r(i, j) = (RandomNumber() - 0.5) * stepLength;
+        }
+    }
+}
+
+
+void VariationalMonteCarlo::MonteCarloCycles()
+{
     // Initialize classes
     Wavefunction waveFunction;
     Hamiltonian hamiltonian;
 
-
-    // TODO: make own function for mcc?
+    // Initialize variables
+    waveFunctionOld = 0;
+    waveFunctionNew = 0;
+    energySum = 0;
+    energySquaredSum = 0;
+    deltaEnergy = 0;
 
     // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
@@ -78,34 +114,6 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
             deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
             energySum += deltaEnergy;
             energySquaredSum += deltaEnergy*deltaEnergy;
-        }
-    }
-    double energy = energySum/(nCycles * nParticles);
-    double energySquared = energySquaredSum/(nCycles * nParticles);
-    std::cout << "Energy: " << energy << "   &   Energy squared: " << energySquared << std::endl;
-    return energy;
-}
-
-
-double VariationalMonteCarlo::RandomNumber()
-{
-    static std::random_device rd;  // Initialize the seed for the random number engine
-    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
-    // Set up the uniform distribution for x in [0, 1]
-    static std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
-    // Set up the normal distribution for x in [0, 1]
-    //std::normal_distribution<double> NormalDistribution(0.0,1.0);     // Will be used later
-    return UniformNumberGenerator(gen);
-}
-
-
-void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r)
-{
-    for (int i = 0; i < nParticles; i++)
-    {
-        for (int j = 0; j < nDimensions; j++)
-        {
-            r(i, j) = (RandomNumber() - 0.5) * stepLength;
         }
     }
 }
