@@ -19,14 +19,13 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 
 double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
 {
-    // Initialize the seed and call the Mersenne Twister algorithm
-    std::random_device rd;
-    std::mt19937_64 gen(rd());
-    // Set up the uniform distribution for x in [0, 1]
-    std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
-    // Set up the normal distribution for x in [0, 1]
-    //std::normal_distribution<double> NormalDistribution(0.0,1.0);         // Will be used later
+    std::random_device rd;                                                   // Initialize the seed
+    std::mt19937_64 gen(rd());                                               // Call the Mersenne Twister algorithm
+    std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);  // Set up the uniform distribution for x in [0, 1]
+    //std::normal_distribution<double> NormalDistribution(0.0,1.0);            // Set up the normal distribution for x in [0, 1]
 
+
+    // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
