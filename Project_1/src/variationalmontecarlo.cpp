@@ -17,10 +17,8 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 }
 
 
-void VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
+double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
 {
-    // TODO: Move random to main?
-
     // Initialize the seed and call the Mersenne Twister algorithm
     std::random_device rd;
     std::mt19937_64 gen(rd());
@@ -125,4 +123,5 @@ void VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimens
     double energy = energySum/(nCycles * nParticles);
     double energySquared = energySquaredSum/(nCycles * nParticles);
     std::cout << "Energy: " << energy << "   &   Energy squared: " << energySquared << std::endl;
+    return energy;
 }

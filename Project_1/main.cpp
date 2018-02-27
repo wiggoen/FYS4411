@@ -14,7 +14,7 @@ int runCatchTests()
     return Catch::Session().run();
 }
 
-int main(int numberOfArguments, char **arguments)
+int main(int numberOfArguments, char *arguments[])
 {
     if (TEST)
     {

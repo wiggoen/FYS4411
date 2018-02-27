@@ -8,7 +8,7 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
-    void runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength);
+    double runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength);
 
 private:
     arma::mat rOld;
