@@ -12,7 +12,7 @@ Hamiltonian::~Hamiltonian()
 
 }
 
-double Hamiltonian::localEnergy(const arma::mat &r, int nParticles, int nDimensions, double alpha)
+double Hamiltonian::LocalEnergy(const arma::mat &r, int nParticles, int nDimensions, double alpha)
 {
     double localEnergy = 0;
     for (int i = 0; i < nParticles; i++)

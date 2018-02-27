@@ -9,7 +9,7 @@
 #define TEST false // Change to true when testing and to false when running the program.
 
 
-int runCatchTests()
+int RunCatchTests()
 {
     return Catch::Session().run();
 }
@@ -19,7 +19,7 @@ int main(int numberOfArguments, char *arguments[])
     if (TEST)
     {
         std::cout << "Running tests" << std::endl;
-        return runCatchTests();
+        return RunCatchTests();
     } else
     {
         // Default if there is no command line arguments
@@ -58,7 +58,7 @@ int main(int numberOfArguments, char *arguments[])
             start = clock();
             auto start_time = std::chrono::high_resolution_clock::now();
 
-            VMC->runMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength);
+            VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength);
 
             // Timing finished
             finish = clock();

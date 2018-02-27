@@ -17,7 +17,7 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 }
 
 
-double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
+double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
 {
     // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -46,7 +46,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
         // Store the current value of the wave function
-        waveFunctionOld = waveFunction.trialWaveFunction(rOld, nParticles, nDimensions, alpha);
+        waveFunctionOld = waveFunction.TrialWaveFunction(rOld, nParticles, nDimensions, alpha);
         waveFunction.QuantumForce(rOld, QForceOld, alpha);
 
         // New position to test
@@ -68,7 +68,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
                 }
             }
             // Recalculate the value of the wave function and the quantum force
-            waveFunctionNew = waveFunction.trialWaveFunction(rNew, nParticles, nDimensions, alpha);
+            waveFunctionNew = waveFunction.TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
             // Sampling: Metropolis brute force
@@ -76,7 +76,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
 
 
             // update energies
-            deltaEnergy = hamiltonian.localEnergy(rNew, nParticles, nDimensions, alpha);
+            deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
             energySum += deltaEnergy;
             energySquaredSum += deltaEnergy*deltaEnergy;
         }

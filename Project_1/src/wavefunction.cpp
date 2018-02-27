@@ -11,7 +11,7 @@ Wavefunction::~Wavefunction()
 
 }
 
-double Wavefunction::trialWaveFunction(const arma::mat &r, int nParticles, int nDimensions, double alpha)
+double Wavefunction::TrialWaveFunction(const arma::mat &r, int nParticles, int nDimensions, double alpha)
 {
     double argument = 0;
     for (int i = 0; i < nParticles; i++)
