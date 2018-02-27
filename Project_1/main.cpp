@@ -47,7 +47,7 @@ int main(int numberOfArguments, char *arguments[])
 
         std::vector<double> timing = {};
         std::vector<double> timing_chrono = {};
-        int trials = 10;
+        int trials = 10;                                 // change to 10 when running timing
 
         // Timing the algorithm
         clock_t start, finish;

@@ -24,30 +24,20 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
-
-    double waveFunctionOld = 0; // TODO: move to wavefunction?
+    double waveFunctionOld = 0;
     double waveFunctionNew = 0;
-
-    double energySum = 0; // TODO: move to hamiltonian?
+    double energySum = 0;
     double energySquaredSum = 0;
-
     double deltaEnergy;
-
     double acceptanceWeight = 0;
 
+    // Initial trial positions
+    InitialTrialPositions(rOld, nParticles, nDimensions, stepLength);
+    rNew = rOld;
+
+    // Initialize classes
     Wavefunction waveFunction;
     Hamiltonian hamiltonian;
-
-
-    // Initial trial positions
-    for (int i = 0; i < nParticles; i++)
-    {
-        for (int j = 0; j < nDimensions; j++)
-        {
-            rOld(i, j) = stepLength; // (2*UniformNumberGenerator(gen) - 1.0) * stepLength
-        }
-    }
-    rNew = rOld;
 
 
     // TODO: make own function for mcc?
@@ -64,7 +54,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
         {
             for (int j = 0; j < nDimensions; j++)
             {
-                rNew(i, j) = 1 + stepLength; // rOld(i, j) + (2*UniformNumberGenerator(gen) - 1.0) * stepLength
+                rNew(i, j) = rOld(i, j) + (RandomNumber() - 0.5) * stepLength;
             }
             //  for the other particles we need to set the position to the old position since
             //  we move only one particle at the time
@@ -81,7 +71,6 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
             waveFunctionNew = waveFunction.trialWaveFunction(rNew, nParticles, nDimensions, alpha);
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
-            //std::cout << RandomNumber() << std::endl;
 
             // TODO: Move sampling to own function
 
@@ -134,7 +123,13 @@ double VariationalMonteCarlo::RandomNumber()
 }
 
 
-void VariationalMonteCarlo::InitialTrialPositions(const arma::mat &r, int nParticles, int nDimensions)
+void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r, int nParticles, int nDimensions, int stepLength)
 {
-
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            r(i, j) = (RandomNumber() - 0.5) * stepLength;
+        }
+    }
 }

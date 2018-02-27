@@ -10,7 +10,7 @@ public:
     ~VariationalMonteCarlo();
     double runMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength);
     double RandomNumber();
-    void InitialTrialPositions(const arma::mat &r, int nParticles, int nDimensions);
+    void InitialTrialPositions(arma::mat &r, int nParticles, int nDimensions, int stepLength);
 
 private:
     arma::mat rOld;
