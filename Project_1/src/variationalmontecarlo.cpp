@@ -29,7 +29,7 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
     double energySum = 0;
     double energySquaredSum = 0;
     double deltaEnergy;
-    double acceptanceWeight = 0;
+    //double acceptanceWeight = 0;
 
     // Initial trial positions
     InitialTrialPositions(rOld, nParticles, nDimensions, stepLength);
@@ -71,32 +71,9 @@ double VariationalMonteCarlo::runMonteCarloIntegration(int nParticles, int nDime
             waveFunctionNew = waveFunction.trialWaveFunction(rNew, nParticles, nDimensions, alpha);
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
+            // Sampling: Metropolis brute force
+            MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, nDimensions, i);
 
-            // TODO: Move sampling to own function
-
-            // Metropolis brute force
-            // test is performed by moving one particle at the time
-            // accept or reject this move
-            acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-
-            //std::cout << acceptanceWeight << std::endl;
-
-            if (RandomNumber() <= acceptanceWeight) // UniformNumberGenerator(gen) <= acceptanceWeight
-            {
-                for (int j = 0; j < nDimensions; j++)
-                {
-                    rOld(i, j) = rNew(i, j);
-                    QForceOld(i, j) = QForceNew(i, j);
-                    waveFunctionOld = waveFunctionNew;
-                }
-            } else
-            {
-                for (int j = 0; j < nDimensions; j++)
-                {
-                    rNew(i, j) = rOld(i, j);
-                    QForceNew(i, j) = QForceOld(i, j);
-                }
-            }
 
             // update energies
             deltaEnergy = hamiltonian.localEnergy(rNew, nParticles, nDimensions, alpha);
@@ -130,6 +107,33 @@ void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r, int nParticles, 
         for (int j = 0; j < nDimensions; j++)
         {
             r(i, j) = (RandomNumber() - 0.5) * stepLength;
+        }
+    }
+}
+
+
+void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int nDimensions, int i)
+{
+    // test is performed by moving one particle at the time
+    // accept or reject this move
+    double acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+
+    //std::cout << acceptanceWeight << std::endl;
+
+    if (RandomNumber() <= acceptanceWeight)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rOld(i, j) = rNew(i, j);
+            QForceOld(i, j) = QForceNew(i, j);
+            waveFunctionOld = waveFunctionNew;
+        }
+    } else
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rNew(i, j) = rOld(i, j);
+            QForceNew(i, j) = QForceOld(i, j);
         }
     }
 }
