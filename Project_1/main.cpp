@@ -23,7 +23,7 @@ int main(int numberOfArguments, char *arguments[])
     } else
     {
         // Default if there is no command line arguments
-        int nParticles = 1;
+        int nParticles = 100;
         int nDimensions = 1;
         int nCycles = 1e6;
         double alpha = 0.5;
@@ -47,7 +47,8 @@ int main(int numberOfArguments, char *arguments[])
 
         std::vector<double> timing = {};
         std::vector<double> timing_chrono = {};
-        int trials = 10;                                 // change to 10 when running timing
+        int trials = 1;                                 // change to 10 when running timing
+        int nrDataPoints = 1000;
 
         // Timing the algorithm
         clock_t start, finish;

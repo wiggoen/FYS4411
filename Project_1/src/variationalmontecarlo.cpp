@@ -4,6 +4,7 @@
 #include <random>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 
 
 VariationalMonteCarlo::VariationalMonteCarlo() {}
@@ -79,6 +80,9 @@ void VariationalMonteCarlo::MonteCarloCycles()
     energySquaredSum = 0;
     deltaEnergy = 0;
 
+    std::ofstream myfile;
+    myfile.open("results.txt");
+
     // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
@@ -90,6 +94,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
         for (int i = 0; i < nParticles; i++)
         {
             for (int j = 0; j < nDimensions; j++)
+
             {
                 rNew(i, j) = rOld(i, j) + (RandomNumber() - 0.5) * stepLength;
             }
@@ -114,9 +119,18 @@ void VariationalMonteCarlo::MonteCarloCycles()
             deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
             energySum += deltaEnergy;
             energySquaredSum += deltaEnergy*deltaEnergy;
+
+            // Write to file
+            if (cycle % 100 == 0)
+            {
+                myfile << cycle << "    " << energySum/(nCycles * nParticles) << std::endl;
+            }
         }
     }
+    myfile.close();
 }
+
+
 
 
 void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i)
