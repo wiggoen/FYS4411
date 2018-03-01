@@ -81,7 +81,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
     deltaEnergy = 0;
 
     std::ofstream myfile;
-    myfile.open("results.txt");
+    myfile.open("../Project_1/results.txt");
 
     // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
@@ -123,9 +123,9 @@ void VariationalMonteCarlo::MonteCarloCycles()
         }
 
         // Write to file
-        if (cycle % 10 == 0)
+        if (cycle % 999999 == 0)
         {
-            myfile << cycle << "    " << energySum/(cycle * nParticles) << std::endl;
+            myfile << cycle << "    " << deltaEnergy << std::endl;
         }
     }
     myfile.close();
