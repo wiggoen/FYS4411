@@ -120,11 +120,12 @@ void VariationalMonteCarlo::MonteCarloCycles()
             energySum += deltaEnergy;
             energySquaredSum += deltaEnergy*deltaEnergy;
 
-            // Write to file
-            if (cycle % 100 == 0)
-            {
-                myfile << cycle << "    " << energySum/(nCycles * nParticles) << std::endl;
-            }
+        }
+
+        // Write to file
+        if (cycle % 10 == 0)
+        {
+            myfile << cycle << "    " << energySum/(cycle * nParticles) << std::endl;
         }
     }
     myfile.close();
