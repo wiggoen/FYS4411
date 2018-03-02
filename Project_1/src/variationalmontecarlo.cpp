@@ -54,6 +54,16 @@ double VariationalMonteCarlo::RandomNumber()
     return UniformNumberGenerator(gen);
 }
 
+double VariationalMonteCarlo::GaussianRandomNumber()
+{
+    static std::random_device rd;  // Initialize the seed for the random number engine
+    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
+    // Set up the uniform distribution for x in [0, 1]
+    static std::normal_distribution<double> UniformNumberGenerator(0.0,1.0);
+    // Set up the normal distribution for x in [0, 1]
+    //std::normal_distribution<double> NormalDistribution(0.0,1.0);     // Will be used later
+    return UniformNumberGenerator(gen);
+}
 
 void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r)
 {
@@ -152,6 +162,32 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         for (int j = 0; j < nDimensions; j++)
         {
             rNew(i, j) = rOld(i, j);
+            QForceNew(i, j) = QForceOld(i, j);
+        }
+    }
+}
+
+void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i)
+{
+    double acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+    double D = 0.5;
+    double deltaT = 0.01; // Interval [0.001,0.01]
+
+    // Test is performed by moving one particle at the time. Accept or reject this move.
+    if (RandomNumber() <= acceptanceWeight)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rOld(i, j) = rNew(i, j);
+            QForceOld(i, j) = QForceNew(i, j);
+            waveFunctionOld = waveFunctionNew;
+        }
+    } else
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            double ksi = GaussianRandomNumber();
+            rNew(i, j) = rOld(i, j) + D*QForceOld*deltaT + ksi*sqrt(deltaT);
             QForceNew(i, j) = QForceOld(i, j);
         }
     }
