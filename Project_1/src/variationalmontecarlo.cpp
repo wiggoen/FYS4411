@@ -123,7 +123,10 @@ void VariationalMonteCarlo::MonteCarloCycles()
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
             // Sampling: Metropolis brute force
-            MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
+            //MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
+
+            // Sampling: Fokker-Planck and Langevin
+            FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
 
             // Update energies
             deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
@@ -187,7 +190,7 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
         for (int j = 0; j < nDimensions; j++)
         {
             double ksi = GaussianRandomNumber();
-            rNew(i, j) = rOld(i, j) + D*QForceOld*deltaT + ksi*sqrt(deltaT);
+            rNew(i, j) = rOld(i, j) + D*QForceOld(i, j)*deltaT + ksi*sqrt(deltaT);
             QForceNew(i, j) = QForceOld(i, j);
         }
     }
