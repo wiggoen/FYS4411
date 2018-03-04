@@ -15,6 +15,7 @@ public:
     void MonteCarloCycles();
     void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i);
     void FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i);
+    double GreensFunction(double x, double y, double D, double deltaT, double QForceOld);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;

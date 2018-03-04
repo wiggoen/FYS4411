@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <math.h>
 
 
 VariationalMonteCarlo::VariationalMonteCarlo() {}
@@ -49,21 +50,19 @@ double VariationalMonteCarlo::RandomNumber()
     static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
     // Set up the uniform distribution for x in [0, 1]
     static std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
-    // Set up the normal distribution for x in [0, 1]
-    //std::normal_distribution<double> NormalDistribution(0.0,1.0);     // Will be used later
     return UniformNumberGenerator(gen);
 }
+
 
 double VariationalMonteCarlo::GaussianRandomNumber()
 {
     static std::random_device rd;  // Initialize the seed for the random number engine
     static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
-    // Set up the uniform distribution for x in [0, 1]
-    static std::normal_distribution<double> UniformNumberGenerator(0.0,1.0);
     // Set up the normal distribution for x in [0, 1]
-    //std::normal_distribution<double> NormalDistribution(0.0,1.0);     // Will be used later
-    return UniformNumberGenerator(gen);
+    static std::normal_distribution<double> NormalDistribution(0.0,1.0);
+    return NormalDistribution(gen);
 }
+
 
 void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r)
 {
@@ -134,17 +133,15 @@ void VariationalMonteCarlo::MonteCarloCycles()
             energySquaredSum += deltaEnergy*deltaEnergy;
 
         }
-
         // Write to file
-        if (cycle % 999999 == 0)
+        int num = 1000;
+        if (cycle % num == 0)
         {
-            myfile << cycle << "    " << deltaEnergy << std::endl;
+            myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << deltaEnergy << std::endl;
         }
     }
     myfile.close();
 }
-
-
 
 
 void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i)
@@ -170,14 +167,26 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
     }
 }
 
+// TODO: Fix FokkerPlank importance sampling
+// acceptanceWeight around 1. Is this ok?
+// Should we have used more abstraction in making the program? More like the mathematical equations?
 void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i)
 {
-    double acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+    double acceptanceFactor = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
     double D = 0.5;
     double deltaT = 0.01; // Interval [0.001,0.01]
+    double acceptanceWeight = 0;
+
+    // Need if-test and changes in matrices for rNew, rOld, QForceOld, QForceNew
+    for (int j = 0; j < nDimensions; j++)
+    {
+        acceptanceWeight = (GreensFunction(rOld(i, j), rNew(i, j), D, deltaT, QForceOld(i, j))/GreensFunction(rNew(i, j), rOld(i, j), D, deltaT, QForceOld(i, j))) * acceptanceFactor;
+        //std::cout << "acceptanceWeight = " << acceptanceWeight << std::endl;
+    }
 
     // Test is performed by moving one particle at the time. Accept or reject this move.
-    if (RandomNumber() <= acceptanceWeight)
+    //if (RandomNumber() <= acceptanceWeight)
+    /*
     {
         for (int j = 0; j < nDimensions; j++)
         {
@@ -189,9 +198,16 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
     {
         for (int j = 0; j < nDimensions; j++)
         {
-            double ksi = GaussianRandomNumber();
-            rNew(i, j) = rOld(i, j) + D*QForceOld(i, j)*deltaT + ksi*sqrt(deltaT);
+            rNew(i, j) = rOld(i, j) + D*QForceOld(i, j)*deltaT + GaussianRandomNumber()*sqrt(deltaT);
             QForceNew(i, j) = QForceOld(i, j);
         }
     }
+    */
+}
+
+// TODO: Fix nParticles dependence. Should take nParticles from class.
+
+double VariationalMonteCarlo::GreensFunction(double x, double y, double D, double deltaT, double QForceOld)
+{
+    return (1.0/pow(4.0*M_PI*D*deltaT, 3*nParticles/2)) * exp(-(y-x-D*deltaT*QForceOld)*(y-x-D*deltaT*QForceOld)/(4.0*D*deltaT));
 }
