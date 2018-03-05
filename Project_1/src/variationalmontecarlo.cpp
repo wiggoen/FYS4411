@@ -14,7 +14,7 @@ VariationalMonteCarlo::VariationalMonteCarlo() {}
 VariationalMonteCarlo::~VariationalMonteCarlo() {}
 
 
-double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength)
+double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int nDataPoints)
 {
     // Adding variables to member variables
     this->nParticles = nParticles;
@@ -22,6 +22,7 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
     this->nCycles = nCycles;
     this->alpha = alpha;
     this->stepLength = stepLength;
+    this->nDataPoints = nDataPoints;
 
     // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -122,10 +123,10 @@ void VariationalMonteCarlo::MonteCarloCycles()
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
             // Sampling: Metropolis brute force
-            //MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
+            MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
 
             // Sampling: Fokker-Planck and Langevin
-            FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
+            //FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew, i);
 
             // Update energies
             deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
@@ -134,8 +135,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
 
         }
         // Write to file
-        int num = 1000;
-        if (cycle % num == 0)
+        if (cycle % nDataPoints == 0)
         {
             myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << deltaEnergy << std::endl;
         }
@@ -178,36 +178,33 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
     double acceptanceWeight = 0;
 
     // Need if-test and changes in matrices for rNew, rOld, QForceOld, QForceNew
-    for (int j = 0; j < nDimensions; j++)
-    {
-        acceptanceWeight = (GreensFunction(rOld(i, j), rNew(i, j), D, deltaT, QForceOld(i, j))/GreensFunction(rNew(i, j), rOld(i, j), D, deltaT, QForceOld(i, j))) * acceptanceFactor;
+    //for (int j = 0; j < nDimensions; j++)
+    //{
         //std::cout << "acceptanceWeight = " << acceptanceWeight << std::endl;
-    }
+    //}
 
     // Test is performed by moving one particle at the time. Accept or reject this move.
-    //if (RandomNumber() <= acceptanceWeight)
-    /*
-    {
-        for (int j = 0; j < nDimensions; j++)
-        {
-            rOld(i, j) = rNew(i, j);
-            QForceOld(i, j) = QForceNew(i, j);
-            waveFunctionOld = waveFunctionNew;
-        }
-    } else
-    {
-        for (int j = 0; j < nDimensions; j++)
-        {
-            rNew(i, j) = rOld(i, j) + D*QForceOld(i, j)*deltaT + GaussianRandomNumber()*sqrt(deltaT);
-            QForceNew(i, j) = QForceOld(i, j);
-        }
-    }
-    */
-}
 
-// TODO: Fix nParticles dependence. Should take nParticles from class.
+
+    //acceptanceWeight = (GreensFunction(rOld(i, j), rNew(i, j), D, deltaT, QForceOld(i, j))/GreensFunction(rNew(i, j), rOld(i, j), D, deltaT, QForceOld(i, j))) * acceptanceFactor;
+
+        for (int j = 0; j < nDimensions; j++)
+        {
+
+            if (RandomNumber() <= acceptanceWeight)
+            {
+                rOld(i, j) = rNew(i, j);
+                QForceOld(i, j) = QForceNew(i, j);
+                waveFunctionOld = waveFunctionNew;
+            } else {
+                rNew(i, j) = rOld(i, j) + D*QForceOld(i, j)*deltaT + GaussianRandomNumber()*sqrt(deltaT);
+                QForceNew(i, j) = QForceOld(i, j);
+
+            }
+        }
+}
 
 double VariationalMonteCarlo::GreensFunction(double x, double y, double D, double deltaT, double QForceOld)
 {
-    return (1.0/pow(4.0*M_PI*D*deltaT, 3*nParticles/2)) * exp(-(y-x-D*deltaT*QForceOld)*(y-x-D*deltaT*QForceOld)/(4.0*D*deltaT));
+    return (1.0/pow(4.0*M_PI*D*deltaT, 3*nParticles/2.0)) * exp(-(y-x-D*deltaT*QForceOld)*(y-x-D*deltaT*QForceOld)/(4.0*D*deltaT));
 }

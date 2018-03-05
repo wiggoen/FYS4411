@@ -26,8 +26,9 @@ int main(int numberOfArguments, char *arguments[])
         int nParticles = 10;
         int nDimensions = 1;
         int nCycles = 1e6;
-        double alpha = 0.4;
+        double alpha = 0.5;
         double stepLength = 0.1;
+        int nDataPoints = 1000;
 
         // If command line arguments are defined
         if (numberOfArguments >= 2) { nParticles = std::atoi(arguments[1]); }
@@ -35,6 +36,7 @@ int main(int numberOfArguments, char *arguments[])
         if (numberOfArguments >= 4) { nCycles = std::atoi(arguments[3]); }
         if (numberOfArguments >= 5) { alpha = std::atof(arguments[4]); }
         if (numberOfArguments >= 6) { stepLength = std::atof(arguments[5]); }
+        if (numberOfArguments >= 7) { nDataPoints = std::atoi(arguments[6]); }
 
         std::cout << "Number of particles = " << nParticles << std::endl;
         std::cout << "Number of dimensions = " << nDimensions << std::endl;
@@ -48,7 +50,6 @@ int main(int numberOfArguments, char *arguments[])
         std::vector<double> timing = {};
         std::vector<double> timing_chrono = {};
         int trials = 1;                                 // change to 10 when running timing
-        int nDataPoints = 1000;
 
         // Timing the algorithm
         clock_t start, finish;
@@ -59,7 +60,7 @@ int main(int numberOfArguments, char *arguments[])
             start = clock();
             auto start_time = std::chrono::high_resolution_clock::now();
 
-            VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength);
+            VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, nDataPoints);
 
             // Timing finished
             finish = clock();
