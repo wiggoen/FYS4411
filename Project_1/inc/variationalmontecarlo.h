@@ -8,7 +8,7 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
-    double RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength);
+    double RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int nDataPoints);
     double RandomNumber();
     double GaussianRandomNumber();
     void InitialTrialPositions(arma::mat &r);
@@ -31,6 +31,7 @@ private:
     int nCycles;
     double alpha;
     double stepLength;
+    int nDataPoints;
 };
 
 #endif // VARIATIONALMONTECARLO_H
