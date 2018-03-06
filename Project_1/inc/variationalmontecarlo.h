@@ -8,14 +8,14 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
-    double RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int nDataPoints);
+    double RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int cycleStepToFile);
     double RandomNumber();
     double GaussianRandomNumber();
     void InitialTrialPositions(arma::mat &r);
     void MonteCarloCycles();
-    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i);
-    void FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew, int i);
-    double GreensFunction(double x, double y, double D, double deltaT, double QForceOld);
+    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
+    void FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
+    double GreensFunction(double oldPosition, double newPosition, double D, double deltaT, double QForceOld);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
@@ -31,7 +31,9 @@ private:
     int nCycles;
     double alpha;
     double stepLength;
-    int nDataPoints;
+    int cycleStepToFile;
+    int x;
+    int y;
 };
 
 #endif // VARIATIONALMONTECARLO_H
