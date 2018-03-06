@@ -7,7 +7,6 @@ VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
 
 TEST_CASE("Local energy", "[Hamiltonian]")
 {
-
     double energy = 0;
 
     energy = VMC->RunMonteCarloIntegration(1, 1, 1e6, 0.5, 0.1, 1e6);
