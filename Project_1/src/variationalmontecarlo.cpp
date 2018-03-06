@@ -167,7 +167,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
     }
 }
 
-
+// TODO: IS THIS CORRECT IMPLEMENTED?
 // acceptanceWeight around 1. Is this ok?
 // Should we have used more abstraction in making the program? More like the mathematical equations?
 void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew)
