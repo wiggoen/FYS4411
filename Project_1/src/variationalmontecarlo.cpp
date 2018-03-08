@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-
+#include <stdlib.h> /* Exit failure <- to force the program to stop: exit(EXIT_FAILURE);  */
 
 VariationalMonteCarlo::VariationalMonteCarlo()
 {
@@ -37,6 +37,7 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     x = 0;
     y = 0;
+    acceptanceRatio = 0;
 
     // Initial trial positions
     InitialTrialPositions(rOld);
@@ -48,7 +49,9 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
     // Calculate energy
     double energy = energySum/(nCycles * nParticles);
     double energySquared = energySquaredSum/(nCycles * nParticles);
-    std::cout << "Energy: " << std::setw(5) << energy << "   &   Energy squared: " << energySquared << std::endl;
+    std::cout << std::setprecision(15) << "Energy: " << std::setw(5) << energy << "   &   Energy squared: " << energySquared << std::endl;
+    std::cout << std::setprecision(15) << "Acceptance ratio = " << acceptanceRatio/(nCycles*nParticles)*100 << " %" << std::endl;
+    std::cout << std::setprecision(15) << "Variance = " << (energySquared - energy*energy)/(nCycles * nParticles) << std::endl;
     return energy;
 }
 
@@ -111,32 +114,31 @@ void VariationalMonteCarlo::MonteCarloCycles()
         // New position to test
         for (int i = 0; i < nParticles; i++)
         {
+            x = i; // Making i visible as private member x
+
             for (int j = 0; j < nDimensions; j++)
             {
-                // Find random position
-                x = (int) (RandomNumber()*nParticles);
-                y = (int) (RandomNumber()*nDimensions);
-                //std::cout << "(x, y) = " << "(" << x << ", " << y << ")" << std::endl;
+                y = j; // Making j visible as private member y
 
                 // Update position value
-                rNew(x, y) = rOld(x, y) + (RandomNumber() - 0.5) * stepLength;
+                rNew(x, y) = rOld(x, y) + (RandomNumber() - 0.5) * stepLength; // rOld(x, y) + (RandomNumber() - 0.5) * stepLength
                 //std::cout << rNew << std::endl;
-
-                // Recalculate the value of the wave function and the quantum force
-                waveFunctionNew = waveFunction.TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
-                waveFunction.QuantumForce(rNew, QForceNew, alpha);
-
-                // Sampling: Metropolis brute force
-                //MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
-
-                // Sampling: Fokker-Planck and Langevin
-                FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
-
-                // Update energies
-                deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha)/nDimensions;
-                energySum += deltaEnergy;
-                energySquaredSum += deltaEnergy*deltaEnergy;
             }
+
+            // Recalculate the value of the wave function and the quantum force
+            waveFunctionNew = waveFunction.TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+            waveFunction.QuantumForce(rNew, QForceNew, alpha);
+
+            // Sampling: Metropolis brute force
+            //MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+
+            // Sampling: Fokker-Planck and Langevin
+            FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+
+            // Update energies
+            deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
+            energySum += deltaEnergy;
+            energySquaredSum += deltaEnergy*deltaEnergy;
         }
         // Write to file
         if (cycle % cycleStepToFile == 0)
@@ -158,13 +160,13 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         rOld(x, y) = rNew(x, y);
         QForceOld(x, y) = QForceNew(x, y);
         waveFunctionOld = waveFunctionNew;
-        //std::cout << "accepted: " << "(x, y) = " << "(" << x << ", " << y << ")" << std::endl;
+        acceptanceRatio += 1;
     } else
     {
         rNew(x, y) = rOld(x, y);
         QForceNew(x, y) = QForceOld(x, y);
-        //std::cout << "rejected: " << "(x, y) = " << "(" << x << ", " << y << ")" << std::endl;
     }
+
 }
 
 // TODO: IS THIS CORRECT IMPLEMENTED?
@@ -183,6 +185,7 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
         rOld(x, y) = rNew(x, y);
         QForceOld(x, y) = QForceNew(x, y);
         waveFunctionOld = waveFunctionNew;
+        acceptanceRatio += 1;
     } else
     {
         rNew(x, y) = rOld(x, y) + D*QForceOld(x, y)*dt + GaussianRandomNumber()*sqrt(dt);
@@ -190,7 +193,7 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
     }
 }
 
-double VariationalMonteCarlo::GreensFunction(double oldPosition, double newPosition, double D, double deltaT, double QForceOld)
+inline double VariationalMonteCarlo::GreensFunction(double oldPosition, double newPosition, double D, double dt, double QForceOld)
 {
-    return (1.0/pow(4.0*M_PI*D*deltaT, 3*nParticles/2.0)) * exp(-(newPosition-oldPosition-D*deltaT*QForceOld)*(newPosition-oldPosition-D*deltaT*QForceOld)/(4.0*D*deltaT));
+    return (1.0/pow(4.0*M_PI*D*dt, 3*nParticles/2.0)) * exp(-(newPosition-oldPosition-D*dt*QForceOld)*(newPosition-oldPosition-D*dt*QForceOld)/(4.0*D*dt)) + (nParticles - 1);
 }

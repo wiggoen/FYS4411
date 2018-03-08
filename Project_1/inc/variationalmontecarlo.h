@@ -15,7 +15,7 @@ public:
     void MonteCarloCycles();
     void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
     void FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
-    double GreensFunction(double oldPosition, double newPosition, double D, double deltaT, double QForceOld);
+    inline double GreensFunction(double oldPosition, double newPosition, double D, double dt, double QForceOld);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
@@ -34,6 +34,7 @@ private:
     int cycleStepToFile;
     int x;
     int y;
+    double acceptanceRatio;
 };
 
 #endif // VARIATIONALMONTECARLO_H

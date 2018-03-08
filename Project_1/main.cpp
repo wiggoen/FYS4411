@@ -3,6 +3,7 @@
 #include "inc/catch.hpp"
 #include "time.h"
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <chrono>  // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
 
@@ -28,7 +29,7 @@ int main(int numberOfArguments, char *arguments[])
         int nCycles = 1e6;
         double alpha = 0.5;
         double stepLength = 0.1;
-        int cycleStepToFile = nCycles-1;
+        int cycleStepToFile = nCycles;
 
         int trials = 1;                                 // change to 10 when running timing
 
@@ -39,6 +40,7 @@ int main(int numberOfArguments, char *arguments[])
         if (numberOfArguments >= 5) { alpha = std::atof(arguments[4]); }
         if (numberOfArguments >= 6) { stepLength = std::atof(arguments[5]); }
         if (numberOfArguments >= 7) { cycleStepToFile = std::atoi(arguments[6]); }
+        if (numberOfArguments >= 8) { trials = std::atoi(arguments[7]); }
 
         std::cout << "Number of particles = " << nParticles << std::endl;
         std::cout << "Number of dimensions = " << nDimensions << std::endl;
