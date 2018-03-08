@@ -42,6 +42,7 @@ int main(int numberOfArguments, char *arguments[])
         if (numberOfArguments >= 7) { cycleStepToFile = std::atoi(arguments[6]); }
         if (numberOfArguments >= 8) { trials = std::atoi(arguments[7]); }
 
+        std::cout << std::endl;
         std::cout << "Number of particles = " << nParticles << std::endl;
         std::cout << "Number of dimensions = " << nDimensions << std::endl;
         std::cout << "Number of cycles = " << nCycles << std::endl;
@@ -52,38 +53,30 @@ int main(int numberOfArguments, char *arguments[])
         VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
 
         std::vector<double> timing = {};
-        std::vector<double> timing_chrono = {};
 
-        // Timing the algorithm
-        clock_t start, finish;
-
+        // TODO: Move timing to the MC cycles loop
         for (int i = 0; i < trials; i++)
         {
             // Start timing
-            start = clock();
             auto start_time = std::chrono::high_resolution_clock::now();
 
             VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, cycleStepToFile);
 
             // Timing finished
-            finish = clock();
             auto end_time = std::chrono::high_resolution_clock::now();
 
-            timing.push_back(double (finish - start)/CLOCKS_PER_SEC);
-            timing_chrono.push_back(std::chrono::duration<double> (end_time - start_time).count());
+            timing.push_back(std::chrono::duration<double> (end_time - start_time).count());
         }
         double sum = 0;
-        double sum_chrono = 0;
         for (int i = 0; i < trials; i++)
         {
             sum += timing.at(i);
-            sum_chrono += timing_chrono.at(i);
         }
         double averageTime = sum/timing.size();
-        double averageTime_chrono = sum_chrono/timing_chrono.size();
 
-        std::cout << std::endl << "Average run time (CPU time): " << averageTime << " sec." << std::endl;
-        std::cout << "Average run time_chrono (Wall clock time): " << averageTime_chrono << " sec." << std::endl;
+        std::cout << std::endl;
+        std::cout << "Average run time_chrono (Wall clock time): " << averageTime << " sec." << std::endl;
+        std::cout << std::endl;
 
         return 0;
     }
