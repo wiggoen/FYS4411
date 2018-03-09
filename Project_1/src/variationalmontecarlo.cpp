@@ -7,6 +7,7 @@
 #include <fstream>
 #include <math.h>
 #include <stdlib.h> /* Exit failure <- to force the program to stop: exit(EXIT_FAILURE);  */
+#include <chrono>  // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
 
 VariationalMonteCarlo::VariationalMonteCarlo()
 {
@@ -20,7 +21,7 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 }
 
 
-double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int cycleStepToFile)
+arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int cycleStepToFile)
 {
     // Adding variables to member variables
     this->nParticles = nParticles;
@@ -37,22 +38,38 @@ double VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDime
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     x = 0;
     y = 0;
-    acceptanceRatio = 0;
+    acceptanceCounter = 0;
+
+    arma::rowvec runDetails;
+    double time = 0;
+    double energy = 0;
+    double energySquared = 0;
+    double variance = 0;
+    double acceptanceRatio = 0;
 
     // Initial trial positions
     InitialTrialPositions(rOld);
     rNew = rOld;
 
+    // Start timing
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     // Run Monte Carlo cycles
     MonteCarloCycles();
 
-    // Calculate energy
-    double energy = energySum/(nCycles * nParticles);
-    double energySquared = energySquaredSum/(nCycles * nParticles);
-    std::cout << std::setprecision(15) << "Energy: " << std::setw(5) << energy << "   &   Energy squared: " << energySquared << std::endl;
-    std::cout << std::setprecision(15) << "Acceptance ratio = " << acceptanceRatio/(nCycles*nParticles)*100 << " %" << std::endl;
-    std::cout << std::setprecision(15) << "Variance = " << (energySquared - energy*energy)/(nCycles * nParticles) << std::endl;
-    return energy;
+    // Timing finished
+    auto end_time = std::chrono::high_resolution_clock::now();
+    time = (std::chrono::duration<double> (end_time - start_time).count());
+
+    // Calculation
+    energy = energySum/(nCycles * nParticles);
+    energySquared = energySquaredSum/(nCycles * nParticles);
+
+    variance = (energySquared - energy*energy)/(nCycles * nParticles);
+    acceptanceRatio = acceptanceCounter/(nCycles * nParticles);
+
+    runDetails << time << energy << energySquared << variance << acceptanceRatio;
+    return runDetails;
 }
 
 
@@ -160,7 +177,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         rOld(x, y) = rNew(x, y);
         QForceOld(x, y) = QForceNew(x, y);
         waveFunctionOld = waveFunctionNew;
-        acceptanceRatio += 1;
+        acceptanceCounter += 1;
     } else
     {
         rNew(x, y) = rOld(x, y);
@@ -185,7 +202,7 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
         rOld(x, y) = rNew(x, y);
         QForceOld(x, y) = QForceNew(x, y);
         waveFunctionOld = waveFunctionNew;
-        acceptanceRatio += 1;
+        acceptanceCounter += 1;
     } else
     {
         rNew(x, y) = rOld(x, y) + D*QForceOld(x, y)*dt + GaussianRandomNumber()*sqrt(dt);
@@ -193,7 +210,7 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
     }
 }
 
-inline double VariationalMonteCarlo::GreensFunction(double oldPosition, double newPosition, double D, double dt, double QForceOld)
+inline double VariationalMonteCarlo::GreensFunction(double &oldPosition, double &newPosition, double &D, double &dt, double &QForceOld)
 {
     return (1.0/pow(4.0*M_PI*D*dt, 3*nParticles/2.0)) * exp(-(newPosition-oldPosition-D*dt*QForceOld)*(newPosition-oldPosition-D*dt*QForceOld)/(4.0*D*dt)) + (nParticles - 1);
 }

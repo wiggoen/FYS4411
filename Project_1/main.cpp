@@ -5,7 +5,6 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <chrono>  // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
 
 #define TEST false // Change to true when testing and to false when running the program.
 
@@ -24,13 +23,12 @@ int main(int numberOfArguments, char *arguments[])
     } else
     {
         // Default if there is no command line arguments
-        int nParticles = 1;
-        int nDimensions = 1;
+        int nParticles = 10;
+        int nDimensions = 2;
         int nCycles = 1e6;
         double alpha = 0.5;
         double stepLength = 0.1;
         int cycleStepToFile = nCycles;
-
         int trials = 1;                                 // change to 10 when running timing
 
         // If command line arguments are defined
@@ -42,41 +40,45 @@ int main(int numberOfArguments, char *arguments[])
         if (numberOfArguments >= 7) { cycleStepToFile = std::atoi(arguments[6]); }
         if (numberOfArguments >= 8) { trials = std::atoi(arguments[7]); }
 
-        std::cout << std::endl;
-        std::cout << "Number of particles = " << nParticles << std::endl;
-        std::cout << "Number of dimensions = " << nDimensions << std::endl;
-        std::cout << "Number of cycles = " << nCycles << std::endl;
-        std::cout << "Alpha = " << alpha << std::endl;
-        std::cout << "Step length = " << stepLength << std::endl;
-        std::cout << std::endl;
-
+        // Initialize VMC
         VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
 
-        std::vector<double> timing = {};
 
-        // TODO: Move timing to the MC cycles loop
+        // Setup for writing to file
+        std::cout << std::endl;
+        std::cout << "Particles " << " Dimensions " << "    Cycles " << " Alpha " << " Step_length " << " Time_[sec] "
+                  << " Energy " << " Energy_squared " << " Variance " << " Acceptance_ratio " << std::endl;
+
+        // Allocation
+        arma::rowvec runVector;
+        arma::mat runMatrix;
+
+        // Run VMC
         for (int i = 0; i < trials; i++)
         {
-            // Start timing
-            auto start_time = std::chrono::high_resolution_clock::now();
-
-            VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, cycleStepToFile);
-
-            // Timing finished
-            auto end_time = std::chrono::high_resolution_clock::now();
-
-            timing.push_back(std::chrono::duration<double> (end_time - start_time).count());
+            runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, cycleStepToFile);
+            runMatrix.insert_rows(i, runVector);
         }
-        double sum = 0;
-        for (int i = 0; i < trials; i++)
-        {
-            sum += timing.at(i);
-        }
-        double averageTime = sum/timing.size();
+        arma::rowvec columnSum;
+        columnSum = arma::sum(runMatrix, 0);
 
-        std::cout << std::endl;
-        std::cout << "Average run time_chrono (Wall clock time): " << averageTime << " sec." << std::endl;
-        std::cout << std::endl;
+        // Finding averages of trials
+        double time = columnSum(0)/trials;
+        double energy = columnSum(1)/trials;
+        double energySquared = columnSum(2)/trials;
+        double variance = columnSum(3)/trials;
+        double acceptanceRatio = columnSum(4)/trials;
+
+        std::cout << std::setw(9) << std::setprecision(6) << nParticles
+                  << std::setw(12) << std::setprecision(6) << nDimensions
+                  << std::setw(11) << std::setprecision(10) << nCycles
+                  << std::setw(7) << std::setprecision(6) << alpha
+                  << std::setw(13) << std::setprecision(6) << stepLength
+                  << std::setw(12) << std::setprecision(6) << time
+                  << std::setw(8) << std::setprecision(15) << energy
+                  << std::setw(16) << std::setprecision(15) << energySquared
+                  << std::setw(10) << std::setprecision(15) << variance
+                  << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
 
         return 0;
     }

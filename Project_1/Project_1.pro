@@ -7,8 +7,8 @@ CONFIG -= qt
 QMAKE_CXXFLAGS_RELEASE -= -O2
 
 # Add optimization flags
-QMAKE_CXXFLAGS_RELEASE *= -O0  # Run this when developing
-#QMAKE_CXXFLAGS_RELEASE *= -O3  # Run this on release
+#QMAKE_CXXFLAGS_RELEASE *= -O0  # Run this when developing
+QMAKE_CXXFLAGS_RELEASE *= -O3  # Run this on release
 
 SOURCES += main.cpp \
     src/hamiltonian.cpp \

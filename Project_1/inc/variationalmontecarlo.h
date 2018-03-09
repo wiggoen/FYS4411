@@ -8,14 +8,14 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
-    double RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int cycleStepToFile);
+    arma::rowvec RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int cycleStepToFile);
     double RandomNumber();
     double GaussianRandomNumber();
     void InitialTrialPositions(arma::mat &r);
     void MonteCarloCycles();
     void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
     void FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
-    inline double GreensFunction(double oldPosition, double newPosition, double D, double dt, double QForceOld);
+    inline double GreensFunction(double &oldPosition, double &newPosition, double &D, double &dt, double &QForceOld);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
@@ -34,7 +34,7 @@ private:
     int cycleStepToFile;
     int x;
     int y;
-    double acceptanceRatio;
+    double acceptanceCounter;
 };
 
 #endif // VARIATIONALMONTECARLO_H
