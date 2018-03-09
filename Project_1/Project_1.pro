@@ -2,8 +2,13 @@ TEMPLATE = app
 CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
-QMAKE_CXXFLAGS_RELEASE -= -O2 # Remove optimization flag
-QMAKE_CXXFLAGS_RELEASE *= -O3 # Adding O3
+
+# Remove default optimization flag used by QT
+QMAKE_CXXFLAGS_RELEASE -= -O2
+
+# Add optimization flags
+QMAKE_CXXFLAGS_RELEASE *= -O0  # Run this when developing
+#QMAKE_CXXFLAGS_RELEASE *= -O3  # Run this on release
 
 SOURCES += main.cpp \
     src/hamiltonian.cpp \
