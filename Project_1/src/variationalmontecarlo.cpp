@@ -199,13 +199,13 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
     // Test is performed by moving one particle at the time. Accept or reject this move.
     if (RandomNumber() <= acceptanceWeight)
     {
-        rOld(x, y) = rNew(x, y);
+        rOld(x, y) = rOld(x, y) + D*QForceOld(x, y)*dt + GaussianRandomNumber()*sqrt(dt);
         QForceOld(x, y) = QForceNew(x, y);
         waveFunctionOld = waveFunctionNew;
         acceptanceCounter += 1;
     } else
     {
-        rNew(x, y) = rOld(x, y) + D*QForceOld(x, y)*dt + GaussianRandomNumber()*sqrt(dt);
+        rNew(x, y) = rOld(x, y);
         QForceNew(x, y) = QForceOld(x, y);
     }
 }
