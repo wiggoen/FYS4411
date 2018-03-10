@@ -138,7 +138,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
                 y = j; // Making j visible as private member y
 
                 // Update position value
-                rNew(x, y) = rOld(x, y) + (RandomNumber() - 0.5) * stepLength; // rOld(x, y) + (RandomNumber() - 0.5) * stepLength
+                rNew(x, y) = rOld(x, y) + (RandomNumber() - 0.5) * stepLength;
                 //std::cout << rNew << std::endl;
             }
 
@@ -186,12 +186,10 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 
 }
 
-// TODO: IS THIS CORRECT IMPLEMENTED?
-// acceptanceWeight around 1. Is this ok?
-// Should we have used more abstraction in making the program? More like the mathematical equations?
+
 void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew)
 {
-    double D = 0.5;
+    double D = 0.5; // Diffusion coefficient
     double dt = 0.01; // Interval [0.001,0.01]
     double acceptanceFactor = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
     double acceptanceWeight = (GreensFunction(rOld(x, y), rNew(x, y), D, dt, QForceOld(x, y))/GreensFunction(rNew(x, y), rOld(x, y), D, dt, QForceOld(x, y))) * acceptanceFactor;
