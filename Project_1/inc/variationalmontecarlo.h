@@ -31,11 +31,12 @@ private:
     int nCycles;
     double alpha;
     double stepLength;
+    double dt;
     int cycleStepToFile;
     int x;
     int y;
+    double acceptanceWeight;
     double acceptanceCounter;
-    double dt;
 };
 
 #endif // VARIATIONALMONTECARLO_H

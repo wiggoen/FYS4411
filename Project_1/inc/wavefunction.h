@@ -8,8 +8,8 @@ class Wavefunction
 public:
     Wavefunction();
     ~Wavefunction();
-    double TrialWaveFunction(const arma::mat &r, int nParticles, int nDimensions, double alpha);
-    void QuantumForce(const arma::mat &r, arma::mat &QForce, double alpha);
+    double TrialWaveFunction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha);
+    void QuantumForce(const arma::mat &r, arma::mat &QForce, double &alpha);
 };
 
 #endif // WAVEFUNCTION_H

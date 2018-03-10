@@ -37,8 +37,6 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
-    x = 0;
-    y = 0;
     acceptanceCounter = 0;
 
     arma::rowvec runDetails;
@@ -139,7 +137,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
                 y = j; // Making j visible as private member y
 
                 // Update position value
-                rNew(x, y) = rOld(x, y) + (RandomNumber() - 0.5) * stepLength;
+                rNew(i, j) = rOld(i, j) + (RandomNumber() - 0.5) * stepLength;
                 //std::cout << rNew << std::endl;
             }
 
@@ -170,7 +168,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
 
 void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew)
 {
-    double acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+    acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
     // Test is performed by moving one particle at the time. Accept or reject this move.
     if (RandomNumber() <= acceptanceWeight)
@@ -192,7 +190,7 @@ void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &
 {
     double D = 0.5; // Diffusion coefficient
     double acceptanceFactor = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-    double acceptanceWeight = (GreensFunction(rOld(x, y), rNew(x, y), D, dt, QForceOld(x, y))/GreensFunction(rNew(x, y), rOld(x, y), D, dt, QForceOld(x, y))) * acceptanceFactor;
+    acceptanceWeight = (GreensFunction(rOld(x, y), rNew(x, y), D, dt, QForceOld(x, y))/GreensFunction(rNew(x, y), rOld(x, y), D, dt, QForceOld(x, y))) * acceptanceFactor;
 
     // Test is performed by moving one particle at the time. Accept or reject this move.
     if (RandomNumber() <= acceptanceWeight)
