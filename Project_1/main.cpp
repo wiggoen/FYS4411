@@ -69,15 +69,15 @@ int main(int numberOfArguments, char *arguments[])
         double variance = columnSum(3)/trials;
         double acceptanceRatio = columnSum(4)/trials;
 
-        std::cout << std::setw(9) << std::setprecision(6) << nParticles
-                  << std::setw(12) << std::setprecision(6) << nDimensions
-                  << std::setw(11) << std::setprecision(10) << nCycles
-                  << std::setw(7) << std::setprecision(6) << alpha
-                  << std::setw(13) << std::setprecision(6) << stepLength
+        std::cout << std::setw(9) << std::setprecision(3) << nParticles
+                  << std::setw(12) << std::setprecision(3) << nDimensions
+                  << std::setw(11) << std::setprecision(8) << nCycles
+                  << std::setw(7) << std::setprecision(3) << alpha
+                  << std::setw(13) << std::setprecision(3) << stepLength
                   << std::setw(12) << std::setprecision(6) << time
-                  << std::setw(8) << std::setprecision(15) << energy
-                  << std::setw(16) << std::setprecision(15) << energySquared
-                  << std::setw(10) << std::setprecision(15) << variance
+                  << std::setw(8) << std::setprecision(3) << energy
+                  << std::setw(16) << std::setprecision(3) << energySquared
+                  << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
 
         return 0;
