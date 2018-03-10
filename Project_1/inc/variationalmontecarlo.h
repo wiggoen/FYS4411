@@ -8,7 +8,7 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
-    arma::rowvec RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int cycleStepToFile);
+    arma::rowvec RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, double dt, int cycleStepToFile);
     double RandomNumber();
     double GaussianRandomNumber();
     void InitialTrialPositions(arma::mat &r);
@@ -35,6 +35,7 @@ private:
     int x;
     int y;
     double acceptanceCounter;
+    double dt;
 };
 
 #endif // VARIATIONALMONTECARLO_H

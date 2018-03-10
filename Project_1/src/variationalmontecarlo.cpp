@@ -21,7 +21,7 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 }
 
 
-arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, int cycleStepToFile)
+arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, double dt, int cycleStepToFile)
 {
     // Adding variables to member variables
     this->nParticles = nParticles;
@@ -29,6 +29,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     this->nCycles = nCycles;
     this->alpha = alpha;
     this->stepLength = stepLength;
+    this->dt = dt;
     this->cycleStepToFile = cycleStepToFile;
 
     // Initialize matrices and variables
@@ -147,10 +148,10 @@ void VariationalMonteCarlo::MonteCarloCycles()
             waveFunction.QuantumForce(rNew, QForceNew, alpha);
 
             // Sampling: Metropolis brute force
-            MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+            //MetropolisBruteForce(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
 
             // Sampling: Fokker-Planck and Langevin
-            //FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+            FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
 
             // Update energies
             deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
@@ -190,7 +191,6 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew)
 {
     double D = 0.5; // Diffusion coefficient
-    double dt = 0.01; // Interval [0.001,0.01]
     double acceptanceFactor = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
     double acceptanceWeight = (GreensFunction(rOld(x, y), rNew(x, y), D, dt, QForceOld(x, y))/GreensFunction(rNew(x, y), rOld(x, y), D, dt, QForceOld(x, y))) * acceptanceFactor;
 
