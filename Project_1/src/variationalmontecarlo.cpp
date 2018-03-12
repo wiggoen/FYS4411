@@ -123,6 +123,26 @@ void VariationalMonteCarlo::MonteCarloCycles()
 }
 
 
+double VariationalMonteCarlo::UniformRandomNumber()
+{
+    static std::random_device rd;  // Initialize the seed for the random number engine
+    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
+    // Set up the uniform distribution for x in [0, 1]
+    static std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
+    return UniformNumberGenerator(gen);
+}
+
+
+double VariationalMonteCarlo::GaussianRandomNumber()
+{
+    static std::random_device rd;  // Initialize the seed for the random number engine
+    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
+    // Set up the normal distribution for x in [0, 1]
+    static std::normal_distribution<double> NormalDistribution(0.0,1.0);
+    return NormalDistribution(gen);
+}
+
+
 void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceNew,
                                                  double &waveFunctionOld, double &waveFunctionNew)
 {
@@ -147,26 +167,6 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 
         UpdateEnergies();
     }
-}
-
-
-double VariationalMonteCarlo::UniformRandomNumber()
-{
-    static std::random_device rd;  // Initialize the seed for the random number engine
-    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
-    // Set up the uniform distribution for x in [0, 1]
-    static std::uniform_real_distribution<double> UniformNumberGenerator(0.0,1.0);
-    return UniformNumberGenerator(gen);
-}
-
-
-double VariationalMonteCarlo::GaussianRandomNumber()
-{
-    static std::random_device rd;  // Initialize the seed for the random number engine
-    static std::mt19937_64 gen(rd());  // Call the Mersenne Twister algorithm
-    // Set up the normal distribution for x in [0, 1]
-    static std::normal_distribution<double> NormalDistribution(0.0,1.0);
-    return NormalDistribution(gen);
 }
 
 
