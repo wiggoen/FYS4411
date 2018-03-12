@@ -1,10 +1,7 @@
 #define CATCH_CONFIG_RUNNER // Configure Catch to use this main, and not its own.
 #include "inc/variationalmontecarlo.h"
 #include "inc/catch.hpp"
-#include "time.h"
-#include <iostream>
-#include <iomanip>
-#include <vector>
+
 
 #define TEST false // Change to true when testing and to false when running the program.
 
@@ -14,11 +11,12 @@ int RunCatchTests()
     return Catch::Session().run();
 }
 
+
 int main(int numberOfArguments, char *arguments[])
 {
     if (TEST)
     {
-        std::cout << "Running tests" << std::endl;
+        std::cout << "Running tests..." << std::endl;
         return RunCatchTests();
     } else
     {
@@ -48,8 +46,9 @@ int main(int numberOfArguments, char *arguments[])
 
         // Setup for writing to file
         std::cout << std::endl;
-        std::cout << "Particles " << " Dimensions " << "    Cycles " << " Alpha " << " Step_length " << " Time_step "
-                  << " Time_[sec] " << " Energy " << " Energy_squared " << " Variance " << " Acceptance_ratio " << std::endl;
+        std::cout << "Particles " << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
+                  << " Time_step " << " Time_[sec] " << " Energy " << " Energy_squared "
+                  << " Variance " << " Acceptance_ratio " << std::endl;
 
         // Allocation
         arma::rowvec runVector;
@@ -58,7 +57,8 @@ int main(int numberOfArguments, char *arguments[])
         // Run VMC
         for (int i = 0; i < trials; i++)
         {
-            runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, dt, cycleStepToFile);
+            runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha,
+                                                      stepLength, dt, cycleStepToFile);
             runMatrix.insert_rows(i, runVector);
         }
         arma::rowvec columnSum;

@@ -1,7 +1,7 @@
 #ifndef VARIATIONALMONTECARLO_H
 #define VARIATIONALMONTECARLO_H
 #include <armadillo>
-#include <random>
+
 
 class VariationalMonteCarlo
 {
@@ -9,13 +9,14 @@ public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
     arma::rowvec RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, double dt, int cycleStepToFile);
-    double RandomNumber();
-    double GaussianRandomNumber();
     void InitialTrialPositions(arma::mat &r);
     void MonteCarloCycles();
-    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
+    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
+    double UniformRandomNumber();
+    double GaussianRandomNumber();
     void FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
-    inline double GreensFunction(double &oldPosition, double &newPosition, double &D, double &dt, double &QForceOld);
+    double GreensFunction(double &oldPosition, double &newPosition, double &D, double &dt, double &QForceOld);
+    void UpdateEnergies();
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;

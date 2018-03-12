@@ -6,10 +6,12 @@ Wavefunction::Wavefunction()
 
 }
 
+
 Wavefunction::~Wavefunction()
 {
 
 }
+
 
 double Wavefunction::TrialWaveFunction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha)
 {
@@ -25,6 +27,7 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, int &nParticles, int 
     }
     return exp(-argument * alpha);
 }
+
 
 void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, double &alpha)
 {
