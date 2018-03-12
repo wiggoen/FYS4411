@@ -111,7 +111,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
 
         // Sampling
         MetropolisBruteForce(rNew, rOld, QForceNew, waveFunctionOld, waveFunctionNew);
-        //FokkerPlanckAndLangevin(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+        //ImportanceSampling(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
 
         // Write to file
         if (cycle % cycleStepToFile == 0)
@@ -170,9 +170,9 @@ double VariationalMonteCarlo::GaussianRandomNumber()
 }
 
 
-void VariationalMonteCarlo::FokkerPlanckAndLangevin(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld,
-                                                    arma::mat &QForceNew, double &waveFunctionOld,
-                                                    double &waveFunctionNew)
+void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld,
+                                               arma::mat &QForceNew, double &waveFunctionOld,
+                                               double &waveFunctionNew)
 {
     // Initialize classes
     Wavefunction waveFunction;
