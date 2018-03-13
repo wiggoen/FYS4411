@@ -9,14 +9,15 @@ public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
     arma::rowvec RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, double dt, int cycleStepToFile);
-    void InitialTrialPositions(arma::mat &r);
+    void InitialTrialPositionsBruteForce(arma::mat &r);
+    void InitialTrialPositionsImportanceSampling(arma::mat &r);
     void MonteCarloCycles();
     double UniformRandomNumber();
     double GaussianRandomNumber();
-    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
+    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionOld, double &waveFunctionNew);
     void ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
-    double GreensFunction(double &oldPosition, double &newPosition, double &D, double &dt, double &QForceOld);
-    void UpdateEnergies();
+    double GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld, double &D, double &dt, int &i);
+    void UpdateEnergies(int &i);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
@@ -34,8 +35,6 @@ private:
     double stepLength;
     double dt;
     int cycleStepToFile;
-    int x;
-    int y;
     double acceptanceWeight;
     double acceptanceCounter;
 };

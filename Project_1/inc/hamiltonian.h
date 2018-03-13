@@ -8,7 +8,7 @@ class Hamiltonian
 public:
     Hamiltonian();
     ~Hamiltonian();
-    double LocalEnergy(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha);
+    static double LocalEnergy(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha);
 };
 
 #endif // HAMILTONIAN_H
