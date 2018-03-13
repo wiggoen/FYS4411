@@ -65,40 +65,40 @@ TEST_CASE("Local energy, 1 particle, 1D, alpha != 0.5", "[Hamiltonian, alpha not
     int cycleStepToFile = 1e6;
 
     double energy = 0;
-    double localEnergy = 0.5;
+    double minEnergy = 0.5;
 
     arma::rowvec runVector;
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.1, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.2, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.3, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.4, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.6, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.7, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.8, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.9, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 }
 
 
@@ -112,40 +112,40 @@ TEST_CASE("Local energy, 10 particles, 1D, alpha != 0.5", "[Hamiltonian, alpha n
     int cycleStepToFile = 1e6;
 
     double energy = 0;
-    double localEnergy = 5;
+    double minEnergy = 5;
 
     arma::rowvec runVector;
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.1, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.2, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.3, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.4, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.6, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.7, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.8, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.9, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 }
 
 
@@ -159,40 +159,40 @@ TEST_CASE("Local energy, 1 particle, 2D, alpha != 0.5", "[Hamiltonian, alpha not
     int cycleStepToFile = 1e6;
 
     double energy = 0;
-    double localEnergy = 1;
+    double minEnergy = 1;
 
     arma::rowvec runVector;
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.1, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.2, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.3, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.4, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.6, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.7, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.8, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.9, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 }
 
 
@@ -206,40 +206,40 @@ TEST_CASE("Local energy, 10 particles, 2D, alpha != 0.5", "[Hamiltonian, alpha n
     int cycleStepToFile = 1e6;
 
     double energy = 0;
-    double localEnergy = 10;
+    double minEnergy = 10;
 
     arma::rowvec runVector;
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.1, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.2, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.3, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.4, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.6, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.7, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.8, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.9, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 }
 
 
@@ -253,40 +253,40 @@ TEST_CASE("Local energy, 1 particle, 3D, alpha != 0.5", "[Hamiltonian, alpha not
     int cycleStepToFile = 1e6;
 
     double energy = 0;
-    double localEnergy = 1.5;
+    double minEnergy = 1.5;
 
     arma::rowvec runVector;
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.1, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.2, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.3, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.4, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.6, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.7, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.8, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.9, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 }
 
 
@@ -300,40 +300,40 @@ TEST_CASE("Local energy, 10 particles, 3D, alpha != 0.5", "[Hamiltonian, alpha n
     int cycleStepToFile = 1e6;
 
     double energy = 0;
-    double localEnergy = 15;
+    double minEnergy = 15;
 
     arma::rowvec runVector;
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.1, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.2, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.3, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.4, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.6, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.7, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.8, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 
     runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, 0.9, stepLength, dt, cycleStepToFile);
     energy = runVector(1);
-    REQUIRE(energy > localEnergy);
+    REQUIRE(energy > minEnergy);
 }
 
 #endif // CATCH_HPP

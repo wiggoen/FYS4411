@@ -53,8 +53,14 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     double acceptanceRatio = 0;
 
     // Initial trial positions
-    InitialTrialPositions(rOld);
+    //InitialTrialPositionsBruteForce(rOld);
+    InitialTrialPositionsImportanceSampling(rOld);
     rNew = rOld;
+
+    // Store the current value of the wave function and quantum force
+    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, nParticles, nDimensions, alpha);
+    Wavefunction::QuantumForce(rOld, QForceOld, alpha);
+    QForceNew = QForceOld;
 
     // Start timing
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -78,7 +84,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
 }
 
 
-void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r)
+void VariationalMonteCarlo::InitialTrialPositionsBruteForce(arma::mat &r)
 {
     for (int i = 0; i < nParticles; i++)
     {
@@ -90,11 +96,20 @@ void VariationalMonteCarlo::InitialTrialPositions(arma::mat &r)
 }
 
 
+void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r)
+{
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            r(i, j) = GaussianRandomNumber()*sqrt(dt);
+        }
+    }
+}
+
+
 void VariationalMonteCarlo::MonteCarloCycles()
 {
-    // Initialize classes
-    Wavefunction waveFunction;
-
     // Initialize variables
     waveFunctionOld = 0;
     waveFunctionNew = 0;
@@ -105,13 +120,9 @@ void VariationalMonteCarlo::MonteCarloCycles()
     // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
-        // Store the current value of the wave function
-        waveFunctionOld = waveFunction.TrialWaveFunction(rOld, nParticles, nDimensions, alpha);
-        waveFunction.QuantumForce(rOld, QForceOld, alpha);
-
         // Sampling
-        MetropolisBruteForce(rNew, rOld, QForceNew, waveFunctionOld, waveFunctionNew);
-        //ImportanceSampling(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+        //MetropolisBruteForce(rNew, rOld, waveFunctionOld, waveFunctionNew);
+        ImportanceSampling(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
 
         // Write to file
         if (cycle % cycleStepToFile == 0)
@@ -143,29 +154,23 @@ double VariationalMonteCarlo::GaussianRandomNumber()
 }
 
 
-void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceNew,
-                                                 double &waveFunctionOld, double &waveFunctionNew)
+void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionOld,
+                                                 double &waveFunctionNew)
 {
-    // Initialize classes
-    Wavefunction waveFunction;
-
     // New position to test
     for (int i = 0; i < nParticles; i++)
     {
-        x = i; // Making i visible as private member x
         for (int j = 0; j < nDimensions; j++)
         {
-            y = j; // Making j visible as private member y
             rNew(i, j) = rOld(i, j) + (UniformRandomNumber() - 0.5) * stepLength;
-            //std::cout << rNew << std::endl;
         }
-        // Recalculate the value of the wave function and the quantum force
-        waveFunctionNew = waveFunction.TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
-        waveFunction.QuantumForce(rNew, QForceNew, alpha);
+
+        // Recalculate the value of the wave function
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
-        UpdateEnergies();
+        UpdateEnergies(i);
     }
 }
 
@@ -174,9 +179,6 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
                                                arma::mat &QForceNew, double &waveFunctionOld,
                                                double &waveFunctionNew)
 {
-    // Initialize classes
-    Wavefunction waveFunction;
-
     double D = 0.5; // Diffusion coefficient
     double acceptanceFactor = 0;
     double GreensOldNew = 0;
@@ -185,57 +187,52 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
     // New position to test
     for (int i = 0; i < nParticles; i++)
     {
-        x = i; // Making i visible as private member x
         for (int j = 0; j < nDimensions; j++)
         {
-            y = j; // Making j visible as private member y
-            rNew(i, j) = rOld(x, y) + D*QForceOld(x, y)*dt + GaussianRandomNumber()*sqrt(dt);
-            //std::cout << rNew << std::endl;
+            rNew(i, j) = rOld(i, j) + D*QForceOld(i, j)*dt + GaussianRandomNumber()*sqrt(dt);
         }
 
         // Recalculate the value of the wave function and the quantum force
-        waveFunctionNew = waveFunction.TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
-        waveFunction.QuantumForce(rNew, QForceNew, alpha);
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+        Wavefunction::QuantumForce(rNew, QForceNew, alpha);
 
         acceptanceFactor = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-        GreensOldNew = GreensFunction(rOld(x, y), rNew(x, y), D, dt, QForceOld(x, y));
-        GreensNewOld = GreensFunction(rNew(x, y), rOld(x, y), D, dt, QForceOld(x, y));
+        GreensOldNew = GreensFunction(rOld, rNew, QForceOld, D, dt, i);
+        GreensNewOld = GreensFunction(rNew, rOld, QForceNew, D, dt, i);
         acceptanceWeight = (GreensOldNew/GreensNewOld) * acceptanceFactor;
 
-        UpdateEnergies();
+        UpdateEnergies(i);
     }
 }
 
 
-double VariationalMonteCarlo::GreensFunction(double &oldPosition, double &newPosition, double &D,
-                                             double &dt, double &QForceOld)
+double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld,
+                                             double &D, double &dt, int &i)
 {
     double fourDdt = 4.0*D*dt;
-    double yxSquared = (newPosition-oldPosition-D*dt*QForceOld)*(newPosition-oldPosition-D*dt*QForceOld);
-    return (1.0/pow(fourDdt*M_PI, 3*nParticles/2.0)) * exp(-yxSquared/fourDdt) + (nParticles - 1);
+    arma::rowvec yx = rNew.row(i)-rOld.row(i)-D*dt*QForceOld.row(i);
+    double yxSquared = arma::dot(yx, yx);
+    return exp(-yxSquared/fourDdt) + (nParticles - 1);
 }
 
 
-void VariationalMonteCarlo::UpdateEnergies()
+void VariationalMonteCarlo::UpdateEnergies(int &i)
 {
-    // Initialize classes
-    Hamiltonian hamiltonian;
-
     // Test is performed by moving one particle at the time. Accept or reject this move.
     if (UniformRandomNumber() <= acceptanceWeight)
     {
-        rOld(x, y) = rNew(x, y);
-        QForceOld(x, y) = QForceNew(x, y);
+        rOld.row(i) = rNew.row(i);
+        QForceOld.row(i) = QForceNew.row(i);
         waveFunctionOld = waveFunctionNew;
         acceptanceCounter += 1;
     } else
     {
-        rNew(x, y) = rOld(x, y);
-        QForceNew(x, y) = QForceOld(x, y);
+        rNew.row(i) = rOld.row(i);
+        QForceNew.row(i) = QForceOld.row(i);
     }
 
     // Update energies
-    deltaEnergy = hamiltonian.LocalEnergy(rNew, nParticles, nDimensions, alpha);
+    deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
     energySum += deltaEnergy;
     energySquaredSum += deltaEnergy*deltaEnergy;
 }
