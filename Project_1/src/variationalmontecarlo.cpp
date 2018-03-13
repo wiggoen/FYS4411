@@ -240,10 +240,11 @@ void VariationalMonteCarlo::UpdateEnergies()
     energySquaredSum += deltaEnergy*deltaEnergy;
 }
 
-void VariationalMonteCarlo::Blocking(int nBlocks)
+void VariationalMonteCarlo::Blocking(arma::vec samples, int nSamples, int block_size, arma::vec results)
 {
-    double mean, sigma;
-
+    //Integer division will waste some samples
+    int nBlocks = nSamples/block_size;
+    double block_samples = new arma::vec(nBlocks);
 }
 
 double VariationalMonteCarlo::Mean(arma::vec &samples, int nSamples)
