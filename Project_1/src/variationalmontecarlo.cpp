@@ -239,3 +239,33 @@ void VariationalMonteCarlo::UpdateEnergies()
     energySum += deltaEnergy;
     energySquaredSum += deltaEnergy*deltaEnergy;
 }
+
+void VariationalMonteCarlo::Blocking(int nBlocks)
+{
+    double mean, sigma;
+
+}
+
+double VariationalMonteCarlo::Mean(arma::vec &samples, int nSamples)
+{
+    double m = 0;
+    for(int i=0; i<nSamples; i++)
+    {
+        m+=samples(i);
+    }
+    return m/double(nSamples);
+}
+
+double VariationalMonteCarlo::Variance(arma::vec &samples, int nSamples, arma::vec &results)
+{
+    double m2=0, m=0;
+    for(int i=0; i<nSamples; i++)
+    {
+        m+=samples(i);
+        m2+=samples(i)*samples(i);
+    }
+    m /= double(nSamples);
+    m2 /= double(nSamples);
+    results(0) = m;
+    results(1) = m2-(m*m);
+}
