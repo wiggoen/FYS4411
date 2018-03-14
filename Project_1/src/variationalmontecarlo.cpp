@@ -87,7 +87,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     energy = energySum/(nCycles * nParticles);
     energySquared = energySquaredSum/(nCycles * nParticles);
 
-    variance = (energySquared - energy*energy);///(nCycles * nParticles); // Er denne regnet korrekt ut i forhold til at energy og energySquared deles på N og dim?
+    variance = (energySquared - energy*energy)/(nCycles * nParticles);
     acceptanceRatio = acceptanceCounter/(nCycles * nParticles);
 
     runDetails << time << energy << energySquared << variance << acceptanceRatio;
