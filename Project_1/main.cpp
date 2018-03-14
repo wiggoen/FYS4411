@@ -21,8 +21,8 @@ int main(int numberOfArguments, char *arguments[])
     } else
     {
         // Default if there is no command line arguments
-        int nParticles = 1;
-        int nDimensions = 1;
+        int nParticles = 10;
+        int nDimensions = 2;
         int nCycles = 1e6;
         double alpha = 0.5;
         double stepLength = 0.1;

@@ -1,7 +1,7 @@
 #ifndef VARIATIONALMONTECARLO_H
 #define VARIATIONALMONTECARLO_H
 #include <armadillo>
-
+#include <string>
 
 class VariationalMonteCarlo
 {
@@ -40,6 +40,7 @@ private:
     int cycleStepToFile;
     double acceptanceWeight;
     double acceptanceCounter;
+    std::string samplingType;
 };
 
 #endif // VARIATIONALMONTECARLO_H

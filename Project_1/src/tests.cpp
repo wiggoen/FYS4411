@@ -11,7 +11,7 @@ TEST_CASE("Local energy, alpha 0.5", "[Hamiltonian]")
     double alpha = 0.5;
     double stepLength = 0.1;
     double dt = 0.01;
-    int cycleStepToFile = 1e6;
+    int cycleStepToFile = nCycles;
     double energy = 0;
     double variance = 0;
     double zero = 0;
@@ -62,7 +62,7 @@ TEST_CASE("Local energy, 1 particle, 1D, alpha != 0.5", "[Hamiltonian, alpha not
     int nCycles = 1e6;
     double stepLength = 0.1;
     double dt = 0.01;
-    int cycleStepToFile = 1e6;
+    int cycleStepToFile = nCycles;
 
     double energy = 0;
     double minEnergy = 0.5;
@@ -109,7 +109,7 @@ TEST_CASE("Local energy, 10 particles, 1D, alpha != 0.5", "[Hamiltonian, alpha n
     int nCycles = 1e6;
     double stepLength = 0.1;
     double dt = 0.01;
-    int cycleStepToFile = 1e6;
+    int cycleStepToFile = nCycles;
 
     double energy = 0;
     double minEnergy = 5;
@@ -156,7 +156,7 @@ TEST_CASE("Local energy, 1 particle, 2D, alpha != 0.5", "[Hamiltonian, alpha not
     int nCycles = 1e6;
     double stepLength = 0.1;
     double dt = 0.01;
-    int cycleStepToFile = 1e6;
+    int cycleStepToFile = nCycles;
 
     double energy = 0;
     double minEnergy = 1;
@@ -203,7 +203,7 @@ TEST_CASE("Local energy, 10 particles, 2D, alpha != 0.5", "[Hamiltonian, alpha n
     int nCycles = 1e6;
     double stepLength = 0.1;
     double dt = 0.01;
-    int cycleStepToFile = 1e6;
+    int cycleStepToFile = nCycles;
 
     double energy = 0;
     double minEnergy = 10;
@@ -250,7 +250,7 @@ TEST_CASE("Local energy, 1 particle, 3D, alpha != 0.5", "[Hamiltonian, alpha not
     int nCycles = 1e6;
     double stepLength = 0.1;
     double dt = 0.01;
-    int cycleStepToFile = 1e6;
+    int cycleStepToFile = nCycles;
 
     double energy = 0;
     double minEnergy = 1.5;
@@ -297,7 +297,7 @@ TEST_CASE("Local energy, 10 particles, 3D, alpha != 0.5", "[Hamiltonian, alpha n
     int nCycles = 1e6;
     double stepLength = 0.1;
     double dt = 0.01;
-    int cycleStepToFile = 1e6;
+    int cycleStepToFile = nCycles;
 
     double energy = 0;
     double minEnergy = 15;

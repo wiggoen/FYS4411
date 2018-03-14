@@ -40,9 +40,12 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
+    waveFunctionOld = 0;
+    waveFunctionNew = 0;
     energySum = 0;
     energySquaredSum = 0;
     deltaEnergy = 0;
+    acceptanceWeight = 0;
     acceptanceCounter = 0;
 
     arma::rowvec runDetails;
@@ -52,9 +55,17 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     double variance = 0;
     double acceptanceRatio = 0;
 
+    // CHOOSE SAMPLING METHOD                    <<< ---
+    //samplingType = "BruteForce";
+    samplingType = "Importance";
+
     // Initial trial positions
-    //InitialTrialPositionsBruteForce(rOld);
-    InitialTrialPositionsImportanceSampling(rOld);
+    if (samplingType == "BruteForce") {
+        InitialTrialPositionsBruteForce(rOld);
+    } else if (samplingType == "Importance")
+    {
+        InitialTrialPositionsImportanceSampling(rOld);
+    }
     rNew = rOld;
 
     // Store the current value of the wave function and quantum force
@@ -76,7 +87,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     energy = energySum/(nCycles * nParticles);
     energySquared = energySquaredSum/(nCycles * nParticles);
 
-    variance = (energySquared - energy*energy)/(nCycles * nParticles);
+    variance = (energySquared - energy*energy);///(nCycles * nParticles); // Er denne regnet korrekt ut i forhold til at energy og energySquared deles på N og dim?
     acceptanceRatio = acceptanceCounter/(nCycles * nParticles);
 
     runDetails << time << energy << energySquared << variance << acceptanceRatio;
@@ -110,10 +121,6 @@ void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r
 
 void VariationalMonteCarlo::MonteCarloCycles()
 {
-    // Initialize variables
-    waveFunctionOld = 0;
-    waveFunctionNew = 0;
-
     std::ofstream myfile;
     myfile.open("../Project_1/results.txt");
 
@@ -121,8 +128,12 @@ void VariationalMonteCarlo::MonteCarloCycles()
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
         // Sampling
-        //MetropolisBruteForce(rNew, rOld, waveFunctionOld, waveFunctionNew);
-        ImportanceSampling(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+        if (samplingType == "BruteForce") {
+            MetropolisBruteForce(rNew, rOld, waveFunctionOld, waveFunctionNew);
+        } else if (samplingType == "Importance")
+        {
+            ImportanceSampling(rNew, rOld, QForceOld, QForceNew, waveFunctionOld, waveFunctionNew);
+        }
 
         // Write to file
         if (cycle % cycleStepToFile == 0)
@@ -180,7 +191,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
                                                double &waveFunctionNew)
 {
     double D = 0.5; // Diffusion coefficient
-    double acceptanceFactor = 0;
+    double wavefunctionsSquared = 0;
     double GreensOldNew = 0;
     double GreensNewOld = 0;
 
@@ -196,10 +207,10 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
         Wavefunction::QuantumForce(rNew, QForceNew, alpha);
 
-        acceptanceFactor = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+        wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
         GreensOldNew = GreensFunction(rOld, rNew, QForceOld, D, dt, i);
         GreensNewOld = GreensFunction(rNew, rOld, QForceNew, D, dt, i);
-        acceptanceWeight = (GreensOldNew/GreensNewOld) * acceptanceFactor;
+        acceptanceWeight = (GreensOldNew/GreensNewOld) * wavefunctionsSquared;
 
         UpdateEnergies(i);
     }
@@ -237,6 +248,7 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     energySquaredSum += deltaEnergy*deltaEnergy;
 }
 
+/*
 void VariationalMonteCarlo::Blocking(arma::vec samples, int nSamples, int block_size, arma::vec results)
 {
     //Integer division will waste some samples
@@ -267,3 +279,4 @@ double VariationalMonteCarlo::Variance(arma::vec &samples, int nSamples, arma::v
     results(0) = m;
     results(1) = m2-(m*m);
 }
+*/
