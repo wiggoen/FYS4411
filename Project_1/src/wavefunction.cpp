@@ -31,5 +31,5 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, int &nParticles, int 
 
 void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, double &alpha)
 {
-    QForce = -4 * alpha * r;
+    QForce = -4.0 * alpha * r;
 }

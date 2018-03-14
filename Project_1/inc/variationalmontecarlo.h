@@ -39,7 +39,7 @@ private:
     double dt;
     int cycleStepToFile;
     double acceptanceWeight;
-    double acceptanceCounter;
+    int acceptanceCounter;
     std::string samplingType;
 };
 

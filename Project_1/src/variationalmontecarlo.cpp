@@ -54,6 +54,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     double energySquared = 0;
     double variance = 0;
     double acceptanceRatio = 0;
+    double normalizationFactor = 1.0/(nCycles * nParticles);
 
     // CHOOSE SAMPLING METHOD                    <<< ---
     //samplingType = "BruteForce";
@@ -84,11 +85,11 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     time = (std::chrono::duration<double> (end_time - start_time).count());
 
     // Calculation
-    energy = energySum/(nCycles * nParticles);
-    energySquared = energySquaredSum/(nCycles * nParticles);
+    energy = energySum * normalizationFactor;
+    energySquared = energySquaredSum * normalizationFactor;
 
-    variance = (energySquared - energy*energy)/(nCycles * nParticles);
-    acceptanceRatio = acceptanceCounter/(nCycles * nParticles);
+    variance = (energySquared - energy*energy) * normalizationFactor;
+    acceptanceRatio = acceptanceCounter * normalizationFactor;
 
     runDetails << time << energy << energySquared << variance << acceptanceRatio;
     return runDetails;
@@ -221,7 +222,7 @@ double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::
                                              double &D, double &dt, int &i)
 {
     double fourDdt = 4.0*D*dt;
-    arma::rowvec yx = rNew.row(i)-rOld.row(i)-D*dt*QForceOld.row(i);
+    arma::rowvec yx = rNew.row(i) - rOld.row(i) - D*dt*QForceOld.row(i);
     double yxSquared = arma::dot(yx, yx);
     return exp(-yxSquared/fourDdt) + (nParticles - 1);
 }
@@ -240,6 +241,7 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     {
         rNew.row(i) = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
+        waveFunctionNew = waveFunctionOld;              // SIKKERT UNØDVENDIG
     }
 
     // Update energies
@@ -247,36 +249,3 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     energySum += deltaEnergy;
     energySquaredSum += deltaEnergy*deltaEnergy;
 }
-
-/*
-void VariationalMonteCarlo::Blocking(arma::vec samples, int nSamples, int block_size, arma::vec results)
-{
-    //Integer division will waste some samples
-    int nBlocks = nSamples/block_size;
-    double block_samples = new arma::vec(nBlocks);
-}
-
-double VariationalMonteCarlo::Mean(arma::vec &samples, int nSamples)
-{
-    double m = 0;
-    for(int i=0; i<nSamples; i++)
-    {
-        m+=samples(i);
-    }
-    return m/double(nSamples);
-}
-
-double VariationalMonteCarlo::Variance(arma::vec &samples, int nSamples, arma::vec &results)
-{
-    double m2=0, m=0;
-    for(int i=0; i<nSamples; i++)
-    {
-        m+=samples(i);
-        m2+=samples(i)*samples(i);
-    }
-    m /= double(nSamples);
-    m2 /= double(nSamples);
-    results(0) = m;
-    results(1) = m2-(m*m);
-}
-*/
