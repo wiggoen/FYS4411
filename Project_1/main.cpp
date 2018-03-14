@@ -47,7 +47,7 @@ int main(int numberOfArguments, char *arguments[])
         // Setup for writing to file
         std::cout << std::endl;
         std::cout << "Particles " << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
-                  << " Time_step " << " Time_[sec] " << " Energy " << " Energy_squared "
+                  << " Time_step " << " Time_[sec] " << "   Energy " << " Energy_squared "
                   << " Variance " << " Acceptance_ratio " << std::endl;
 
         // Allocation
@@ -78,7 +78,7 @@ int main(int numberOfArguments, char *arguments[])
                   << std::setw(13) << std::setprecision(3) << stepLength
                   << std::setw(11) << std::setprecision(6) << dt
                   << std::setw(12) << std::setprecision(6) << time
-                  << std::setw(8) << std::setprecision(3) << energy
+                  << std::setw(10) << std::setprecision(3) << energy
                   << std::setw(16) << std::setprecision(3) << energySquared
                   << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
