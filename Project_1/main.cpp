@@ -21,10 +21,10 @@ int main(int numberOfArguments, char *arguments[])
     } else
     {
         // Default if there is no command line arguments
-        int nParticles = 10;
-        int nDimensions = 2;
+        int nParticles = 1;
+        int nDimensions = 1;
         int nCycles = 1e6;
-        double alpha = 0.5;
+        double alpha = 0.2;
         double stepLength = 0.1;
         double dt = 0.01;               // Time step interval [0.001,0.01]
         int cycleStepToFile = nCycles;
@@ -65,11 +65,11 @@ int main(int numberOfArguments, char *arguments[])
         columnSum = arma::sum(runMatrix, 0);
 
         // Finding averages of trials
-        double time = columnSum(0)/trials;
-        double energy = columnSum(1)/trials;
-        double energySquared = columnSum(2)/trials;
-        double variance = columnSum(3)/trials;
-        double acceptanceRatio = columnSum(4)/trials;
+        double time = columnSum(0)/double(trials);
+        double energy = columnSum(1)/double(trials);
+        double energySquared = columnSum(2)/double(trials);
+        double variance = columnSum(3)/double(trials);
+        double acceptanceRatio = columnSum(4)/double(trials);
 
         std::cout << std::setw(9) << std::setprecision(3) << nParticles
                   << std::setw(12) << std::setprecision(3) << nDimensions
