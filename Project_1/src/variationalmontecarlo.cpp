@@ -6,7 +6,7 @@
 #include <fstream>
 #include <random>
 #include <chrono>  // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
-#include <math.h>
+#include <cmath>
 //#include <stdlib.h> /* Exit failure <- to force the program to stop: exit(EXIT_FAILURE);  */
 
 
@@ -221,10 +221,13 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
 double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld,
                                              double &D, double &dt, int &i)
 {
+
     double fourDdt = 4.0*D*dt;
     arma::rowvec yx = rNew.row(i) - rOld.row(i) - D*dt*QForceOld.row(i);
     double yxSquared = arma::dot(yx, yx);
-    return exp(-yxSquared/fourDdt) + (nParticles - 1);
+    arma::rowvec xy = rOld.row(i) - rNew.row(i) - D*dt*QForceNew.row(i);
+    double xySquared = arma::dot(xy, xy);
+    return exp((-yxSquared + xySquared)/fourDdt);// + (nParticles - 1.0);
 }
 
 
