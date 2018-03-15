@@ -18,9 +18,6 @@ public:
     void ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
     double GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld, double &D, double &dt, int &i);
     void UpdateEnergies(int &i);
-    void Blocking(arma::vec samples, int nSamples, int block_size, arma::vec results);
-    double Mean(arma::vec &samples, int nSamples);
-    double Variance(arma::vec &samlpes, int nSamples, arma::vec &results);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
