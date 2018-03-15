@@ -221,7 +221,6 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
 double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld,
                                              double &D, double &dt, int &i)
 {
-
     double fourDdt = 4.0*D*dt;
     arma::rowvec yx = rNew.row(i) - rOld.row(i) - D*dt*QForceOld.row(i);
     double yxSquared = arma::dot(yx, yx);
