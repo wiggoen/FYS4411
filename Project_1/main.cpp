@@ -24,7 +24,7 @@ int main(int numberOfArguments, char *arguments[])
         int nParticles = 1;
         int nDimensions = 1;
         int nCycles = 1e6;
-        double alpha = 0.2;
+        double alpha = 0.5;
         double stepLength = 0.1;
         double dt = 0.01;               // Time step interval [0.001,0.01]
         int cycleStepToFile = nCycles;

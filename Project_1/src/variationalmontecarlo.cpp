@@ -193,8 +193,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
 {
     double D = 0.5; // Diffusion coefficient
     double wavefunctionsSquared = 0;
-    double GreensOldNew = 0;
-    double GreensNewOld = 0;
+    double GreensRatio = 0;
 
     // New position to test
     for (int i = 0; i < nParticles; i++)
@@ -209,9 +208,8 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         Wavefunction::QuantumForce(rNew, QForceNew, alpha);
 
         wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-        GreensOldNew = GreensFunction(rOld, rNew, QForceOld, D, dt, i);
-        GreensNewOld = GreensFunction(rNew, rOld, QForceNew, D, dt, i);
-        acceptanceWeight = (GreensOldNew/GreensNewOld) * wavefunctionsSquared;
+        GreensRatio = GreensFunction(rOld, rNew, QForceOld, D, dt, i);
+        acceptanceWeight = GreensRatio * wavefunctionsSquared;
 
         UpdateEnergies(i);
     }
@@ -226,7 +224,7 @@ double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::
     double yxSquared = arma::dot(yx, yx);
     arma::rowvec xy = rOld.row(i) - rNew.row(i) - D*dt*QForceNew.row(i);
     double xySquared = arma::dot(xy, xy);
-    return exp((-yxSquared + xySquared)/fourDdt);// + (nParticles - 1.0);
+    return exp((-xySquared + yxSquared)/fourDdt) + (nParticles - 1.0);
 }
 
 
