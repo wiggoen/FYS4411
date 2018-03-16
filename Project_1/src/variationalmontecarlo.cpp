@@ -23,7 +23,7 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 
 
 arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles,
-                                                             double alpha, double stepLength, double dt,
+                                                             double alpha, double stepLength, double timeStep,
                                                              int cycleStepToFile)
 {
     // Adding variables to member variables
@@ -32,8 +32,28 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     this->nCycles = nCycles;
     this->alpha = alpha;
     this->stepLength = stepLength;
-    this->dt = dt;
+    this->timeStep = timeStep;
     this->cycleStepToFile = cycleStepToFile;
+
+    // For writing to file										<<<< REMEMBER TO REMOVE THESE!
+	/*
+	if ( nParticles == 1 ) { strParticles = "1"; }
+    if ( nParticles == 10 ) { strParticles = "10"; }
+    if ( nParticles == 100 ) { strParticles = "100"; }
+    if ( nParticles == 500 ) { strParticles = "500"; }
+	if ( nDimensions == 1 ) { strDimensions = "1"; }
+	if ( nDimensions == 2 ) { strDimensions = "2"; }
+    if ( nDimensions == 3 ) { strDimensions = "3"; }
+    if ( alpha == 0.1 ) { strAlpha = "01"; }
+    if ( alpha == 0.2 ) { strAlpha = "02"; }
+    if ( alpha == 0.3 ) { strAlpha = "03"; }
+    if ( alpha == 0.4 ) { strAlpha = "04"; }
+    if ( alpha == 0.5 ) { strAlpha = "05"; }
+    if ( alpha == 0.6 ) { strAlpha = "06"; }
+    if ( alpha == 0.7 ) { strAlpha = "07"; }
+    if ( alpha == 0.8 ) { strAlpha = "08"; }
+    if ( alpha == 0.9 ) { strAlpha = "09"; }
+	*/
 
     // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -49,7 +69,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     acceptanceCounter = 0;
 
     arma::rowvec runDetails;
-    double time = 0;
+    double runTime = 0;
     double energy = 0;
     double energySquared = 0;
     double variance = 0;
@@ -82,7 +102,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
 
     // Timing finished
     auto end_time = std::chrono::high_resolution_clock::now();
-    time = (std::chrono::duration<double> (end_time - start_time).count());
+    runTime = (std::chrono::duration<double> (end_time - start_time).count());
 
     // Calculation
     energy = energySum * normalizationFactor;
@@ -91,7 +111,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     variance = (energySquared - energy*energy) * normalizationFactor;
     acceptanceRatio = acceptanceCounter * normalizationFactor;
 
-    runDetails << time << energy << energySquared << variance << acceptanceRatio;
+    runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
     return runDetails;
 }
 
@@ -114,7 +134,7 @@ void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r
     {
         for (int j = 0; j < nDimensions; j++)
         {
-            r(i, j) = GaussianRandomNumber()*sqrt(dt);
+            r(i, j) = GaussianRandomNumber()*sqrt(timeStep);
         }
     }
 }
@@ -123,7 +143,7 @@ void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r
 void VariationalMonteCarlo::MonteCarloCycles()
 {
     std::ofstream myfile;
-    myfile.open("../Project_1/results.txt");
+    myfile.open("../Project_1/results/results_" + strParticles + "p_" + strDimensions + "d_alpha" + strAlpha + ".txt");
 
     // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
@@ -191,7 +211,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
                                                arma::mat &QForceNew, double &waveFunctionOld,
                                                double &waveFunctionNew)
 {
-    double D = 0.5; // Diffusion coefficient
+    double diffusionCoefficient = 0.5;
     double wavefunctionsSquared = 0;
     double GreensRatio = 0;
 
@@ -200,7 +220,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
     {
         for (int j = 0; j < nDimensions; j++)
         {
-            rNew(i, j) = rOld(i, j) + D*QForceOld(i, j)*dt + GaussianRandomNumber()*sqrt(dt);
+            rNew(i, j) = rOld(i, j) + diffusionCoefficient*QForceOld(i, j)*timeStep + GaussianRandomNumber()*sqrt(timeStep);
         }
 
         // Recalculate the value of the wave function and the quantum force
@@ -208,7 +228,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         Wavefunction::QuantumForce(rNew, QForceNew, alpha);
 
         wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-        GreensRatio = GreensFunction(rOld, rNew, QForceOld, D, dt, i);
+        GreensRatio = GreensFunction(rOld, rNew, QForceOld, diffusionCoefficient, timeStep, i);
         acceptanceWeight = GreensRatio * wavefunctionsSquared;
 
         UpdateEnergies(i);
@@ -217,14 +237,14 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
 
 
 double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld,
-                                             double &D, double &dt, int &i)
+                                             double &diffusionCoefficient, double &timeStep, int &i)
 {
-    double fourDdt = 4.0*D*dt;
-    arma::rowvec yx = rNew.row(i) - rOld.row(i) - D*dt*QForceOld.row(i);
+    double fraction = 1.0/(4.0*diffusionCoefficient*timeStep);
+    arma::rowvec yx = rNew.row(i) - rOld.row(i) - diffusionCoefficient*timeStep*QForceOld.row(i);
     double yxSquared = arma::dot(yx, yx);
-    arma::rowvec xy = rOld.row(i) - rNew.row(i) - D*dt*QForceNew.row(i);
+    arma::rowvec xy = rOld.row(i) - rNew.row(i) - diffusionCoefficient*timeStep*QForceNew.row(i);
     double xySquared = arma::dot(xy, xy);
-    return exp((-xySquared + yxSquared)/fourDdt) + (nParticles - 1.0);
+    return exp((-xySquared + yxSquared) * fraction) + (nParticles - 1.0);
 }
 
 
