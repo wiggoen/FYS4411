@@ -143,7 +143,8 @@ void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r
 void VariationalMonteCarlo::MonteCarloCycles()
 {
     std::ofstream myfile;
-    myfile.open("../Project_1/results/results_" + strParticles + "p_" + strDimensions + "d_alpha" + strAlpha + ".txt");
+    myfile.open("../Project_1/results.txt");
+    //myfile.open("../Project_1/results/results_" + strParticles + "p_" + strDimensions + "d_alpha" + strAlpha + ".txt");
 
     // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
