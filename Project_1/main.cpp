@@ -27,7 +27,7 @@ int main(int numberOfArguments, char *arguments[])
         double alpha = 0.5;
         double stepLength = 0.1;
         double timeStep = 0.01;         // Interval [0.001,0.01]
-        int cycleStepToFile = nCycles;
+        int cycleStepToFile = 1000;
         int trials = 1;                 // change to 10 when running timing
 
         // If command line arguments are defined

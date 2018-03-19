@@ -15,6 +15,7 @@ public:
     double UniformRandomNumber();
     double GaussianRandomNumber();
     void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionOld, double &waveFunctionNew);
+    double NumericalDerivation(arma::mat R, double &waveFunctionNew);
     void ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
     double GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld, double &diffusionCoefficient, double &timeStep, int &i);
     void UpdateEnergies(int &i);

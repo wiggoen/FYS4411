@@ -160,7 +160,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
         // Write to file
         if (cycle % cycleStepToFile == 0)
         {
-            myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << deltaEnergy << std::endl;
+            myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
         }
     }
     myfile.close();
@@ -199,13 +199,46 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
 
         // Recalculate the value of the wave function
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+        // Analytic:
+        //waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+        // Numeric:
+
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
         UpdateEnergies(i);
     }
 }
+
+double VariationalMonteCarlo::NumericalDerivation(arma::mat R, double &waveFunctionNew)
+{
+    waveFunctionNew = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha);
+    double Rsquared = 0;
+    double kineticEnergy = 0;
+    double externalPotential =0;
+    double h = stepLength;
+    double h2 = h*h;
+
+    // Kinetic energy
+    arma::mat Rplus = R + h;
+    arma::mat Rminus = R - h;
+
+    for (int i = 0; i < nParticles; i++)
+    {
+        Rsquared = 0;
+        for (int j = 0; j < nParticles; j++)
+        {
+            Rsquared += R(i,j)*R(i,j);
+        }
+        externalPotential += 0.5*Rsquared;
+    }
+    double waveFunctionPlus = Wavefunction::TrialWaveFunction(Rplus, nParticles, nDimensions, alpha);
+    double waveFunctionMinus = Wavefunction::TrialWaveFunction(Rminus, nParticles, nDimensions, alpha);
+    kineticEnergy -= (waveFunctionPlus+waveFunctionMinus - 2*waveFunctionNew);
+    kineticEnergy = 0.5*kineticEnergy*h2/waveFunctionNew;
+    return kineticEnergy + externalPotential;
+}
+
 
 
 void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld,
@@ -235,6 +268,8 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         UpdateEnergies(i);
     }
 }
+
+
 
 
 double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld,
