@@ -318,6 +318,8 @@ double VariationalMonteCarlo::SteepestDescent(const arma::mat R, int nParticles,
     double energy = 0;
     double totalEnergy = 0;
     double totalEnergySquared = 0;
+    double M = nParticles; // ????
+    double totalPsi = 0;
 
     // Loop over nAlphas
     for (int i = 0; i<nAlpha; i++)
@@ -340,9 +342,16 @@ double VariationalMonteCarlo::SteepestDescent(const arma::mat R, int nParticles,
         totalEnergySquared += energy*energy;
         MonteCarloCycles();
         totalEnergy += energy;
-        double E_L_average = totalEnergy/nParticles;
-        double E_L_squared = totalEnergySquared/nParticles;
-        //if (abs(E_L_der))
+        totalPsi += waveFunctionNew;
+        double averageEnergy = totalEnergy/nParticles;
+        double averageEnergySquared = totalEnergySquared/nParticles;
+
+        double averagePsi = totalPsi/nParticles;
+        double E_L_der = 2*(averageEnergy - averagePsi*averageEnergy);
+        if (abs(E_L_der) < eps || abs(alpha_new - alpha)/alpha < eps)
+        {
+            std::cout << "Yes! " << alpha_new << std::endl;
+        }
     }
     return alpha_new;
 }
