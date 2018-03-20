@@ -305,3 +305,44 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     energySum += deltaEnergy;
     energySquaredSum += deltaEnergy*deltaEnergy;
 }
+
+
+double VariationalMonteCarlo::SteepestDescent(const arma::mat R, int nParticles, int nDimensions, double initialAlpha)
+{
+    double alpha  = initialAlpha;
+    double eps    = 0.001;
+    double eta    = 0.001;
+    double nAlpha = 100;
+    double alpha_new = 0;
+    double psi = 0;
+    double energy = 0;
+    double totalEnergy = 0;
+    double totalEnergySquared = 0;
+
+    // Loop over nAlphas
+    for (int i = 0; i<nAlpha; i++)
+    {
+        /*
+         *  Initialize position matrix (Already have this?)
+         *  Initialize wavefunction
+         *  Calculate energy
+         *  Etot += E
+         *  Do MC cycles
+         *  Etot += E
+         *  Calculate E_L and E_L^2
+         *  If abs(E_L_der < eps & abs(alpha - alpha_old)/alpha_old < eps:
+         *      cout something
+         *  alpha = alpha - eta*E_L_der
+         */
+        waveFunctionNew = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha);
+        energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha);
+        totalEnergy += energy;
+        totalEnergySquared += energy*energy;
+        MonteCarloCycles();
+        totalEnergy += energy;
+        double E_L_average = totalEnergy/nParticles;
+        double E_L_squared = totalEnergySquared/nParticles;
+        //if (abs(E_L_der))
+    }
+    return alpha_new;
+}

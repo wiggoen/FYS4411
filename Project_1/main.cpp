@@ -23,7 +23,7 @@ int main(int numberOfArguments, char *arguments[])
         // Default if there is no command line arguments
         int nParticles = 1;
         int nDimensions = 1;
-        int nCycles = 1e6;
+        int nCycles = 1e3;
         double alpha = 0.5;
         double stepLength = 0.1;
         double timeStep = 0.01;         // Interval [0.001,0.01]
