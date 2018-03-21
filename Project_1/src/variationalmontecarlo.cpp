@@ -67,6 +67,9 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     deltaEnergy = 0;
     acceptanceWeight = 0;
     acceptanceCounter = 0;
+    psiSum = 0;
+    psiTimesEnergySum = 0;
+    //psiSum = 0;
 
     arma::rowvec runDetails;
     double runTime = 0;
@@ -301,78 +304,86 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     }
 
     // Update energies
-    deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
-    energySum += deltaEnergy;
+    deltaEnergy       = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
+    energySum        += deltaEnergy;
     energySquaredSum += deltaEnergy*deltaEnergy;
+    psiSum           += waveFunctionNew;
+    psiTimesEnergySum += psiSum*energySum;
+    //psiEnergyTot         = waveFunctionNew*energySum*scalingFactor;
+    //averageEnergy        = totalEnergy;
+    //averageEnergySquared = totalEnergySquared;
+
+    //double psiEnergyAverage = psiEnergyTot;
+    //double averagePsi = totalPsi;
+    //double localEnergyDerivative = 2*(psiEnergyAverage - averagePsi*averageEnergy);
 }
 
 
 double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions, double initialAlpha)
 {
     //double alpha  = initialAlpha;
-    double eps    = 0.001;
+    //double eps    = 0.001;
     double eta    = 0.001;
-    double nAlpha = 100;
+    double nAlpha = 5;
     double alpha_new = initialAlpha;
     double energy = 0;
     double psi = 0;
     double totalEnergy = 0;
     double totalEnergySquared = 0;
-    double M = nCycles; // ????
     double totalPsi = 0;
     double totalPsiSquared = 0;
     double psiEnergyTot = 0;
     arma::vec R = rOld;
 
+    alpha = 0.55;
+
+
+    double scalingFactor = 1.0/(nParticles*nDimensions);
+
     double averageEnergy = 0;
-    double averageEnergySquared = 0;
+    double averageEnergySquared;
 
     // Calculate energies
-    psi = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha_new);
-    totalPsi += psi;
-    totalPsiSquared += psi*psi;
-    energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha_new);
-    totalEnergy += energy;
-    totalEnergySquared += energy*energy;
-    psiEnergyTot += psi*energy;
+    //psi = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha_new);
+    //totalPsi += psi;
+    //totalPsiSquared += psi*psi;
+    //energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha_new)*scalingFactor;
+    //totalEnergy += energy;
+    //totalEnergySquared += energy*energy;
+    //psiEnergyTot += psi*energy;
+
 
     //std::cout << energy << std::endl;
     // Loop over nAlphas
     for (int i = 0; i<nAlpha; i++)
     {
-        double iPlus2 = i+2;
         // Run Monte Carlo cycles
-        MonteCarloCycles();
+        RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile);
 
-        // Update energies
-        energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha_new);
-        //std::cout << energy << std::endl;
-        psi = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha_new);
-        totalEnergy += energy;
-        totalPsi += psi;
-        psiEnergyTot += psi*energy;
-        averageEnergy = totalEnergy/iPlus2;
-        averageEnergySquared = totalEnergySquared/iPlus2;
+        std::cout << energySum << std::endl;
 
-        double psiEnergyAvegare = psiEnergyTot/iPlus2;
-        double averagePsi = totalPsi/iPlus2;
-        double localEnergyDerivative = 2*(psiEnergyAvegare - averagePsi*averageEnergy);
+        // Update energies:
+        totalEnergy          = energySum*scalingFactor;
+        totalEnergySquared   = energySquaredSum*scalingFactor;
+        totalPsi             = psiSum*scalingFactor;
+        psiEnergyTot         = psiTimesEnergySum*scalingFactor;
+        averageEnergy        = totalEnergy;
+        averageEnergySquared = totalEnergySquared;
 
-        //if (abs(E_L_der) < eps || abs(alpha_new - alpha)/alpha < eps)
-        //{
-//            alpha_new = alpha_new - eta*localEnergyDerivative;
-//            std::cout << "Yes! " << alpha_new << std::endl;
-        //}
+        double psiEnergyAverage = psiEnergyTot;
+        double averagePsi = totalPsi;
+        double localEnergyDerivative = 2*(psiEnergyAverage - averagePsi*averageEnergy);
+
+        // Print energies to check values:
+        std::cout << "Psi energy average: "      << psiEnergyAverage      << std::endl
+                  << "Average Psi:        "      << averagePsi            << std::endl
+                  << "Average energy:     "      << averageEnergy         << std::endl
+                  << "Local energy derivative: " << localEnergyDerivative << std::endl;
+
+        alpha -= eta*localEnergyDerivative;
+        std::cout << "New alpha: " << alpha << std::endl;
     }
-    double iPlus2 = nAlpha;
-    averageEnergy = totalEnergy/iPlus2;
-    averageEnergySquared = totalEnergySquared/iPlus2;
 
-    double psiEnergyAvegare = psiEnergyTot/iPlus2;
-    double averagePsi = totalPsi/iPlus2;
-    double localEnergyDerivative = 2*(psiEnergyAvegare - averagePsi*averageEnergy);
-
-
-    std::cout << alpha_new << std::endl;
-    return alpha_new;
+    std::cout << alpha << std::endl;
+    return alpha;
 }

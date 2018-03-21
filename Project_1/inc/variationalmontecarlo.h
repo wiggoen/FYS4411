@@ -25,6 +25,8 @@ public:
     double energySum;
     double energySquaredSum;
     double deltaEnergy;
+    double psiSum;
+    double psiTimesEnergySum;
 private:
     arma::mat rOld;
     arma::mat rNew;
