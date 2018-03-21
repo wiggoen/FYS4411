@@ -54,6 +54,7 @@ int main(int numberOfArguments, char *arguments[])
         arma::rowvec runVector;
         arma::mat runMatrix;
 
+
         // Run VMC
         for (int i = 0; i < trials; i++)
         {
@@ -61,6 +62,17 @@ int main(int numberOfArguments, char *arguments[])
                                                       stepLength, timeStep, cycleStepToFile);
             runMatrix.insert_rows(i, runVector);
         }
+
+        // Run conjugate descend
+
+        //runVector = VMC->SteepestDescent(nParticles, nDimensions, alpha);
+        double bestAlpha = VMC->SteepestDescent(nParticles, nDimensions, alpha);
+
+        std::cout << "Steepest descend yields best alpha: alpha = " << bestAlpha << std::endl;
+
+
+
+
         arma::rowvec columnSum;
         columnSum = arma::sum(runMatrix, 0);
 

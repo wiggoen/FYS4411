@@ -77,8 +77,8 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     double normalizationFactor = 1.0/(nCycles * nParticles);
 
     // CHOOSE SAMPLING METHOD                    <<< ---
-    //samplingType = "BruteForce";
-    samplingType = "Importance";
+    samplingType = "BruteForce";
+    //samplingType = "Importance";
 
     // Initial trial positions
     if (samplingType == "BruteForce") {
@@ -307,51 +307,58 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
 }
 
 
-double VariationalMonteCarlo::SteepestDescent(const arma::mat R, int nParticles, int nDimensions, double initialAlpha)
+double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions, double initialAlpha)
 {
     double alpha  = initialAlpha;
     double eps    = 0.001;
     double eta    = 0.001;
     double nAlpha = 100;
-    double alpha_new = 0;
-    double psi = 0;
+    double alpha_new = initialAlpha;
     double energy = 0;
+    double psi = 0;
     double totalEnergy = 0;
     double totalEnergySquared = 0;
     double M = nParticles; // ????
     double totalPsi = 0;
+    double totalPsiSquared = 0;
+    double psiEnergyTot = 0;
+    arma::vec R = rOld;
+
+    double averageEnergy = 0;
+    double averageEnergySquared = 0;
+
+    // Calculate energies
+    psi = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha_new);
+    totalPsi += psi;
+    totalPsiSquared += psi*psi;
+    energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha_new);
+    totalEnergy += energy;
+    totalEnergySquared += energy*energy;
+    psiEnergyTot += psi*energy;
+
 
     // Loop over nAlphas
     for (int i = 0; i<nAlpha; i++)
     {
-        /*
-         *  Initialize position matrix (Already have this?)
-         *  Initialize wavefunction
-         *  Calculate energy
-         *  Etot += E
-         *  Do MC cycles
-         *  Etot += E
-         *  Calculate E_L and E_L^2
-         *  If abs(E_L_der < eps & abs(alpha - alpha_old)/alpha_old < eps:
-         *      cout something
-         *  alpha = alpha - eta*E_L_der
-         */
-        waveFunctionNew = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha);
-        energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha);
-        totalEnergy += energy;
-        totalEnergySquared += energy*energy;
+        // Run Monte Carlo cycles
         MonteCarloCycles();
+
+        // Update energies
+        energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha_new);
+        psi = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha_new);
         totalEnergy += energy;
-        totalPsi += waveFunctionNew;
-        double averageEnergy = totalEnergy/nParticles;
-        double averageEnergySquared = totalEnergySquared/nParticles;
+        totalPsi += psi;
+        averageEnergy = totalEnergy/M;
+        averageEnergySquared = totalEnergySquared/M;
 
         double averagePsi = totalPsi/nParticles;
         double E_L_der = 2*(averageEnergy - averagePsi*averageEnergy);
-        if (abs(E_L_der) < eps || abs(alpha_new - alpha)/alpha < eps)
-        {
+
+        //if (abs(E_L_der) < eps || abs(alpha_new - alpha)/alpha < eps)
+        //{
+            alpha_new = alpha_new - eta*E_L_der;
             std::cout << "Yes! " << alpha_new << std::endl;
-        }
+        //}
     }
     return alpha_new;
 }
