@@ -304,11 +304,11 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     }
 
     // Update energies
-    deltaEnergy       = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
-    energySum        += deltaEnergy;
-    energySquaredSum += deltaEnergy*deltaEnergy;
-    psiSum           += waveFunctionNew;
-    psiTimesEnergySum += psiSum*energySum;
+    deltaEnergy        = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
+    energySum         += deltaEnergy;
+    energySquaredSum  += deltaEnergy*deltaEnergy;
+    psiSum            += waveFunctionNew;
+    psiTimesEnergySum += waveFunctionNew*deltaEnergy;
     //psiEnergyTot         = waveFunctionNew*energySum*scalingFactor;
     //averageEnergy        = totalEnergy;
     //averageEnergySquared = totalEnergySquared;
@@ -321,69 +321,48 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
 
 double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions, double initialAlpha)
 {
-    //double alpha  = initialAlpha;
-    //double eps    = 0.001;
-    double eta    = 0.001;
-    double nAlpha = 5;
-    double alpha_new = initialAlpha;
-    double energy = 0;
-    double psi = 0;
-    double totalEnergy = 0;
-    double totalEnergySquared = 0;
-    double totalPsi = 0;
-    double totalPsiSquared = 0;
-    double psiEnergyTot = 0;
-    arma::vec R = rOld;
-
-    alpha = 0.55;
-
-
-    double scalingFactor = 1.0/(nParticles*nDimensions);
-
-    double averageEnergy = 0;
+    double eta              = 0.001;
+    double nAlpha           = 50;
+    double totalEnergy      = 0;
+    double totalPsi         = 0;
+    double psiEnergyTot     = 0;
+    double averageEnergy    = 0;
     double averageEnergySquared;
+    //arma::vec R = rOld;
 
-    // Calculate energies
-    //psi = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha_new);
-    //totalPsi += psi;
-    //totalPsiSquared += psi*psi;
-    //energy = Hamiltonian::LocalEnergy(R, nParticles, nDimensions, alpha_new)*scalingFactor;
-    //totalEnergy += energy;
-    //totalEnergySquared += energy*energy;
-    //psiEnergyTot += psi*energy;
+    double scalingFactor = 1.0/(nParticles*nDimensions*nCycles);
 
-
-    //std::cout << energy << std::endl;
-    // Loop over nAlphas
+    // Loop over number of alphas
     for (int i = 0; i<nAlpha; i++)
     {
+        std::cout << energySum*scalingFactor << std::endl;
         // Run Monte Carlo cycles
         RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile);
 
-        std::cout << energySum << std::endl;
+        std::cout << energySum*scalingFactor << std::endl;
 
         // Update energies:
         totalEnergy          = energySum*scalingFactor;
-        totalEnergySquared   = energySquaredSum*scalingFactor;
+        //totalEnergySquared   = energySquaredSum*scalingFactor;
         totalPsi             = psiSum*scalingFactor;
         psiEnergyTot         = psiTimesEnergySum*scalingFactor;
         averageEnergy        = totalEnergy;
-        averageEnergySquared = totalEnergySquared;
 
         double psiEnergyAverage = psiEnergyTot;
         double averagePsi = totalPsi;
         double localEnergyDerivative = 2*(psiEnergyAverage - averagePsi*averageEnergy);
 
         // Print energies to check values:
-        std::cout << "Psi energy average: "      << psiEnergyAverage      << std::endl
-                  << "Average Psi:        "      << averagePsi            << std::endl
+        std::cout << "Average psi*energy: "      << psiEnergyAverage      << std::endl
+                  << "Average psi:        "      << averagePsi            << std::endl
                   << "Average energy:     "      << averageEnergy         << std::endl
                   << "Local energy derivative: " << localEnergyDerivative << std::endl;
 
-        alpha -= eta*localEnergyDerivative;
+        alpha = alpha - eta*localEnergyDerivative;
+        std::cout << alpha - eta*localEnergyDerivative << std::endl;
         std::cout << "New alpha: " << alpha << std::endl;
     }
 
-    std::cout << alpha << std::endl;
+    std::cout << std::fixed << std::setprecision(15) << alpha << std::endl;
     return alpha;
 }

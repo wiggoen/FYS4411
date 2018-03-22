@@ -21,10 +21,10 @@ int main(int numberOfArguments, char *arguments[])
     } else
     {
         // Default if there is no command line arguments
-        int nParticles = 1;
-        int nDimensions = 1;
-        int nCycles = 1e3;
-        double alpha = 0.5;
+        int nParticles = 10;
+        int nDimensions = 3;
+        int nCycles = 1e2;
+        long double alpha = 0.700L;
         double stepLength = 0.1;
         double timeStep = 0.01;         // Interval [0.001,0.01]
         int cycleStepToFile = nCycles;
