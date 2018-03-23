@@ -22,33 +22,26 @@ int main(int numberOfArguments, char *arguments[])
     {
         // Default if there is no command line arguments
         int nParticles = 10;
-        int nDimensions = 3;
-        int nCycles = 1e2;
-        long double alpha = 0.700L;
-        double stepLength = 0.1;
-        double timeStep = 0.01;         // Interval [0.001,0.01]
+        int nDimensions = 2;
+        int nCycles = 1e5;
+        long double alpha = 0.8L;
+        double stepLength = 0.01;
+        double timeStep = 0.25;         // Interval [0.001,0.01]
         int cycleStepToFile = nCycles;
         int trials = 1;                 // change to 10 when running timing
 
         // If command line arguments are defined
-        if (numberOfArguments >= 2) { nParticles = std::atoi(arguments[1]); }
-        if (numberOfArguments >= 3) { nDimensions = std::atoi(arguments[2]); }
-        if (numberOfArguments >= 4) { nCycles = std::atoi(arguments[3]); }
-        if (numberOfArguments >= 5) { alpha = std::atof(arguments[4]); }
-        if (numberOfArguments >= 6) { stepLength = std::atof(arguments[5]); }
-        if (numberOfArguments >= 7) { timeStep = std::atof(arguments[6]); }
+        if (numberOfArguments >= 2) { nParticles      = std::atoi(arguments[1]); }
+        if (numberOfArguments >= 3) { nDimensions     = std::atoi(arguments[2]); }
+        if (numberOfArguments >= 4) { nCycles         = std::atoi(arguments[3]); }
+        if (numberOfArguments >= 5) { alpha           = std::atof(arguments[4]); }
+        if (numberOfArguments >= 6) { stepLength      = std::atof(arguments[5]); }
+        if (numberOfArguments >= 7) { timeStep        = std::atof(arguments[6]); }
         if (numberOfArguments >= 8) { cycleStepToFile = std::atoi(arguments[7]); }
-        if (numberOfArguments >= 9) { trials = std::atoi(arguments[8]); }
+        if (numberOfArguments >= 9) { trials          = std::atoi(arguments[8]); }
 
         // Initialize VMC
         VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
-
-
-        // Setup for writing to file
-        std::cout << std::endl;
-        std::cout << "Particles " << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
-                  << " Time_step " << " Time_[sec] " << "   Energy " << " Energy_squared "
-                  << " Variance " << " Acceptance_ratio " << std::endl;
 
         // Allocation
         arma::rowvec runVector;
@@ -56,6 +49,7 @@ int main(int numberOfArguments, char *arguments[])
 
 
         // Run VMC
+
         for (int i = 0; i < trials; i++)
         {
             runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha,
@@ -63,16 +57,12 @@ int main(int numberOfArguments, char *arguments[])
             runMatrix.insert_rows(i, runVector);
         }
 
-        // Run conjugate descend
 
-        //runVector = VMC->SteepestDescent(nParticles, nDimensions, alpha);
-        double bestAlpha = VMC->SteepestDescent(nParticles, nDimensions, alpha);
-
-        std::cout << "Steepest descend yields best alpha: alpha = " << bestAlpha << std::endl;
-
-
-
-
+        // Run steepest descend to find best alpha
+        //double bestAlpha = VMC->SteepestDescent(nParticles, nDimensions);
+        //runMatrix.insert_rows(i, runVector);
+        //std::cout << "Steepest descend yields best alpha: alpha = " << bestAlpha << std::endl;
+/*
         arma::rowvec columnSum;
         columnSum = arma::sum(runMatrix, 0);
 
@@ -83,10 +73,16 @@ int main(int numberOfArguments, char *arguments[])
         double variance = columnSum(3)/trials;
         double acceptanceRatio = columnSum(4)/trials;
 
-        std::cout << std::setw(9) << std::setprecision(3) << nParticles
+        // Setup for writing to file
+        std::cout << std::endl;
+        std::cout << "Particles " << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
+                  << " Time_step " << " Time_[sec] " << "   Energy " << " Energy_squared "
+                  << " Variance " << " Acceptance_ratio " << std::endl;
+
+        std::cout << std::setw(9)  << std::setprecision(3) << nParticles
                   << std::setw(12) << std::setprecision(3) << nDimensions
                   << std::setw(11) << std::setprecision(8) << nCycles
-                  << std::setw(7) << std::setprecision(3) << alpha
+                  << std::setw(7)  << std::setprecision(3) << alpha
                   << std::setw(13) << std::setprecision(3) << stepLength
                   << std::setw(11) << std::setprecision(6) << timeStep
                   << std::setw(12) << std::setprecision(6) << runTime
@@ -94,6 +90,7 @@ int main(int numberOfArguments, char *arguments[])
                   << std::setw(16) << std::setprecision(3) << energySquared
                   << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
+                  */
 
         return 0;
     }

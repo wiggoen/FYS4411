@@ -69,6 +69,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     acceptanceCounter = 0;
     psiSum = 0;
     psiTimesEnergySum = 0;
+    deltaPsi = 0;
     //psiSum = 0;
 
     arma::rowvec runDetails;
@@ -78,10 +79,11 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     double variance = 0;
     double acceptanceRatio = 0;
     double normalizationFactor = 1.0/(nCycles * nParticles);
+    double beta = 1.0;
 
     // CHOOSE SAMPLING METHOD                    <<< ---
-    samplingType = "BruteForce";
-    //samplingType = "Importance";
+    //samplingType = "BruteForce";
+    samplingType = "Importance";
 
     // Initial trial positions
     if (samplingType == "BruteForce") {
@@ -101,7 +103,9 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     auto start_time = std::chrono::high_resolution_clock::now();
 
     // Run Monte Carlo cycles
-    MonteCarloCycles();
+    //MonteCarloCycles();
+
+    SteepestDescent(nParticles,nDimensions);
 
     // Timing finished
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -113,6 +117,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
 
     variance = (energySquared - energy*energy) * normalizationFactor;
     acceptanceRatio = acceptanceCounter * normalizationFactor;
+
 
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
     return runDetails;
@@ -203,9 +208,9 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 
         // Recalculate the value of the wave function
         // Analytic:
-        //waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
         // Numeric:
-
+        //energySum += NumericalDerivation(rNew, waveFunctionNew);
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
@@ -295,74 +300,71 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
         rOld.row(i) = rNew.row(i);
         QForceOld.row(i) = QForceNew.row(i);
         waveFunctionOld = waveFunctionNew;
-        acceptanceCounter += 1;
+        acceptanceCounter += 1.0;
+        //std::cout << "Hrello " << std::endl;
     } else
     {
         rNew.row(i) = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
-        waveFunctionNew = waveFunctionOld;              // SIKKERT UNØDVENDIG
+        waveFunctionNew = waveFunctionOld;      // SIKKERT UNØDVENDIG
+        //std::cout << "WOW" << std::endl;
     }
+    double beta = 1.0;
 
     // Update energies
     deltaEnergy        = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
     energySum         += deltaEnergy;
     energySquaredSum  += deltaEnergy*deltaEnergy;
-    psiSum            += waveFunctionNew;
-    psiTimesEnergySum += waveFunctionNew*deltaEnergy;
-    //psiEnergyTot         = waveFunctionNew*energySum*scalingFactor;
-    //averageEnergy        = totalEnergy;
-    //averageEnergySquared = totalEnergySquared;
+    deltaPsi            = Wavefunction::derivativePsi(rNew, nParticles, nDimensions, beta);
+    psiSum             += deltaPsi;
+    //psiSum = Wavefunction::QuantumForce(rNew,QForceOld,alpha);
+    psiTimesEnergySum += deltaPsi*deltaEnergy;
 
-    //double psiEnergyAverage = psiEnergyTot;
-    //double averagePsi = totalPsi;
-    //double localEnergyDerivative = 2*(psiEnergyAverage - averagePsi*averageEnergy);
 }
 
-
-double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions, double initialAlpha)
+double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions)
 {
-    double eta              = 0.001;
-    double nAlpha           = 50;
-    double totalEnergy      = 0;
-    double totalPsi         = 0;
-    double psiEnergyTot     = 0;
-    double averageEnergy    = 0;
-    double averageEnergySquared;
-    //arma::vec R = rOld;
-
-    double scalingFactor = 1.0/(nParticles*nDimensions*nCycles);
+    double eta           = 0.001;
+    double nAlpha        = 500;
+    double averagePsi    = 0;
+    double averageEnergy = 0;
+    double averagePsiTimesEnergy = 0;
+    double localEnergyDerivative = 0;
+    //double scalingFactor = 1.0/(nParticles*nDimensions*nCycles);
+    double scalingFactor = 1.0/(nCycles*nParticles);
 
     // Loop over number of alphas
     for (int i = 0; i<nAlpha; i++)
     {
-        std::cout << energySum*scalingFactor << std::endl;
         // Run Monte Carlo cycles
-        RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile);
+        //RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile);
+        acceptanceCounter = 0;
+        waveFunctionOld = 0;
+        waveFunctionNew = 0;
+        energySum = 0;
+        energySquaredSum = 0;
+        deltaEnergy = 0;
+        acceptanceWeight = 0;
+        acceptanceCounter = 0;
+        psiSum = 0;
+        psiTimesEnergySum = 0;
+        deltaPsi = 0;
 
-        std::cout << energySum*scalingFactor << std::endl;
+        MonteCarloCycles();
 
         // Update energies:
-        totalEnergy          = energySum*scalingFactor;
-        //totalEnergySquared   = energySquaredSum*scalingFactor;
-        totalPsi             = psiSum*scalingFactor;
-        psiEnergyTot         = psiTimesEnergySum*scalingFactor;
-        averageEnergy        = totalEnergy;
+        averagePsi    = psiSum*scalingFactor;
+        averageEnergy = energySum*scalingFactor;
+        averagePsiTimesEnergy = psiTimesEnergySum*scalingFactor;
+        localEnergyDerivative = 2*(averagePsiTimesEnergy - averagePsi*averageEnergy);
 
-        double psiEnergyAverage = psiEnergyTot;
-        double averagePsi = totalPsi;
-        double localEnergyDerivative = 2*(psiEnergyAverage - averagePsi*averageEnergy);
 
-        // Print energies to check values:
-        std::cout << "Average psi*energy: "      << psiEnergyAverage      << std::endl
-                  << "Average psi:        "      << averagePsi            << std::endl
-                  << "Average energy:     "      << averageEnergy         << std::endl
-                  << "Local energy derivative: " << localEnergyDerivative << std::endl;
+        // Calculate alpha
+        std::cout << "New alpha: "  << alpha
+                  << " Average energy: " << averageEnergy << std::endl;
+        std::cout << acceptanceCounter*scalingFactor << "   " << acceptanceCounter << std::endl;
 
-        alpha = alpha - eta*localEnergyDerivative;
-        std::cout << alpha - eta*localEnergyDerivative << std::endl;
-        std::cout << "New alpha: " << alpha << std::endl;
+        alpha -= eta*localEnergyDerivative;
     }
-
-    std::cout << std::fixed << std::setprecision(15) << alpha << std::endl;
     return alpha;
 }

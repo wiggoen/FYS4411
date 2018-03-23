@@ -19,7 +19,7 @@ public:
     void ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
     double GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld, double &diffusionCoefficient, double &timeStep, int &i);
     void UpdateEnergies(int &i);
-    double SteepestDescent(int nParticles, int nDimensions, double initialAlpha);
+    double SteepestDescent(int nParticles, int nDimensions);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
@@ -27,6 +27,7 @@ public:
     double deltaEnergy;
     double psiSum;
     double psiTimesEnergySum;
+    double deltaPsi;
 private:
     arma::mat rOld;
     arma::mat rNew;
