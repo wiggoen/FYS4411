@@ -36,13 +36,13 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     this->cycleStepToFile = cycleStepToFile;
 
     // For writing to file										<<<< REMEMBER TO REMOVE THESE!
-	/*
-	if ( nParticles == 1 ) { strParticles = "1"; }
+    /*
+    if ( nParticles == 1 ) { strParticles = "1"; }
     if ( nParticles == 10 ) { strParticles = "10"; }
     if ( nParticles == 100 ) { strParticles = "100"; }
     if ( nParticles == 500 ) { strParticles = "500"; }
-	if ( nDimensions == 1 ) { strDimensions = "1"; }
-	if ( nDimensions == 2 ) { strDimensions = "2"; }
+    if ( nDimensions == 1 ) { strDimensions = "1"; }
+    if ( nDimensions == 2 ) { strDimensions = "2"; }
     if ( nDimensions == 3 ) { strDimensions = "3"; }
     if ( alpha == 0.1 ) { strAlpha = "01"; }
     if ( alpha == 0.2 ) { strAlpha = "02"; }
@@ -53,7 +53,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     if ( alpha == 0.7 ) { strAlpha = "07"; }
     if ( alpha == 0.8 ) { strAlpha = "08"; }
     if ( alpha == 0.9 ) { strAlpha = "09"; }
-	*/
+    */
 
     // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -70,7 +70,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     psiSum = 0;
     psiTimesEnergySum = 0;
     deltaPsi = 0;
-    //psiSum = 0;
+    double beta = 1.0;
 
     arma::rowvec runDetails;
     double runTime = 0;
@@ -79,7 +79,6 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     double variance = 0;
     double acceptanceRatio = 0;
     double normalizationFactor = 1.0/(nCycles * nParticles);
-    double beta = 1.0;
 
     // CHOOSE SAMPLING METHOD                    <<< ---
     //samplingType = "BruteForce";
@@ -104,7 +103,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
 
     // Run Monte Carlo cycles
     MonteCarloCycles();
-    //SteepestDescent(nParticles,nDimensions);
+    //SteepestDescent(nParticles, nDimensions);
 
     // Timing finished
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -116,7 +115,6 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
 
     variance = (energySquared - energy*energy) * normalizationFactor;
     acceptanceRatio = acceptanceCounter * normalizationFactor;
-
 
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
     return runDetails;
@@ -168,6 +166,7 @@ void VariationalMonteCarlo::MonteCarloCycles()
         if (cycle % cycleStepToFile == 0)
         {
             myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
+            // TODO: CHECK IF THIS WRITE THE CORRECT THING.
         }
     }
     myfile.close();
@@ -206,43 +205,69 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
 
         // Recalculate the value of the wave function
-        // Analytic:
-        //waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
-        // Numeric:
-        energySum += NumericalDerivation(rNew, waveFunctionNew);
-
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
         UpdateEnergies(i);
     }
 }
 
-double VariationalMonteCarlo::NumericalDerivation(arma::mat R, double &waveFunctionNew)
+double VariationalMonteCarlo::NumericalDerivation(const arma::mat &r)
 {
-    waveFunctionNew = Wavefunction::TrialWaveFunction(R, nParticles, nDimensions, alpha);
-    double Rsquared = 0;
-    double kineticEnergy = 0;
-    double externalPotential =0;
-    double h = stepLength;
-    double h2 = h*h;
+    arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
+    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
+
+    rPlus = r;
+    rMinus = r;
+
+    double waveFunctionMinus = 0;
+    double waveFunctionPlus = 0;
+    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, nParticles, nDimensions, alpha);
+
+    double stepLengthSquaredFraction = 1.0 / (stepLength * stepLength);
 
     // Kinetic energy
-    arma::mat Rplus = R + h;
-    arma::mat Rminus = R - h;
-
-    for (int i = 0; i < nParticles; i++)
-    {
-        Rsquared = 0;
-        for (int j = 0; j < nParticles; j++)
-        {
-            Rsquared += R(i,j)*R(i,j);
+    double kineticEnergy = 0;
+    for(int i = 0; i < nParticles; i++) {
+        for(int j = 0; j < nDimensions; j++) {
+            rPlus(i, j) += stepLength;
+            rMinus(i, j) -= stepLength;
+            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, nParticles, nDimensions, alpha);
+            waveFunctionPlus = Wavefunction::TrialWaveFunction(rPlus, nParticles, nDimensions, alpha);
+            kineticEnergy -= (waveFunctionMinus + waveFunctionPlus - 2 * waveFunctionCurrent);
+            rPlus(i, j) = r(i, j);
+            rMinus(i, j) = r(i, j);
         }
-        externalPotential += 0.5*Rsquared;
     }
-    double waveFunctionPlus = Wavefunction::TrialWaveFunction(Rplus, nParticles, nDimensions, alpha);
-    double waveFunctionMinus = Wavefunction::TrialWaveFunction(Rminus, nParticles, nDimensions, alpha);
-    kineticEnergy -= (waveFunctionPlus+waveFunctionMinus - 2*waveFunctionNew);
-    kineticEnergy = 0.5*kineticEnergy*h2/waveFunctionNew;
+    kineticEnergy = 0.5 * stepLengthSquaredFraction * kineticEnergy / waveFunctionCurrent;
+
+    // External potential
+    double externalPotential = 0;
+    double rSquared = 0;
+    for(int i = 0; i < nParticles; i++)
+    {
+        rSquared = 0;
+        for(int j = 0; j < nDimensions; j++)
+        {
+            rSquared += r(i, j) * r(i, j);
+        }
+        externalPotential += 0.5 * rSquared;
+    }
+
+    // TODO: Implement!!
+    // Internal potential
+    /*
+    double rij = 0;
+    for(int i = 0; i < nParticles; i++) {
+        for(int j = i + 1; j < nParticles; j++) {
+            rij = 0;
+            for(int k = 0; k < nDimensions; k++) {
+                rij += (r(i, k) - r(j, k)) * (r(i, k) - r(j, k));
+            }
+            potentialEnergy += 1 / sqrt(rij);
+        }
+    }
+    */
     return kineticEnergy + externalPotential;
 }
 
@@ -299,26 +324,33 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
         rOld.row(i) = rNew.row(i);
         QForceOld.row(i) = QForceNew.row(i);
         waveFunctionOld = waveFunctionNew;
-        acceptanceCounter += 1.0;
-        //std::cout << "Hrello " << std::endl;
+        acceptanceCounter += 1;
     } else
     {
         rNew.row(i) = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
         waveFunctionNew = waveFunctionOld;      // SIKKERT UNØDVENDIG
-        //std::cout << "WOW" << std::endl;
     }
     double beta = 1.0;
 
-    // Update energies
+    // Update energies (without numerical derivation)
+    /*
     deltaEnergy        = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
     energySum         += deltaEnergy;
     energySquaredSum  += deltaEnergy*deltaEnergy;
-    deltaPsi            = Wavefunction::derivativePsi(rNew, nParticles, nDimensions, beta);
-    psiSum             += deltaPsi;
+    */
+
+    // Update energies using numerical derivation
+    deltaEnergy          = NumericalDerivation(rNew);
+    energySum           += deltaEnergy;
+    energySquaredSum    += deltaEnergy*deltaEnergy;
+
+    /*
+    deltaPsi           = Wavefunction::derivativePsi(rNew, nParticles, nDimensions, beta);
+    psiSum            += deltaPsi;
     //psiSum = Wavefunction::QuantumForce(rNew,QForceOld,alpha);
     psiTimesEnergySum += deltaPsi*deltaEnergy;
-
+    */
 }
 
 double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions)

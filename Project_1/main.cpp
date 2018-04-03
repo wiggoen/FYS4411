@@ -24,9 +24,9 @@ int main(int numberOfArguments, char *arguments[])
         int nParticles = 10;
         int nDimensions = 2;
         int nCycles = 1e6;
-        long double alpha = 0.5L;
-        double stepLength = 0.01;
-        double timeStep = 0.25;         // Interval [0.001,0.01]
+        double alpha = 0.5;
+        double stepLength = 0.001;
+        double timeStep = 0.001;         // Interval [0.001,0.01]
         int cycleStepToFile = nCycles;
         int trials = 1;                 // change to 10 when running timing
 
