@@ -47,9 +47,7 @@ int main(int numberOfArguments, char *arguments[])
         arma::rowvec runVector;
         arma::mat runMatrix;
 
-
         // Run VMC
-
         for (int i = 0; i < trials; i++)
         {
             runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha,
@@ -57,7 +55,7 @@ int main(int numberOfArguments, char *arguments[])
             runMatrix.insert_rows(i, runVector);
         }
 
-
+        // TODO: IS THIS IN USE? OR CAN IT BE REMOVED?
         // Run steepest descend to find best alpha
         //double bestAlpha = VMC->SteepestDescent(nParticles, nDimensions);
         //runMatrix.insert_rows(i, runVector);
@@ -90,7 +88,6 @@ int main(int numberOfArguments, char *arguments[])
                   << std::setw(16) << std::setprecision(3) << energySquared
                   << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
-
 
         return 0;
     }

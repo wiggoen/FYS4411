@@ -282,20 +282,18 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
 
     if (integrationType == "Analytical") {
         // Update energies (without numerical derivation)
-        std::cout << "Analytical integration" << std::endl;
         deltaEnergy        = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
         energySum         += deltaEnergy;
         energySquaredSum  += deltaEnergy*deltaEnergy;
     } else if (integrationType == "Numerical")
     {
         // Update energies using numerical derivation
-        //std::cout << "Numerical integration" << std::endl;
         deltaEnergy        = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength);
         energySum         += deltaEnergy;
         energySquaredSum  += deltaEnergy*deltaEnergy;
     }
 
-
+    // TODO: IS THIS IN USE? OR CAN IT BE REMOVED?
     /*
     deltaPsi           = Wavefunction::derivativePsi(rNew, nParticles, nDimensions, beta);
     psiSum            += deltaPsi;
