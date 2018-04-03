@@ -10,7 +10,8 @@ public:
     ~Wavefunction();
     static double TrialWaveFunction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha);
     static void QuantumForce(const arma::mat &r, arma::mat &QForce, double &alpha);
-    static double derivativePsi(const arma::mat &R, int nParticles, int nDimensions, double beta);
+    static void NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, int &nParticles, int &nDimensions, double &alpha, double &stepLength);
+    static double DerivativePsi(const arma::mat &r, int &nParticles, int &nDimensions, double &beta);
 
 };
 

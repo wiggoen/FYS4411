@@ -15,7 +15,6 @@ public:
     double UniformRandomNumber();
     double GaussianRandomNumber();
     void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionOld, double &waveFunctionNew);
-    double NumericalDerivation(const arma::mat &r);
     void ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld, arma::mat &QForceNew, double &waveFunctionOld, double &waveFunctionNew);
     double GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld, double &diffusionCoefficient, double &timeStep, int &i);
     void UpdateEnergies(int &i);
@@ -39,10 +38,12 @@ private:
     double alpha;
     double stepLength;
     double timeStep;
+    double beta;
     int cycleStepToFile;
     double acceptanceWeight;
     int acceptanceCounter;
     std::string samplingType;
+    std::string integrationType;
 	/*
 	std::string strParticles;			// <<< REMOVE THESE!!
     std::string strDimensions;

@@ -70,7 +70,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     psiSum = 0;
     psiTimesEnergySum = 0;
     deltaPsi = 0;
-    double beta = 1.0;
+    beta = 1.0;
 
     arma::rowvec runDetails;
     double runTime = 0;
@@ -83,6 +83,10 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     // CHOOSE SAMPLING METHOD                    <<< ---
     //samplingType = "BruteForce";
     samplingType = "Importance";
+
+    // CHOOSE INTEGRATION METHOD                 <<< ---
+    //integrationType = "Analytical";
+    integrationType = "Numerical";
 
     // Initial trial positions
     if (samplingType == "BruteForce") {
@@ -212,66 +216,6 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
     }
 }
 
-double VariationalMonteCarlo::NumericalDerivation(const arma::mat &r)
-{
-    arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
-    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
-
-    rPlus = r;
-    rMinus = r;
-
-    double waveFunctionMinus = 0;
-    double waveFunctionPlus = 0;
-    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, nParticles, nDimensions, alpha);
-
-    double stepLengthSquaredFraction = 1.0 / (stepLength * stepLength);
-
-    // Kinetic energy
-    double kineticEnergy = 0;
-    for(int i = 0; i < nParticles; i++) {
-        for(int j = 0; j < nDimensions; j++) {
-            rPlus(i, j) += stepLength;
-            rMinus(i, j) -= stepLength;
-            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, nParticles, nDimensions, alpha);
-            waveFunctionPlus = Wavefunction::TrialWaveFunction(rPlus, nParticles, nDimensions, alpha);
-            kineticEnergy -= (waveFunctionMinus + waveFunctionPlus - 2 * waveFunctionCurrent);
-            rPlus(i, j) = r(i, j);
-            rMinus(i, j) = r(i, j);
-        }
-    }
-    kineticEnergy = 0.5 * stepLengthSquaredFraction * kineticEnergy / waveFunctionCurrent;
-
-    // External potential
-    double externalPotential = 0;
-    double rSquared = 0;
-    for(int i = 0; i < nParticles; i++)
-    {
-        rSquared = 0;
-        for(int j = 0; j < nDimensions; j++)
-        {
-            rSquared += r(i, j) * r(i, j);
-        }
-        externalPotential += 0.5 * rSquared;
-    }
-
-    // TODO: Implement!!
-    // Internal potential
-    /*
-    double rij = 0;
-    for(int i = 0; i < nParticles; i++) {
-        for(int j = i + 1; j < nParticles; j++) {
-            rij = 0;
-            for(int k = 0; k < nDimensions; k++) {
-                rij += (r(i, k) - r(j, k)) * (r(i, k) - r(j, k));
-            }
-            potentialEnergy += 1 / sqrt(rij);
-        }
-    }
-    */
-    return kineticEnergy + externalPotential;
-}
-
-
 
 void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld,
                                                arma::mat &QForceNew, double &waveFunctionOld,
@@ -291,7 +235,13 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
 
         // Recalculate the value of the wave function and the quantum force
         waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
-        Wavefunction::QuantumForce(rNew, QForceNew, alpha);
+        if (integrationType == "Analytical")
+        {
+            Wavefunction::QuantumForce(rNew, QForceNew, alpha);
+        } else if (integrationType == "Numerical")
+        {
+            Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, stepLength);
+        }
 
         wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
         GreensRatio = GreensFunction(rOld, rNew, QForceOld, diffusionCoefficient, timeStep, i);
@@ -300,8 +250,6 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         UpdateEnergies(i);
     }
 }
-
-
 
 
 double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld,
@@ -331,19 +279,22 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
         QForceNew.row(i) = QForceOld.row(i);
         waveFunctionNew = waveFunctionOld;      // SIKKERT UNØDVENDIG
     }
-    double beta = 1.0;
 
-    // Update energies (without numerical derivation)
-    /*
-    deltaEnergy        = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
-    energySum         += deltaEnergy;
-    energySquaredSum  += deltaEnergy*deltaEnergy;
-    */
+    if (integrationType == "Analytical") {
+        // Update energies (without numerical derivation)
+        std::cout << "Analytical integration" << std::endl;
+        deltaEnergy        = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
+        energySum         += deltaEnergy;
+        energySquaredSum  += deltaEnergy*deltaEnergy;
+    } else if (integrationType == "Numerical")
+    {
+        // Update energies using numerical derivation
+        //std::cout << "Numerical integration" << std::endl;
+        deltaEnergy        = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength);
+        energySum         += deltaEnergy;
+        energySquaredSum  += deltaEnergy*deltaEnergy;
+    }
 
-    // Update energies using numerical derivation
-    deltaEnergy          = NumericalDerivation(rNew);
-    energySum           += deltaEnergy;
-    energySquaredSum    += deltaEnergy*deltaEnergy;
 
     /*
     deltaPsi           = Wavefunction::derivativePsi(rNew, nParticles, nDimensions, beta);
@@ -352,6 +303,7 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     psiTimesEnergySum += deltaPsi*deltaEnergy;
     */
 }
+
 
 double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions)
 {
@@ -365,7 +317,7 @@ double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions)
     double scalingFactor = 1.0/(nCycles*nParticles);
 
     // Loop over number of alphas
-    for (int i = 0; i<nAlpha; i++)
+    for (int i = 0; i < nAlpha; i++)
     {
         // Run Monte Carlo cycles
         //RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile);
@@ -395,7 +347,7 @@ double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions)
                   << " Average energy: " << averageEnergy << std::endl;
         std::cout << acceptanceCounter*scalingFactor << "   " << acceptanceCounter << std::endl;
 
-        alpha -= eta*localEnergyDerivative;
+        alpha -= eta * localEnergyDerivative;
     }
     return alpha;
 }
