@@ -103,9 +103,8 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     auto start_time = std::chrono::high_resolution_clock::now();
 
     // Run Monte Carlo cycles
-    //MonteCarloCycles();
-
-    SteepestDescent(nParticles,nDimensions);
+    MonteCarloCycles();
+    //SteepestDescent(nParticles,nDimensions);
 
     // Timing finished
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -208,9 +207,9 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 
         // Recalculate the value of the wave function
         // Analytic:
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+        //waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
         // Numeric:
-        //energySum += NumericalDerivation(rNew, waveFunctionNew);
+        energySum += NumericalDerivation(rNew, waveFunctionNew);
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 

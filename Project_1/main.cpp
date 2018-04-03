@@ -23,8 +23,8 @@ int main(int numberOfArguments, char *arguments[])
         // Default if there is no command line arguments
         int nParticles = 10;
         int nDimensions = 2;
-        int nCycles = 1e5;
-        long double alpha = 0.8L;
+        int nCycles = 1e6;
+        long double alpha = 0.5L;
         double stepLength = 0.01;
         double timeStep = 0.25;         // Interval [0.001,0.01]
         int cycleStepToFile = nCycles;
@@ -62,7 +62,7 @@ int main(int numberOfArguments, char *arguments[])
         //double bestAlpha = VMC->SteepestDescent(nParticles, nDimensions);
         //runMatrix.insert_rows(i, runVector);
         //std::cout << "Steepest descend yields best alpha: alpha = " << bestAlpha << std::endl;
-/*
+
         arma::rowvec columnSum;
         columnSum = arma::sum(runMatrix, 0);
 
@@ -90,7 +90,7 @@ int main(int numberOfArguments, char *arguments[])
                   << std::setw(16) << std::setprecision(3) << energySquared
                   << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
-                  */
+
 
         return 0;
     }
