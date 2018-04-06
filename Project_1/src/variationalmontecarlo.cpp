@@ -86,7 +86,16 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
 
     // CHOOSE INTEGRATION METHOD                 <<< ---
     //integrationType = "Analytical";
-    integrationType = "Numerical";
+    //integrationType = "Numerical";
+    integrationType = "Interaction";
+
+    if (integrationType == "Analytical") {
+        beta = 1;
+    } else if (integrationType == "Numerical") {
+        beta = 1;
+    } else if (integrationType == "Interaction") {
+        beta = 2.82843;
+    }
 
     // Initial trial positions
     if (samplingType == "BruteForce") {
@@ -98,7 +107,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     rNew = rOld;
 
     // Store the current value of the wave function and quantum force
-    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, nParticles, nDimensions, alpha);
+    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, nParticles, nDimensions, alpha, beta);
     Wavefunction::QuantumForce(rOld, QForceOld, alpha);
     QForceNew = QForceOld;
 
@@ -209,7 +218,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
 
         // Recalculate the value of the wave function
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
         UpdateEnergies(i);
@@ -234,13 +243,16 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         }
 
         // Recalculate the value of the wave function and the quantum force
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha);
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
         if (integrationType == "Analytical")
         {
             Wavefunction::QuantumForce(rNew, QForceNew, alpha);
         } else if (integrationType == "Numerical")
         {
             Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, stepLength);
+        } else if (integrationType == "Interaction")
+        {
+            Wavefunction::QuantumForceInteraction(rNew, QForceNew, alpha);
         }
 
         wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
@@ -291,7 +303,14 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
         deltaEnergy        = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength);
         energySum         += deltaEnergy;
         energySquaredSum  += deltaEnergy*deltaEnergy;
+    } else if (integrationType == "Interaction")
+    {
+        // Update energies using numerical derivation
+        deltaEnergy        = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta);
+        energySum         += deltaEnergy;
+        energySquaredSum  += deltaEnergy*deltaEnergy;
     }
+
 
     // TODO: IS THIS IN USE? OR CAN IT BE REMOVED?
     /*

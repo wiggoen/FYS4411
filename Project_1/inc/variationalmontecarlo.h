@@ -36,9 +36,9 @@ private:
     int nDimensions;
     int nCycles;
     double alpha;
+    double beta;
     double stepLength;
     double timeStep;
-    double beta;
     int cycleStepToFile;
     double acceptanceWeight;
     int acceptanceCounter;
