@@ -11,6 +11,7 @@ public:
     arma::rowvec RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles, double alpha, double stepLength, double timeStep, int cycleStepToFile);
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void InitialTrialPositionsImportanceSampling(arma::mat &r);
+    void RedrawPositionImportanceSampling(arma::mat &r, int &i);
     void MonteCarloCycles();
     double UniformRandomNumber();
     double GaussianRandomNumber();
@@ -27,6 +28,7 @@ public:
     double psiSum;
     double psiTimesEnergySum;
     double deltaPsi;
+    double a;
 private:
     arma::mat rOld;
     arma::mat rNew;

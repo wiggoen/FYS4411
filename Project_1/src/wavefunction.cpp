@@ -1,4 +1,5 @@
 #include "inc/wavefunction.h"
+#include "inc/hamiltonian.h"
 
 
 Wavefunction::Wavefunction()
@@ -32,6 +33,30 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, int &nParticles, int 
         argument += rSingleParticle;
     }
     return exp(-argument * alpha);
+}
+
+
+double Wavefunction::TrialWaveFunctionInteraction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha, double &beta, double &a)
+{
+    double trailWaveFunctionOneBody = Wavefunction::TrialWaveFunction(r, nParticles, nDimensions, alpha, beta);
+    double distance = 0;
+    double f = 1;
+
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = i+1; j < nParticles; j++)
+        {
+            distance = Hamiltonian::ParticleDistance(r.row(i), r.row(j));
+
+            if (distance > a) {
+                f *= (1 - a / distance);
+            } else
+            {
+                f *= 0;
+            }
+        }
+    }
+    return trailWaveFunctionOneBody * f;
 }
 
 
@@ -74,9 +99,10 @@ void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, 
 }
 
 
-void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, double &alpha)
+void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, double &alpha, int &nParticles, int &nDimensions, double &a, int &i)
 {
-    QForce = -4.0 * alpha * r;
+    arma::rowvec vectorSum = Hamiltonian::VectorSum(r, nParticles, nDimensions, a, i);
+    QForce.row(i) = -4.0 * alpha * r.row(i) + 2 * a * vectorSum;
 }
 
 

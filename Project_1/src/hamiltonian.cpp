@@ -1,7 +1,7 @@
 #include "inc/hamiltonian.h"
 #include "inc/wavefunction.h"
 #include <armadillo>
-#include <limits>               // trenger vi denne? infinity
+
 
 Hamiltonian::Hamiltonian()
 {
@@ -81,19 +81,20 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, int &nParticles, in
 }
 
 
-double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha, double &beta)
+double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha, double &beta, double &a)
 {
-    //std::cout << "beta = " << beta << std::endl;
+    double aSquared = a*a;
+    double aQuadrupoled = aSquared*aSquared;
+    double betaSquared = beta*beta;
+    double singleParticleBetaSquared = 0;
 
-    double a = 0.0043;
     arma::mat PhiGradient = -2 * alpha * r;
+
     double PhiLaplacian = 0;
     arma::rowvec vectorSum;
     double gradientProduct = 0;
     double doubleSum = 0;
     double derivativeSum = 0;
-    double singleParticle = 0;
-    //double distanceFractionSum = 0;
 
     double repulsivePontential = 0;
 
@@ -103,38 +104,33 @@ double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, int &nParticles, 
         PhiLaplacian = arma::dot(PhiGradient.row(k), PhiGradient.row(k)) - 2 * alpha * (2 + beta);
 
         vectorSum = VectorSum(r, nParticles, nDimensions, a, k);
-        gradientProduct = arma::dot(PhiGradient.row(k), vectorSum);
-        doubleSum = arma::dot(vectorSum, vectorSum);
-        derivativeSum = DerivativeSum(r, nParticles, a, k);
+        gradientProduct = 2 * a * arma::dot(PhiGradient.row(k), vectorSum);
 
-        //std::cout << "gradientProduct = " << gradientProduct << std::endl;
-        //std::cout << "doubleSum = " << doubleSum << std::endl;
+        //doubleSum = arma::dot(vectorSum, vectorSum);
+        derivativeSum = - aSquared * DerivativeSum(r, nParticles, a, k);
 
-        singleParticle += arma::dot(r.row(k), r.row(k));
-        //distanceFractionSum += Correlation(r, nParticles, a, k);          << Trengs denne?
+        doubleSum = aQuadrupoled * derivativeSum*derivativeSum;
 
-        repulsivePontential += RepulsivePotential(r, nParticles, a, k);     // << er dette korrekt implementasjon?
+        //singleParticle += arma::dot(r.row(k), r.row(k));
+
+        repulsivePontential += RepulsivePotential(r, nParticles, a, k);
 
         laplacianSum -= (PhiLaplacian + gradientProduct + doubleSum + derivativeSum);
-    }
 
-
-    // TODO: Implement!!
-    // Repulsive potential
-    /*
-    double rij = 0;
-    for(int i = 0; i < nParticles; i++) {
-        for(int j = i + 1; j < nParticles; j++) {
-            rij = 0;
-            for(int k = 0; k < nDimensions; k++) {
-                rij += (r(i, k) - r(j, k)) * (r(i, k) - r(j, k));
+        double argument = 0;
+        for (int j = 0; j < nDimensions; j++)
+        {
+            if (j < 2)
+            {
+                argument += r(k, j) * r(k, j);
+            } else
+            {
+                argument += betaSquared * r(k, j) * r(k, j);
             }
-            potentialEnergy += 1 / sqrt(rij);
         }
+        singleParticleBetaSquared += argument;
     }
-    */
-    std::cout << "laplacianSum = " << laplacianSum << std::endl;
-    return 0.5 * (laplacianSum + singleParticle * exp(-singleParticle * alpha)) + repulsivePontential;// * distanceFractionSum;//0.5 * (f+g+h) + pot;
+    return 0.5 * (laplacianSum + singleParticleBetaSquared) + repulsivePontential;
 }
 
 
@@ -149,6 +145,7 @@ arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, int &nParticles, int &nD
 {
     arma::rowvec vectorSum = arma::zeros<arma::rowvec>(nDimensions);
     double distance = 0;
+    double distanceSquared = 0;
 
     for (int j = 0; j < nParticles; j++)
     {
@@ -156,7 +153,8 @@ arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, int &nParticles, int &nD
         {
             //std::cout << "j = " << j << "     " << "k = " << k << std::endl;
             distance = ParticleDistance(r.row(k), r.row(j));
-            vectorSum += (((r.row(k) - r.row(j)) / distance) * (a / ((distance*distance)*(distance-a))));
+            distanceSquared = distance*distance;
+            vectorSum += (((r.row(k) - r.row(j)) / distance) * (a / (distanceSquared*(distance - a))));
         }
     }
     //std::cout << "vectorSum = " << vectorSum << std::endl;
@@ -168,6 +166,9 @@ double Hamiltonian::DerivativeSum(const arma::mat &r, int &nParticles, const dou
 {
     double derivativeSum = 0;
     double distance = 0;
+    double distanceSquared = 0;
+    double distanceSubtraction = 0;
+    double distanceSubtractionSquared = 0;
 
     for (int j = 0; j < nParticles; j++)
     {
@@ -175,26 +176,13 @@ double Hamiltonian::DerivativeSum(const arma::mat &r, int &nParticles, const dou
         {
             //std::cout << "j = " << j << "     " << "k = " << k << std::endl;
             distance = ParticleDistance(r.row(k), r.row(j));
-            derivativeSum += (-a*a / (distance*distance * (distance - a)*(distance - a)));
+            distanceSquared = distance*distance;
+            distanceSubtraction = distance - a;
+            distanceSubtractionSquared = distanceSubtraction*distanceSubtraction;
+            derivativeSum -= (1 / (distanceSquared * distanceSubtractionSquared));
         }
     }
-    //std::cout << "derivativeSum = " << derivativeSum << std::endl;
     return derivativeSum;
-}
-
-
-double Hamiltonian::Correlation(const arma::mat &r, int &nParticles, double &a, int &k)
-{
-    double distanceFractionSum = 0;
-
-    for (int j = 0; j < nParticles; j++)
-    {
-        if (j != k)
-        {
-            distanceFractionSum += (1 - a/ParticleDistance(r.row(k), r.row(j)));
-        }
-    }
-    return distanceFractionSum;
 }
 
 
@@ -202,9 +190,6 @@ double Hamiltonian::RepulsivePotential(const arma::mat &r, int &nParticles, doub
 {
     double repulsivePotential = 0;
     double distance = 0;
-    double infinity = std::numeric_limits<double>::infinity();
-
-    //std::cout << "infinity = " << infinity << std::endl;
 
     for (int j = 0; j < nParticles; j++)
     {
@@ -213,10 +198,7 @@ double Hamiltonian::RepulsivePotential(const arma::mat &r, int &nParticles, doub
             distance = ParticleDistance(r.row(k), r.row(j));
             if (distance <= a)
             {
-                repulsivePotential += infinity;      // UENDELIG?!?!?
-            } else
-            {
-                repulsivePotential += 0;
+                repulsivePotential += 1e50; // Er denne stor nok?
             }
         }
     }
