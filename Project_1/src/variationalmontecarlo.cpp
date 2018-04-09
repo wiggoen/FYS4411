@@ -7,7 +7,7 @@
 #include <random>
 #include <chrono>  // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
 #include <cmath>
-//#include <stdlib.h> /* Exit failure <- to force the program to stop: exit(EXIT_FAILURE);  */
+#include <stdlib.h> /* Exit failure <- to force the program to stop: exit(EXIT_FAILURE);  */
 
 
 VariationalMonteCarlo::VariationalMonteCarlo()
@@ -115,14 +115,13 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
                     distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
                     while (distance < a)
                     {
+                        // Making sure that no particle lies within a distance 'a' from each other
                         RedrawPositionImportanceSampling(rOld, i);
                         distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
-                        std::cout << "Redraw position" << std::endl;
                     }
                 }
             }
         }
-        std::cout << "yey!" << std::endl;
     }
     rNew = rOld;
 
@@ -283,6 +282,12 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         } else if (integrationType == "Interaction")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
+            //static int debug = 0;
+            //std::cout << "wf new = " << waveFunctionNew << std::endl;
+            //std::cout << "wf old = " << waveFunctionOld << std::endl;
+
+            //debug++;
+            //if (debug == 4) exit(EXIT_FAILURE);
             Wavefunction::QuantumForceInteraction(rNew, QForceNew, alpha, nParticles, nDimensions, a, i);
         }
 
