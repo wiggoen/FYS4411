@@ -8,13 +8,12 @@ class Wavefunction
 public:
     Wavefunction();
     ~Wavefunction();
-    static double TrialWaveFunction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha, double &beta);
-    static double TrialWaveFunctionInteraction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha, double &beta, double &a);
-    static void QuantumForce(const arma::mat &r, arma::mat &QForce, double &alpha);
-    static void NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, int &nParticles, int &nDimensions, double &alpha, double &stepLength);
-    static void QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, double &alpha, int &nParticles, int &nDimensions, double &a, int &i);
-    static double DerivativePsi(const arma::mat &r, int &nParticles, int &nDimensions, double &beta);
-
+    static double TrialWaveFunction(const arma::mat &, const int &, const int &, const double &, const double &);
+    static double TrialWaveFunctionInteraction(const arma::mat &, const int &, const int &, const double &, const double &, const double &);
+    static void QuantumForce(const arma::mat &, arma::mat &, const double &);
+    static void NumericalQuantumForce(const arma::mat &, arma::mat &, const int &, const int &, const double &, const double &);
+    static void QuantumForceInteraction(const arma::mat &, arma::mat &, const double &, const int &, const int &, const double &, const int &);
+    static double DerivativePsi(const arma::mat &, const int &, const int &, const double &);
 };
 
 #endif // WAVEFUNCTION_H

@@ -22,18 +22,21 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 }
 
 
-arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int nDimensions, int nCycles,
-                                                             double alpha, double stepLength, double timeStep,
-                                                             int cycleStepToFile)
+arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticles, const int nDimensions, const int nCycles,
+                                                             const double alpha, const double stepLength, const double timeStep,
+                                                             const int cycleStepToFile, const std::string samplingType,
+                                                             const std::string integrationType)
 {
     // Adding variables to member variables
-    this->nParticles = nParticles;
-    this->nDimensions = nDimensions;
-    this->nCycles = nCycles;
-    this->alpha = alpha;
-    this->stepLength = stepLength;
-    this->timeStep = timeStep;
+    this->nParticles      = nParticles;
+    this->nDimensions     = nDimensions;
+    this->nCycles         = nCycles;
+    this->alpha           = alpha;
+    this->stepLength      = stepLength;
+    this->timeStep        = timeStep;
     this->cycleStepToFile = cycleStepToFile;
+    this->samplingType    = samplingType;
+    this->integrationType = integrationType;
 
     // For writing to file										<<<< REMEMBER TO REMOVE THESE!
     /*
@@ -71,7 +74,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     psiTimesEnergySum = 0;
     deltaPsi = 0;
     beta = 1.0;
-    a = 0.0043;
+    a = 0.0043;     // hard-core diameter of the bosons
     //a = 0.433;
 
     arma::rowvec runDetails;
@@ -82,18 +85,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     double acceptanceRatio = 0;
     double normalizationFactor = 1.0/(nCycles * nParticles);
 
-    // CHOOSE SAMPLING METHOD                    <<< ---
-    //samplingType = "BruteForce";
-    samplingType = "Importance";
-
-    // CHOOSE INTEGRATION METHOD                 <<< ---
-    //integrationType = "Analytical";
-    //integrationType = "Numerical";
-    integrationType = "Interaction";
-
-    if (integrationType == "Analytical") {
-        beta = 1;
-    } else if (integrationType == "Numerical") {
+    if (integrationType == "Analytical" || integrationType == "Numerical") {
         beta = 1;
     } else if (integrationType == "Interaction") {
         beta = 2.82843;
@@ -105,24 +97,13 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     } else if (samplingType == "Importance")
     {
         InitialTrialPositionsImportanceSampling(rOld);
-        if (integrationType == "Interaction")
-        {
-            double distance = 0;
-            for (int i = 0; i < nParticles; i++)
-            {
-                for (int j = i+1; j < nParticles; j++)
-                {
-                    distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
-                    while (distance < a)
-                    {
-                        // Making sure that no particle lies within a distance 'a' from each other
-                        RedrawPositionImportanceSampling(rOld, i);
-                        distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
-                    }
-                }
-            }
-        }
     }
+
+    if (integrationType == "Interaction")
+    {
+        CheckInitialDistance(rOld);
+    }
+
     rNew = rOld;
 
     // Store the current value of the wave function and quantum force
@@ -145,7 +126,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(int nParticles, int
     energy = energySum * normalizationFactor;//nParticles;
     energySquared = energySquaredSum * normalizationFactor;
 
-    variance = (energySquared - energy*energy) * normalizationFactor;
+    variance = (energySquared - energy*energy);// * normalizationFactor;
     acceptanceRatio = acceptanceCounter * normalizationFactor;
 
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
@@ -177,11 +158,30 @@ void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r
 }
 
 
-void VariationalMonteCarlo::RedrawPositionImportanceSampling(arma::mat &r, int &i)
+void VariationalMonteCarlo::RedrawPositionImportanceSampling(arma::mat &r, const int &i)
 {
     for (int j = 0; j < nDimensions; j++)
     {
         r(i, j) = GaussianRandomNumber()*sqrt(timeStep);
+    }
+}
+
+
+void VariationalMonteCarlo::CheckInitialDistance(arma::mat &rOld)
+{
+    double distance = 0;
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = i+1; j < nParticles; j++)
+        {
+            distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
+            while (distance < a)
+            {
+                // Making sure that no particle lies within a distance 'a' from each other
+                RedrawPositionImportanceSampling(rOld, i);
+                distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
+            }
+        }
     }
 }
 
@@ -246,7 +246,14 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
 
         // Recalculate the value of the wave function
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
+        if (integrationType == "Interaction")
+        {
+            waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
+        } else
+        {
+            waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
+        }
+
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
 
         UpdateEnergies(i);
@@ -282,12 +289,6 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         } else if (integrationType == "Interaction")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
-            //static int debug = 0;
-            //std::cout << "wf new = " << waveFunctionNew << std::endl;
-            //std::cout << "wf old = " << waveFunctionOld << std::endl;
-
-            //debug++;
-            //if (debug == 4) exit(EXIT_FAILURE);
             Wavefunction::QuantumForceInteraction(rNew, QForceNew, alpha, nParticles, nDimensions, a, i);
         }
 
@@ -301,7 +302,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
 
 
 double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::mat &rNew, const arma::mat &QForceOld,
-                                             double &diffusionCoefficient, double &timeStep, int &i)
+                                             const double &diffusionCoefficient, const double &timeStep, const int &i)
 {
     double fraction = 1.0/(4.0*diffusionCoefficient*timeStep);
     arma::rowvec yx = rNew.row(i) - rOld.row(i) - diffusionCoefficient*timeStep*QForceOld.row(i);
@@ -312,7 +313,7 @@ double VariationalMonteCarlo::GreensFunction(const arma::mat &rOld, const arma::
 }
 
 
-void VariationalMonteCarlo::UpdateEnergies(int &i)
+void VariationalMonteCarlo::UpdateEnergies(const int &i)
 {
     // Test is performed by moving one particle at the time. Accept or reject this move.
     if (UniformRandomNumber() <= acceptanceWeight)
@@ -325,27 +326,28 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
     {
         rNew.row(i) = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
-        waveFunctionNew = waveFunctionOld;      // SIKKERT UNØDVENDIG
+        waveFunctionNew = waveFunctionOld;      // Probably unnecessary since the wavefunction didn't change, but just to be sure.
     }
 
     if (integrationType == "Analytical") {
         // Update energies (without numerical derivation)
-        deltaEnergy        = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
-        energySum         += deltaEnergy;
-        energySquaredSum  += deltaEnergy*deltaEnergy;
+        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
     } else if (integrationType == "Numerical")
     {
         // Update energies using numerical derivation
-        deltaEnergy        = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength);
-        energySum         += deltaEnergy;
-        energySquaredSum  += deltaEnergy*deltaEnergy;
+        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength);
     } else if (integrationType == "Interaction")
     {
         // Update energies using numerical derivation
-        deltaEnergy        = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
-        energySum         += deltaEnergy;
-        energySquaredSum  += deltaEnergy*deltaEnergy;
+        deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
     }
+    /*
+    if (fabs(deltaEnergy) > 1000) {
+        std::cout << deltaEnergy << "  " << waveFunctionNew << "  " << waveFunctionOld << std::endl;
+        //std::cout << waveFunctionNew << std::endl;
+    }*/
+    energySum         += deltaEnergy;
+    energySquaredSum  += deltaEnergy*deltaEnergy;
 
 
     // TODO: IS THIS IN USE? OR CAN IT BE REMOVED?
@@ -358,7 +360,7 @@ void VariationalMonteCarlo::UpdateEnergies(int &i)
 }
 
 
-double VariationalMonteCarlo::SteepestDescent(int nParticles, int nDimensions)
+double VariationalMonteCarlo::SteepestDescent(int nParticles)//, int nDimensions)
 {
     double eta           = 0.001;
     double nAlpha        = 500;

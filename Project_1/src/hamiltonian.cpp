@@ -15,7 +15,7 @@ Hamiltonian::~Hamiltonian()
 }
 
 
-double Hamiltonian::LocalEnergy(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha)
+double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha)
 {
     double factors = -2.0 * alpha*alpha + 0.5;
     double dimensionality = nDimensions * alpha;
@@ -34,7 +34,7 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, int &nParticles, int &nDimen
 }
 
 
-double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha, double &stepLength)
+double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha, const double &stepLength)
 {
     double beta = 1;
 
@@ -81,7 +81,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, int &nParticles, in
 }
 
 
-double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, int &nParticles, int &nDimensions, double &alpha, double &beta, double &a)
+double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha, const double &beta, const double &a)
 {
     double aSquared = a*a;
     double aQuadrupoled = aSquared*aSquared;
@@ -138,7 +138,7 @@ double Hamiltonian::ParticleDistance(const arma::rowvec &r_k, const arma::rowvec
 }
 
 
-arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, int &nParticles, int &nDimensions, const double a, const int &k)
+arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, const int &nParticles, const int &nDimensions, const double a, const int &k)
 {
     arma::rowvec vectorSum = arma::zeros<arma::rowvec>(nDimensions);
     double distance = 0;
@@ -159,7 +159,7 @@ arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, int &nParticles, int &nD
 }
 
 
-double Hamiltonian::DerivativeSum(const arma::mat &r, int &nParticles, const double a, const int &k)
+double Hamiltonian::DerivativeSum(const arma::mat &r, const int &nParticles, const double a, const int &k)
 {
     double derivativeSum = 0;
     double distance = 0;
@@ -183,7 +183,7 @@ double Hamiltonian::DerivativeSum(const arma::mat &r, int &nParticles, const dou
 }
 
 
-double Hamiltonian::RepulsivePotential(const arma::mat &r, int &nParticles, double &a, int &k)
+double Hamiltonian::RepulsivePotential(const arma::mat &r, const int &nParticles, const double &a, const int &k)
 {
     double repulsivePotential = 0;
     double distance = 0;
@@ -195,7 +195,7 @@ double Hamiltonian::RepulsivePotential(const arma::mat &r, int &nParticles, doub
             distance = ParticleDistance(r.row(k), r.row(j));
             if (distance <= a)
             {
-                repulsivePotential += 1e50;
+                repulsivePotential += 1e16;
             }
         }
     }

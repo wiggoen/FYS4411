@@ -25,20 +25,53 @@ int main(int numberOfArguments, char *arguments[])
         int nDimensions = 3;
         int nCycles = 1e6;
         double alpha = 0.5;
-        double stepLength = 0.001;
+        double stepLength = 0.2;//0.001;
         double timeStep = 0.01;         // Interval [0.001,0.01]
         int cycleStepToFile = nCycles;
         int trials = 1;                 // change to 10 when running timing
 
+        // CHOOSE SAMPLING METHOD                       <<< --- CHOOSE ONLY ONE
+        std::string samplingType = "BruteForce";
+        //std::string samplingType = "Importance";
+
+        // CHOOSE INTEGRATION METHOD                    <<< --- CHOOSE ONLY ONE
+        std::string integrationType = "Analytical";
+        //std::string integrationType = "Numerical";
+        //std::string integrationType = "Interaction";
+
+
         // If command line arguments are defined
-        if (numberOfArguments >= 2) { nParticles      = std::atoi(arguments[1]); }
-        if (numberOfArguments >= 3) { nDimensions     = std::atoi(arguments[2]); }
-        if (numberOfArguments >= 4) { nCycles         = std::atoi(arguments[3]); }
-        if (numberOfArguments >= 5) { alpha           = std::atof(arguments[4]); }
-        if (numberOfArguments >= 6) { stepLength      = std::atof(arguments[5]); }
-        if (numberOfArguments >= 7) { timeStep        = std::atof(arguments[6]); }
-        if (numberOfArguments >= 8) { cycleStepToFile = std::atoi(arguments[7]); }
-        if (numberOfArguments >= 9) { trials          = std::atoi(arguments[8]); }
+        if (numberOfArguments >= 2)  { nParticles      = std::atoi(arguments[1]); }
+        if (numberOfArguments >= 3)  { nDimensions     = std::atoi(arguments[2]); }
+        if (numberOfArguments >= 4)  { nCycles         = std::atoi(arguments[3]); }
+        if (numberOfArguments >= 5)  { alpha           = std::atof(arguments[4]); }
+        if (numberOfArguments >= 6)  { stepLength      = std::atof(arguments[5]); }
+        if (numberOfArguments >= 7)  { timeStep        = std::atof(arguments[6]); }
+        if (numberOfArguments >= 8)  { cycleStepToFile = std::atoi(arguments[7]); }
+        if (numberOfArguments >= 9)  { trials          = std::atoi(arguments[8]); }
+        if (numberOfArguments >= 10) {
+            samplingType = std::string(arguments[9]);
+            // Renaming sampling type to run with the program implementation
+            if      (samplingType == "bf")  { samplingType = "BruteForce"; }
+            else if (samplingType == "im")  { samplingType = "Importance"; }
+            else {
+                std::cerr << "Error: You have to specify sampling type." << std::endl;
+                std::cerr << "Options are 'bf' (brute force) or 'im' (importance sampling)." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        }
+        if (numberOfArguments >= 11) {
+            integrationType = std::string(arguments[10]);
+            // Renaming integration type to run with the program implementation
+            if      (integrationType == "ana")  { integrationType = "Analytical"; }
+            else if (integrationType == "num")  { integrationType = "Numerical"; }
+            else if (integrationType == "int")  { integrationType = "Interaction"; }
+            else {
+                std::cerr << "Error: You have to specify integration type." << std::endl;
+                std::cerr << "Options are 'ana' (analytic) or 'num' (numerical) or 'int' (interaction)." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        }
 
         // Initialize VMC
         VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
@@ -51,7 +84,8 @@ int main(int numberOfArguments, char *arguments[])
         for (int i = 0; i < trials; i++)
         {
             runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha,
-                                                      stepLength, timeStep, cycleStepToFile);
+                                                      stepLength, timeStep, cycleStepToFile,
+                                                      samplingType, integrationType);
             runMatrix.insert_rows(i, runVector);
         }
 
