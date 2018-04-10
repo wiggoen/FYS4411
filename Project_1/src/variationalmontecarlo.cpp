@@ -5,12 +5,13 @@
 #include <iomanip>
 #include <fstream>
 #include <random>
-#include <chrono>  // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
+#include <chrono>    // high resolution timing: http://en.cppreference.com/w/cpp/chrono/c/clock
 #include <cmath>
-#include <stdlib.h> /* Exit failure <- to force the program to stop: exit(EXIT_FAILURE);  */
+#include <stdlib.h>  // Exit failure, to force the program to stop: exit(EXIT_FAILURE);
 
 
-VariationalMonteCarlo::VariationalMonteCarlo()
+VariationalMonteCarlo::VariationalMonteCarlo() :
+    a(0.0043)  // hard-core diameter of the bosons
 {
 
 }
@@ -23,8 +24,9 @@ VariationalMonteCarlo::~VariationalMonteCarlo()
 
 
 arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticles, const int nDimensions, const int nCycles,
-                                                             const double alpha, const double stepLength, const double timeStep,
-                                                             const int cycleStepToFile, const std::string samplingType,
+                                                             const double alpha, const double stepLength,
+                                                             const double timeStep, const int cycleStepToFile,
+                                                             const std::string samplingType,
                                                              const std::string integrationType)
 {
     // Adding variables to member variables
@@ -38,7 +40,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     this->samplingType    = samplingType;
     this->integrationType = integrationType;
 
-    // For writing to file										<<<< REMEMBER TO REMOVE THESE!
+    // For writing to file                                   <<<< REMEMBER TO REMOVE THESE!
     /*
     if ( nParticles == 1 ) { strParticles = "1"; }
     if ( nParticles == 10 ) { strParticles = "10"; }
@@ -63,46 +65,33 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
-    waveFunctionOld = 0;
-    waveFunctionNew = 0;
-    energySum = 0;
-    energySquaredSum = 0;
-    deltaEnergy = 0;
-    acceptanceWeight = 0;
-    acceptanceCounter = 0;
-    psiSum = 0;
-    psiTimesEnergySum = 0;
-    deltaPsi = 0;
-    beta = 1.0;
-    a = 0.0043;     // hard-core diameter of the bosons
-    //a = 0.433;
+    waveFunctionOld   = 0.0;
+    waveFunctionNew   = 0.0;
+    energySum         = 0.0;
+    energySquaredSum  = 0.0;
+    deltaEnergy       = 0.0;
+    acceptanceWeight  = 0.0;
+    acceptanceCounter = 0.0;
+    psiSum            = 0.0;
+    psiTimesEnergySum = 0.0;
+    deltaPsi          = 0.0;
 
     arma::rowvec runDetails;
-    double runTime = 0;
-    double energy = 0;
-    double energySquared = 0;
-    double variance = 0;
-    double acceptanceRatio = 0;
+    double runTime = 0.0;
+    double energy = 0.0;
+    double energySquared = 0.0;
+    double variance = 0.0;
+    double acceptanceRatio = 0.0;
     double normalizationFactor = 1.0/(nCycles * nParticles);
 
-    if (integrationType == "Analytical" || integrationType == "Numerical") {
-        beta = 1;
-    } else if (integrationType == "Interaction") {
-        beta = 2.82843;
-    }
+    if (integrationType == "Interaction")  { beta = 2.82843; }
+    else                                   { beta = 1.0; }
 
     // Initial trial positions
-    if (samplingType == "BruteForce") {
-        InitialTrialPositionsBruteForce(rOld);
-    } else if (samplingType == "Importance")
-    {
-        InitialTrialPositionsImportanceSampling(rOld);
-    }
+    if (samplingType == "BruteForce")      { InitialTrialPositionsBruteForce(rOld); }
+    else if (samplingType == "Importance") { InitialTrialPositionsImportanceSampling(rOld); }
 
-    if (integrationType == "Interaction")
-    {
-        CheckInitialDistance(rOld);
-    }
+    if (integrationType == "Interaction")  { CheckInitialDistance(rOld); }
 
     rNew = rOld;
 
@@ -123,10 +112,10 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     runTime = (std::chrono::duration<double> (end_time - start_time).count());
 
     // Calculation
-    energy = energySum * normalizationFactor;//nParticles;
+    energy = energySum * normalizationFactor;
     energySquared = energySquaredSum * normalizationFactor;
 
-    variance = (energySquared - energy*energy);// * normalizationFactor;
+    variance = (energySquared - energy*energy);
     acceptanceRatio = acceptanceCounter * normalizationFactor;
 
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
@@ -162,7 +151,13 @@ void VariationalMonteCarlo::RedrawPositionImportanceSampling(arma::mat &r, const
 {
     for (int j = 0; j < nDimensions; j++)
     {
-        r(i, j) = GaussianRandomNumber()*sqrt(timeStep);
+        if (integrationType == "Importance")
+        {
+            r(i, j) = GaussianRandomNumber()*sqrt(timeStep);
+        } else
+        {
+            r(i, j) = (UniformRandomNumber() - 0.5) * stepLength;
+        }
     }
 }
 
@@ -207,7 +202,10 @@ void VariationalMonteCarlo::MonteCarloCycles()
         if (cycle % cycleStepToFile == 0)
         {
             myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
+
+
             // TODO: CHECK IF THIS WRITE THE CORRECT THING.
+
         }
     }
     myfile.close();
@@ -234,7 +232,7 @@ double VariationalMonteCarlo::GaussianRandomNumber()
 }
 
 
-void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionOld,
+void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, const double &waveFunctionOld,
                                                  double &waveFunctionNew)
 {
     // New position to test
@@ -261,13 +259,13 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 }
 
 
-void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld, arma::mat &QForceOld,
-                                               arma::mat &QForceNew, double &waveFunctionOld,
+void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceOld,
+                                               arma::mat &QForceNew, const double &waveFunctionOld,
                                                double &waveFunctionNew)
 {
     double diffusionCoefficient = 0.5;
-    double wavefunctionsSquared = 0;
-    double GreensRatio = 0;
+    double wavefunctionsSquared = 0.0;
+    double GreensRatio = 0.0;
 
     // New position to test
     for (int i = 0; i < nParticles; i++)
@@ -285,7 +283,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, arma::mat &rOld,
         } else if (integrationType == "Numerical")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
-            Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, stepLength);
+            Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, stepLength, beta);
         } else if (integrationType == "Interaction")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
@@ -326,31 +324,42 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     {
         rNew.row(i) = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
-        waveFunctionNew = waveFunctionOld;      // Probably unnecessary since the wavefunction didn't change, but just to be sure.
+        //waveFunctionNew = waveFunctionOld;  // Probably unnecessary since the wavefunction didn't change.
     }
 
     if (integrationType == "Analytical") {
-        // Update energies (without numerical derivation)
+        // Update energies (without numerical derivation and interaction)
         deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
     } else if (integrationType == "Numerical")
     {
         // Update energies using numerical derivation
-        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength);
+        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta);
     } else if (integrationType == "Interaction")
     {
-        // Update energies using numerical derivation
+        // Update energies using interaction
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
     }
-    /*
-    if (fabs(deltaEnergy) > 1000) {
-        std::cout << deltaEnergy << "  " << waveFunctionNew << "  " << waveFunctionOld << std::endl;
+
+    if (fabs(deltaEnergy) > 500) {
+        deltaEnergy = 0;
+        //std::cout << "deltaEnergy = " << deltaEnergy << std::endl;
+        //std::cout << "waveFunctionNew = " << waveFunctionNew << std::endl;
+        //std::cout << "waveFunctionOld = " << waveFunctionOld << std::endl;
+        //std::cout << "rNew: " << rNew << std::endl;
+        //std::cout << "rOld: " << rOld << std::endl;
+        //
+        //std::cout << "------------" << std::endl;
         //std::cout << waveFunctionNew << std::endl;
-    }*/
+    }
+
     energySum         += deltaEnergy;
-    energySquaredSum  += deltaEnergy*deltaEnergy;
+    energySquaredSum  += (deltaEnergy*deltaEnergy);
+
+
 
 
     // TODO: IS THIS IN USE? OR CAN IT BE REMOVED?
+
     /*
     deltaPsi           = Wavefunction::derivativePsi(rNew, nParticles, nDimensions, beta);
     psiSum            += deltaPsi;
@@ -360,16 +369,16 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 }
 
 
-double VariationalMonteCarlo::SteepestDescent(int nParticles)//, int nDimensions)
+double VariationalMonteCarlo::SteepestDescent(const int &nParticles)//, int nDimensions)
 {
-    double eta           = 0.001;
-    double nAlpha        = 500;
-    double averagePsi    = 0;
-    double averageEnergy = 0;
-    double averagePsiTimesEnergy = 0;
-    double localEnergyDerivative = 0;
+    double eta                   = 0.001;
+    int nAlpha                   = 500;
+    double averagePsi            = 0.0;
+    double averageEnergy         = 0.0;
+    double averagePsiTimesEnergy = 0.0;
+    double localEnergyDerivative = 0.0;
     //double scalingFactor = 1.0/(nParticles*nDimensions*nCycles);
-    double scalingFactor = 1.0/(nCycles*nParticles);
+    double scalingFactor         = 1.0/(nCycles*nParticles);
 
     // Loop over number of alphas
     for (int i = 0; i < nAlpha; i++)
@@ -377,16 +386,15 @@ double VariationalMonteCarlo::SteepestDescent(int nParticles)//, int nDimensions
         // Run Monte Carlo cycles
         //RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile);
         acceptanceCounter = 0;
-        waveFunctionOld = 0;
-        waveFunctionNew = 0;
-        energySum = 0;
-        energySquaredSum = 0;
-        deltaEnergy = 0;
-        acceptanceWeight = 0;
-        acceptanceCounter = 0;
-        psiSum = 0;
-        psiTimesEnergySum = 0;
-        deltaPsi = 0;
+        waveFunctionOld   = 0.0;
+        waveFunctionNew   = 0.0;
+        energySum         = 0.0;
+        energySquaredSum  = 0.0;
+        deltaEnergy       = 0.0;
+        acceptanceWeight  = 0.0;
+        psiSum            = 0.0;
+        psiTimesEnergySum = 0.0;
+        deltaPsi          = 0.0;
 
         MonteCarloCycles();
 
@@ -394,7 +402,7 @@ double VariationalMonteCarlo::SteepestDescent(int nParticles)//, int nDimensions
         averagePsi    = psiSum*scalingFactor;
         averageEnergy = energySum*scalingFactor;
         averagePsiTimesEnergy = psiTimesEnergySum*scalingFactor;
-        localEnergyDerivative = 2*(averagePsiTimesEnergy - averagePsi*averageEnergy);
+        localEnergyDerivative = 2.0*(averagePsiTimesEnergy - averagePsi*averageEnergy);
 
 
         // Calculate alpha

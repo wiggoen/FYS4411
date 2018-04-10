@@ -14,21 +14,17 @@ Wavefunction::~Wavefunction()
 }
 
 
-double Wavefunction::TrialWaveFunction(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha, const double &beta)
+double Wavefunction::TrialWaveFunction(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                       const double &alpha, const double &beta)
 {
-    double argument = 0;
+    double argument = 0.0;
     for (int i = 0; i < nParticles; i++)
     {
-        double rSingleParticle = 0;
+        double rSingleParticle = 0.0;
         for (int j = 0; j < nDimensions; j++)
         {
-            if (j < 2)
-            {
-                rSingleParticle += r(i, j) * r(i, j);
-            } else
-            {
-                rSingleParticle += beta * r(i, j) * r(i, j);
-            }
+            if (j < 2) { rSingleParticle += r(i, j) * r(i, j); }
+            else       { rSingleParticle += beta * r(i, j) * r(i, j); }
         }
         argument += rSingleParticle;
     }
@@ -36,11 +32,12 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const int &nParticles
 }
 
 
-double Wavefunction::TrialWaveFunctionInteraction(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha, const double &beta, const double &a)
+double Wavefunction::TrialWaveFunctionInteraction(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                                  const double &alpha, const double &beta, const double &a)
 {
     double trailWaveFunctionOneBody = Wavefunction::TrialWaveFunction(r, nParticles, nDimensions, alpha, beta);
-    double distance = 0;
-    double f = 1;
+    double distance = 0.0;
+    double f = 1.0;
 
     for (int i = 0; i < nParticles; i++)
     {
@@ -48,12 +45,8 @@ double Wavefunction::TrialWaveFunctionInteraction(const arma::mat &r, const int 
         {
             distance = Hamiltonian::ParticleDistance(r.row(i), r.row(j));
 
-            if (distance > a) {
-                f *= (1 - a / distance);
-            } else
-            {
-                f *= 0;
-            }
+            if (distance > a) { f *= (1.0 - a / distance); }
+            else              { f *= 0.0; }
         }
     }
     return trailWaveFunctionOneBody * f;
@@ -66,18 +59,18 @@ void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const dou
 }
 
 
-void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles, const int &nDimensions, const double &alpha, const double &stepLength)
+void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
+                                         const int &nDimensions, const double &alpha, const double &stepLength,
+                                         const double &beta)
 {
-    double beta = 1;
-
     arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
 
     rPlus = r;
     rMinus = r;
 
-    double waveFunctionMinus = 0;
-    double waveFunctionPlus = 0;
+    double waveFunctionMinus = 0.0;
+    double waveFunctionPlus = 0.0;
     double waveFunctionCurrent = TrialWaveFunction(r, nParticles, nDimensions, alpha, beta);
 
     double stepLengthFraction = 1.0 / stepLength;
@@ -99,14 +92,18 @@ void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, 
 }
 
 
-void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, const double &alpha, const int &nParticles, const int &nDimensions, const double &a, const int &i)
+void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, const double &alpha,
+                                           const int &nParticles, const int &nDimensions, const double &a, const int &k)
 {
-    arma::rowvec vectorSum = Hamiltonian::VectorSum(r, nParticles, nDimensions, a, i);
-    QForce.row(i) = -4.0 * alpha * r.row(i) + 2 * a * vectorSum;
+    arma::rowvec vectorSum = Hamiltonian::VectorSum(r, nParticles, nDimensions, a, k);
+    QForce.row(k) = -4.0 * alpha * r.row(k) + 2.0 * a * vectorSum;
 }
 
 
-// TODO: CHECK IF THIS IS IN USE.
+
+// TODO: CHECK IF DerivativePsi IS IN USE.
+
+
 double Wavefunction::DerivativePsi(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta)
 // Returns 1/psi * psi'
 {
@@ -116,11 +113,11 @@ double Wavefunction::DerivativePsi(const arma::mat &r, const int &nParticles, co
         for (int j = 0; j < nDimensions; j++)
         {
             if (j < 2) {
-                derivative -= r(i,j) * r(i,j);
+                derivative -= r(i, j) * r(i, j);
             }
             else
             {
-                derivative -= beta * r(i,j) * r(i,j);
+                derivative -= beta * r(i, j) * r(i, j);
             }
         }
     }

@@ -16,11 +16,11 @@ public:
     void MonteCarloCycles();
     double UniformRandomNumber();
     double GaussianRandomNumber();
-    void MetropolisBruteForce(arma::mat &, arma::mat &, double &, double &);
-    void ImportanceSampling(arma::mat &, arma::mat &, arma::mat &, arma::mat &, double &, double &);
+    void MetropolisBruteForce(arma::mat &, arma::mat &, const double &, double &);
+    void ImportanceSampling(arma::mat &, const arma::mat &, const arma::mat &, arma::mat &, const double &, double &);
     double GreensFunction(const arma::mat &, const arma::mat &, const arma::mat &, const double &, const double &, const int &);
     void UpdateEnergies(const int &);
-    double SteepestDescent(int);
+    double SteepestDescent(const int &);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
@@ -29,7 +29,7 @@ public:
     double psiSum;
     double psiTimesEnergySum;
     double deltaPsi;
-    double a;
+    const double a;
 private:
     arma::mat rOld;
     arma::mat rNew;
