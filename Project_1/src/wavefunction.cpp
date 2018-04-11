@@ -92,8 +92,8 @@ void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, 
 }
 
 
-void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, const double &alpha,
-                                           const int &nParticles, const int &nDimensions, const double &a, const int &k)
+void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, const int &nParticles,
+                                           const int &nDimensions, const double &alpha, const double &a, const int &k)
 {
     arma::rowvec vectorSum = Hamiltonian::VectorSum(r, nParticles, nDimensions, a, k);
     QForce.row(k) = -4.0 * alpha * r.row(k) + 2.0 * a * vectorSum;
@@ -101,8 +101,8 @@ void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce
 
 
 
-// TODO: CHECK IF DerivativePsi IS IN USE.
 
+//TODO: SJEKK OM DETTE REGNES UT RETT
 
 double Wavefunction::DerivativePsi(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta)
 // Returns 1/psi * psi'
@@ -112,13 +112,8 @@ double Wavefunction::DerivativePsi(const arma::mat &r, const int &nParticles, co
     {
         for (int j = 0; j < nDimensions; j++)
         {
-            if (j < 2) {
-                derivative -= r(i, j) * r(i, j);
-            }
-            else
-            {
-                derivative -= beta * r(i, j) * r(i, j);
-            }
+            if (j < 2) { derivative -= r(i, j) * r(i, j); }
+            else       { derivative -= beta * r(i, j) * r(i, j); }
         }
     }
     return derivative;

@@ -21,9 +21,9 @@ int main(int numberOfArguments, char *arguments[])
     } else
     {
         // Default if there is no command line arguments
-        int nParticles      = 10;
+        int nParticles      = 6;
         int nDimensions     = 3;
-        int nCycles         = 1e6/nParticles;  // To make a total of 1 million samples
+        int nCycles         = 1e6;//nParticles;  // To make a total of 1 million samples
         double alpha        = 0.5;
         double stepLength   = 0.1;             //                         << Use 0.1 or 0.2
         double timeStep     = 0.01;            // Interval [0.001,0.01]
@@ -39,6 +39,9 @@ int main(int numberOfArguments, char *arguments[])
         //std::string integrationType = "Numerical";
         std::string integrationType = "Interaction";
 
+        // CHOOSE CYCLE TYPE                            <<< --- CHOOSE ONLY ONE
+        std::string cycleType = "MonteCarlo";
+        //std::string cycleType = "SteepestDescent";
 
         // If command line arguments are defined
         if (numberOfArguments >= 2)  { nParticles      = std::atoi(arguments[1]); }
@@ -85,7 +88,7 @@ int main(int numberOfArguments, char *arguments[])
         {
             runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha,
                                                       stepLength, timeStep, cycleStepToFile,
-                                                      samplingType, integrationType);
+                                                      samplingType, integrationType, cycleType);
             runMatrix.insert_rows(i, runVector);
         }
 

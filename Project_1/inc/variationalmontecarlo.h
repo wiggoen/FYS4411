@@ -8,7 +8,7 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo();
-    arma::rowvec RunMonteCarloIntegration(const int, const int, const int, const double, const double, const double, const int, const std::string, const std::string);
+    arma::rowvec RunMonteCarloIntegration(const int, const int, const int, const double, const double, const double, const int, const std::string, const std::string, const std::string);
     void InitialTrialPositionsBruteForce(arma::mat &);
     void InitialTrialPositionsImportanceSampling(arma::mat &);
     void RedrawPositionImportanceSampling(arma::mat &, const int &);
@@ -16,9 +16,9 @@ public:
     void MonteCarloCycles();
     double UniformRandomNumber();
     double GaussianRandomNumber();
-    void MetropolisBruteForce(arma::mat &, arma::mat &, const double &, double &);
-    void ImportanceSampling(arma::mat &, const arma::mat &, const arma::mat &, arma::mat &, const double &, double &);
-    double GreensFunction(const arma::mat &, const arma::mat &, const arma::mat &, const double &, const double &, const int &);
+    void MetropolisBruteForce(arma::mat &, arma::mat &, double &, const double &);
+    void ImportanceSampling(arma::mat &, const arma::mat &, arma::mat &, const arma::mat &, double &, const double &);
+    double GreensFunction(const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const double &, const double &, const int &);
     void UpdateEnergies(const int &);
     double SteepestDescent(const int &);
     double waveFunctionOld;
@@ -44,6 +44,7 @@ private:
     int cycleStepToFile;
     std::string samplingType;
     std::string integrationType;
+    std::string cycleType;
     double beta;
     double acceptanceWeight;
     int acceptanceCounter;
