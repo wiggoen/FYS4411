@@ -93,8 +93,9 @@ double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, const int &nParti
     double secondDerivativeOfWavefunction = 0.0;
 
     arma::mat PhiGradient = -2.0 * alpha * r;  // the first part of the gradient term
-    for (int i = 0; i < nParticles; i++) {
-        if (nDimensions > 2)
+    if (nDimensions > 2)
+    {
+        for (int i = 0; i < nParticles; i++)
         {
             PhiGradient(i, 2) *= beta;
         }
