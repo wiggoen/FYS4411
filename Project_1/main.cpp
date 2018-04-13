@@ -58,9 +58,9 @@ int main(int numberOfArguments, char *arguments[])
             if      (samplingType == "bf")  { samplingType = "BruteForce"; }
             else if (samplingType == "im")  { samplingType = "Importance"; }
             else {
-                std::cerr << "Error: You have to specify sampling type." << std::endl;
-                std::cerr << "Options are 'bf' (brute force) or 'im' (importance sampling)." << std::endl;
-                exit(EXIT_FAILURE);
+                std::cerr << "Error: You have to specify sampling type. Sampling type '" << samplingType << "' is not valid." << "\n"
+                          << "Options are 'bf' (brute force) or 'im' (importance sampling)." << std::endl;
+                exit(1);
             }
         }
         if (numberOfArguments >= 11) {
@@ -70,9 +70,9 @@ int main(int numberOfArguments, char *arguments[])
             else if (integrationType == "num")  { integrationType = "Numerical"; }
             else if (integrationType == "int")  { integrationType = "Interaction"; }
             else {
-                std::cerr << "Error: You have to specify integration type." << std::endl;
-                std::cerr << "Options are 'ana' (analytic) or 'num' (numerical) or 'int' (interaction)." << std::endl;
-                exit(EXIT_FAILURE);
+                std::cerr << "Error: You have to specify integration type. Integration type '" << integrationType << "' is not valid." << "\n"
+                          << "Options are 'ana' (analytic) or 'num' (numerical) or 'int' (interaction)." << std::endl;
+                exit(1);
             }
         }
 
