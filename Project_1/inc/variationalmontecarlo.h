@@ -43,7 +43,7 @@ private:
     double timeStep;
     int cycleStepToFile;
     std::string samplingType;
-    std::string integrationType;
+    std::string derivationType;
     std::string cycleType;
     double beta;
     double acceptanceWeight;

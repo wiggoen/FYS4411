@@ -87,13 +87,13 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     double normalizationFactor = 1.0/(nCycles * nParticles);
 
     if (derivationType == "Interaction")  { beta = 2.82843; }
-    else                                   { beta = 1.0; }
+    else                                  { beta = 1.0; }
 
     // Initial trial positions
     if (samplingType == "BruteForce")      { InitialTrialPositionsBruteForce(rOld); }
     else if (samplingType == "Importance") { InitialTrialPositionsImportanceSampling(rOld); }
 
-    if (derivationType == "Interaction")  { CheckInitialDistance(rOld); }
+    if (derivationType == "Interaction")   { CheckInitialDistance(rOld); }
 
     rNew = rOld;
 
