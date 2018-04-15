@@ -138,7 +138,7 @@ double Hamiltonian::ParticleDistance(const arma::rowvec &r_k, const arma::rowvec
 }
 
 
-arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, const int &nParticles, const int &nDimensions, const double a,
+arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &a,
                                     const int &k)
 {
     arma::rowvec vectorSum = arma::zeros<arma::rowvec>(nDimensions);
@@ -151,14 +151,14 @@ arma::rowvec Hamiltonian::VectorSum(const arma::mat &r, const int &nParticles, c
         {
             distance = ParticleDistance(r.row(k), r.row(j));
             distanceSquared = distance*distance;
-            vectorSum += ( ( (r.row(k) - r.row(j)) / (distanceSquared*(distance - a)) ) );
+            vectorSum += ( (r.row(k) - r.row(j)) / (distanceSquared*(distance - a)) );
         }
     }
     return vectorSum;
 }
 
 
-double Hamiltonian::DerivativeSum(const arma::mat &r, const int &nParticles, const double a, const int &k)
+double Hamiltonian::DerivativeSum(const arma::mat &r, const int &nParticles, const double &a, const int &k)
 {
     double derivativeSum = 0.0;
     double distance = 0.0;

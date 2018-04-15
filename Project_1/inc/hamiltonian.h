@@ -12,8 +12,8 @@ public:
     static double NumericalLocalEnergy(const arma::mat &, const int &, const int &, const double &, const double &, const double &);
     static double LocalEnergyInteraction(const arma::mat &, const int &, const int &, const double &, const double &, const double &);
     static double ParticleDistance(const arma::rowvec &, const arma::rowvec &);
-    static arma::rowvec VectorSum(const arma::mat &, const int &, const int &, const double, const int &);
-    static double DerivativeSum(const arma::mat &, const int &, const double, const int &);
+    static arma::rowvec VectorSum(const arma::mat &, const int &, const int &, const double &, const int &);
+    static double DerivativeSum(const arma::mat &, const int &, const double &, const int &);
     static double RepulsivePotential(const arma::mat &, const int &, const double &, const int &);
 };
 

@@ -93,10 +93,22 @@ void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, 
 
 
 void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, const int &nParticles,
-                                           const int &nDimensions, const double &alpha, const double &a, const int &k)
+                                           const int &nDimensions, const double &alpha, const double &beta, const double &a,
+                                           const int &k)
 {
     arma::rowvec vectorSum = Hamiltonian::VectorSum(r, nParticles, nDimensions, a, k);
-    QForce.row(k) = -4.0 * alpha * r.row(k) + 2.0 * a * vectorSum;
+
+    arma::mat R = r;  // copy of r to get beta-dependence in position because of the derivation
+    if (nDimensions > 2)
+    {
+        for (int i = 0; i < nParticles; i++)
+        {
+            R(i, 2) *= beta;
+            // changing the whole column is a little CPU waste, but rowvec-operations in armadillo is not trivial
+        }
+    }
+
+    QForce.row(k) = -4.0 * alpha * R.row(k) + 2.0 * a * vectorSum;
 }
 
 
