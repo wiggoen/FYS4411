@@ -174,7 +174,7 @@ double Hamiltonian::DerivativeSum(const arma::mat &r, const int &nParticles, con
             distanceSquared = distance*distance;
             distanceSubtraction = distance - a;
             distanceSubtractionSquared = distanceSubtraction*distanceSubtraction;
-            derivativeSum += (1.0 / (distanceSquared * distanceSubtractionSquared) );
+            derivativeSum += ( 1.0 / (distanceSquared * distanceSubtractionSquared) );
         }
     }
     return derivativeSum;
