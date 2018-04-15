@@ -35,9 +35,9 @@ int main(int numberOfArguments, char *arguments[])
         //std::string samplingType = "Importance";
 
         // CHOOSE INTEGRATION METHOD                    <<< --- CHOOSE ONLY ONE
-        //std::string integrationType = "Analytical";
-        //std::string integrationType = "Numerical";
-        std::string integrationType = "Interaction";
+        //std::string derivationType = "Analytical";
+        //std::string derivationType = "Numerical";
+        std::string derivationType = "Interaction";
 
         // CHOOSE CYCLE TYPE                            <<< --- CHOOSE ONLY ONE
         std::string cycleType = "MonteCarlo";
@@ -64,13 +64,13 @@ int main(int numberOfArguments, char *arguments[])
             }
         }
         if (numberOfArguments >= 11) {
-            integrationType = std::string(arguments[10]);
+            derivationType = std::string(arguments[10]);
             // Renaming integration type to run with the program implementation
-            if      (integrationType == "ana")  { integrationType = "Analytical"; }
-            else if (integrationType == "num")  { integrationType = "Numerical"; }
-            else if (integrationType == "int")  { integrationType = "Interaction"; }
+            if      (derivationType == "ana")  { derivationType = "Analytical"; }
+            else if (derivationType == "num")  { derivationType = "Numerical"; }
+            else if (derivationType == "int")  { derivationType = "Interaction"; }
             else {
-                std::cerr << "Error: You have to specify integration type. Integration type '" << integrationType << "' is not valid." << "\n"
+                std::cerr << "Error: You have to specify integration type. Integration type '" << derivationType << "' is not valid." << "\n"
                           << "Options are 'ana' (analytic) or 'num' (numerical) or 'int' (interaction)." << std::endl;
                 exit(1);
             }
@@ -88,7 +88,7 @@ int main(int numberOfArguments, char *arguments[])
         {
             runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha,
                                                       stepLength, timeStep, cycleStepToFile,
-                                                      samplingType, integrationType, cycleType);
+                                                      samplingType, derivationType, cycleType);
             runMatrix.insert_rows(i, runVector);
         }
 

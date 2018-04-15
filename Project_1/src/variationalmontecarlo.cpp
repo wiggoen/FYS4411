@@ -27,7 +27,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
                                                              const double alpha, const double stepLength,
                                                              const double timeStep, const int cycleStepToFile,
                                                              const std::string samplingType,
-                                                             const std::string integrationType,
+                                                             const std::string derivationType,
                                                              const std::string cycleType)
 {
     // Adding variables to member variables
@@ -39,7 +39,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     this->timeStep        = timeStep;
     this->cycleStepToFile = cycleStepToFile;
     this->samplingType    = samplingType;
-    this->integrationType = integrationType;
+    this->derivationType  = derivationType;
     this->cycleType       = cycleType;
 
     // For writing to file                                   <<<< REMEMBER TO REMOVE THESE!
@@ -86,14 +86,14 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     double acceptanceRatio = 0.0;
     double normalizationFactor = 1.0/(nCycles * nParticles);
 
-    if (integrationType == "Interaction")  { beta = 2.82843; }
+    if (derivationType == "Interaction")  { beta = 2.82843; }
     else                                   { beta = 1.0; }
 
     // Initial trial positions
     if (samplingType == "BruteForce")      { InitialTrialPositionsBruteForce(rOld); }
     else if (samplingType == "Importance") { InitialTrialPositionsImportanceSampling(rOld); }
 
-    if (integrationType == "Interaction")  { CheckInitialDistance(rOld); }
+    if (derivationType == "Interaction")  { CheckInitialDistance(rOld); }
 
     rNew = rOld;
 
@@ -156,7 +156,7 @@ void VariationalMonteCarlo::RedrawPositionImportanceSampling(arma::mat &r, const
 {
     for (int j = 0; j < nDimensions; j++)
     {
-        if (integrationType == "Importance")
+        if (derivationType == "Importance")
         {
             r(i, j) = GaussianRandomNumber()*sqrt(timeStep);
         } else
@@ -249,7 +249,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
 
         // Recalculate the value of the wave function
-        if (integrationType == "Interaction")
+        if (derivationType == "Interaction")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
         } else
@@ -281,15 +281,15 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
         }
 
         // Recalculate the value of the wave function and the quantum force
-        if (integrationType == "Analytical")
+        if (derivationType == "Analytical")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
             Wavefunction::QuantumForce(rNew, QForceNew, alpha);
-        } else if (integrationType == "Numerical")
+        } else if (derivationType == "Numerical")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
             Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, stepLength, beta);
-        } else if (integrationType == "Interaction")
+        } else if (derivationType == "Interaction")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
             Wavefunction::QuantumForceInteraction(rNew, QForceNew, nParticles, nDimensions, alpha, beta, a, i);
@@ -333,14 +333,14 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         //waveFunctionNew = waveFunctionOld;  // Probably unnecessary since the wavefunction didn't change.
     }
 
-    if (integrationType == "Analytical") {
+    if (derivationType == "Analytical") {
         // Update energies (without numerical derivation and interaction)
         deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha);
-    } else if (integrationType == "Numerical")
+    } else if (derivationType == "Numerical")
     {
         // Update energies using numerical derivation
         deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta);
-    } else if (integrationType == "Interaction")
+    } else if (derivationType == "Interaction")
     {
         // Update energies using interaction
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
