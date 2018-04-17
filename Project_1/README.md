@@ -31,3 +31,6 @@ into
 #define TEST true
 ```
 Remember to put it back to 'false' when running the program!
+
+## Bosonic interaction
+This part of the code does not work properly. We are trying to figure it out. We will update the program if we find out where tings go wrong.
