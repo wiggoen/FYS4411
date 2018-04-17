@@ -79,7 +79,7 @@ int main(int numberOfArguments, char *arguments[])
         // Initialize VMC
         VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
 
-        // Allocation
+        // Allocation of information to be printed
         arma::rowvec runVector;
         arma::mat runMatrix;
 
@@ -92,12 +92,7 @@ int main(int numberOfArguments, char *arguments[])
             runMatrix.insert_rows(i, runVector);
         }
 
-        // TODO: IS THIS IN USE? OR CAN IT BE REMOVED?
-        // Run steepest descend to find best alpha
-        //double bestAlpha = VMC->SteepestDescent(nParticles, nDimensions);
-        //runMatrix.insert_rows(i, runVector);
-        //std::cout << "Steepest descend yields best alpha: alpha = " << bestAlpha << std::endl;
-
+        // Used for running several trials
         arma::rowvec columnSum;
         columnSum = arma::sum(runMatrix, 0);
 
