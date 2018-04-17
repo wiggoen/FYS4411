@@ -12,7 +12,7 @@ In collaboration with [Line](https://github.com/linegpe).
 
 ## Running automatic tests of the code
 This is unfortunately done manually. In 'tests.cpp' you can choose what to test:
-´´´
+```
 // CHOOSE SAMPLING METHOD                       <<< --- CHOOSE ONLY ONE FOR TESTING
 std::string samplingType = "BruteForce";
 //std::string samplingType = "Importance";
@@ -21,9 +21,9 @@ std::string samplingType = "BruteForce";
 std::string derivationType = "Analytical";
 //std::string derivationType = "Numerical";
 //std::string derivationType = "Interaction";
-´´´
+```
 and in 'main.cpp' you have to set
-´´´
+```
 #define TEST true
-´´´
+```
 Remember to put it back to 'false' when running the program!
