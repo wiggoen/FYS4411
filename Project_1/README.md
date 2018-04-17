@@ -8,3 +8,22 @@ In collaboration with [Line](https://github.com/linegpe).
   - [Python 3](scripts/py3-run.py) [relative link]
 - Manually by running it in [Qt Creator](https://www.qt.io) (you have to link [Armadillo](http://arma.sourceforge.net) to the .pro-file)
 - Manually by using the command line with command line arguments (basically the same as the Python scripts provide)
+
+
+## Running automatic tests of the code
+This is unfortunately done manually. In 'tests.cpp' you can choose what to test:
+´´´
+// CHOOSE SAMPLING METHOD                       <<< --- CHOOSE ONLY ONE FOR TESTING
+std::string samplingType = "BruteForce";
+//std::string samplingType = "Importance";
+
+// CHOOSE INTEGRATION METHOD                    <<< --- CHOOSE ONLY ONE FOR TESTING
+std::string derivationType = "Analytical";
+//std::string derivationType = "Numerical";
+//std::string derivationType = "Interaction";
+´´´
+and in 'main.cpp' you have to set
+´´´
+#define TEST true
+´´´
+Remember to put it back to 'false' when running the program!
