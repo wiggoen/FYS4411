@@ -104,17 +104,13 @@ void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce
         for (int i = 0; i < nParticles; i++)
         {
             R(i, 2) *= beta;
-            // changing the whole column is a little CPU waste, but rowvec-operations in armadillo is not trivial
+            // changing the whole column is a little CPU waste, but rowvec-operations in Armadillo is not trivial
         }
     }
 
     QForce.row(k) = -4.0 * alpha * R.row(k) + 2.0 * a * vectorSum;
 }
 
-
-
-
-//TODO: SJEKK OM DETTE REGNES UT RETT
 
 double Wavefunction::DerivativePsi(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta)
 // Returns 1/psi * psi'

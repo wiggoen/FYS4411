@@ -48,11 +48,6 @@ private:
     double beta;
     double acceptanceWeight;
     int acceptanceCounter;
-    /*
-    std::string strParticles;			// <<< REMOVE THESE!!
-    std::string strDimensions;
-    std::string strAlpha;
-    */
 };
 
 #endif // VARIATIONALMONTECARLO_H

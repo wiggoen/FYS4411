@@ -42,26 +42,6 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     this->derivationType  = derivationType;
     this->cycleType       = cycleType;
 
-    // For writing to file                                   <<<< REMEMBER TO REMOVE THESE!
-    /*
-    if ( nParticles == 1 ) { strParticles = "1"; }
-    if ( nParticles == 10 ) { strParticles = "10"; }
-    if ( nParticles == 100 ) { strParticles = "100"; }
-    if ( nParticles == 500 ) { strParticles = "500"; }
-    if ( nDimensions == 1 ) { strDimensions = "1"; }
-    if ( nDimensions == 2 ) { strDimensions = "2"; }
-    if ( nDimensions == 3 ) { strDimensions = "3"; }
-    if ( alpha == 0.1 ) { strAlpha = "01"; }
-    if ( alpha == 0.2 ) { strAlpha = "02"; }
-    if ( alpha == 0.3 ) { strAlpha = "03"; }
-    if ( alpha == 0.4 ) { strAlpha = "04"; }
-    if ( alpha == 0.5 ) { strAlpha = "05"; }
-    if ( alpha == 0.6 ) { strAlpha = "06"; }
-    if ( alpha == 0.7 ) { strAlpha = "07"; }
-    if ( alpha == 0.8 ) { strAlpha = "08"; }
-    if ( alpha == 0.9 ) { strAlpha = "09"; }
-    */
-
     // Initialize matrices and variables
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -190,7 +170,6 @@ void VariationalMonteCarlo::MonteCarloCycles()
 {
     std::ofstream myfile;
     myfile.open("../Project_1/results.txt");
-    //myfile.open("../Project_1/results/results_" + strParticles + "p_" + strDimensions + "d_alpha" + strAlpha + ".txt");
 
     // Loop over Monte Carlo cycles
     for (int cycle = 0; cycle < nCycles; cycle++)
@@ -207,10 +186,6 @@ void VariationalMonteCarlo::MonteCarloCycles()
         if (cycle % cycleStepToFile == 0)
         {
             myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
-
-
-            // TODO: CHECK IF THIS WRITE THE CORRECT THING.
-
         }
     }
     myfile.close();
@@ -346,20 +321,6 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
     }
 
-    // TODO: CHECK WHY LARGE ENERGIES IS ACCEPTED
-    /*
-    if (fabs(deltaEnergy) > 100)
-    {
-        //deltaEnergy = 0;
-        std::cout << "deltaEnergy = " << deltaEnergy << std::endl;
-        //std::cout << "waveFunctionNew = " << waveFunctionNew << std::endl;
-        //std::cout << "waveFunctionOld = " << waveFunctionOld << std::endl;
-        //std::cout << "rNew: " << rNew << std::endl;
-        //std::cout << "rOld: " << rOld << std::endl;
-        //
-        //std::cout << "------------" << std::endl;
-        //std::cout << waveFunctionNew << std::endl;
-    }*/
     energySum         += deltaEnergy;
     energySquaredSum  += (deltaEnergy*deltaEnergy);
 
