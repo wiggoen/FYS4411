@@ -105,6 +105,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     energySquared = energySquaredSum * normalizationFactor;
 
     variance = (energySquared - energy*energy);
+    acceptanceCounter -= thrownCounter;  // To account for thrown energies. Only affects interactions.
     acceptanceRatio = acceptanceCounter * normalizationFactor;
 
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
@@ -330,7 +331,6 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     {
         deltaEnergy        = 0;
         thrownCounter     += 1;
-        acceptanceCounter -= 1;  // To account for thrown energies
     }
 
     energySum         += deltaEnergy;
