@@ -40,8 +40,8 @@ int main(int numberOfArguments, char *arguments[])
         std::string derivationType = "Interaction";
 
         // CHOOSE CYCLE TYPE                            <<< --- CHOOSE ONLY ONE
-        //std::string cycleType = "MonteCarlo";
-        std::string cycleType = "SteepestDescent";
+        std::string cycleType = "MonteCarlo";
+        //std::string cycleType = "SteepestDescent";
 
         // If command line arguments are defined
         if (numberOfArguments >= 2)  { nParticles      = std::atoi(arguments[1]); }
