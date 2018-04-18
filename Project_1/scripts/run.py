@@ -43,6 +43,6 @@ includes = "-I/usr/local/include -I/home/line/github/FYS4411/Project_1"
 run_cmd("g++ -std=c++11 -O3 %s %s -o %s.out %s.cpp %s.cpp %s.cpp %s.cpp %s.cpp -larmadillo" % (library, includes, fname1, fname1, fname2, fname3, fname4, fname5))
 
 # Run
-for i in range(len(nDim)):
+for i in range(len(nDimensions)):
     for j in range(len(nParticles)):
         run_cmd("./%s.out %s %s %s %s %s %s %s %s %s %s" % (fname1, nParticles[j], nDimensions[i], nCycles, alpha, stepLength, timeStep, cycleStepToFile, trials, samplingType, derivationType))

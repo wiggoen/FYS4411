@@ -23,9 +23,9 @@ int main(int numberOfArguments, char *arguments[])
         // Default if there is no command line arguments
         int nParticles      = 10;
         int nDimensions     = 3;
-        int nCycles         = 1e6;//nParticles;  // To make a total of 1 million samples
+        int nCycles         = 1e6;
         double alpha        = 0.5;
-        double stepLength   = 0.1;             //                         << Use 0.1 or 0.2
+        double stepLength   = 0.1;             // Use 0.1 or 0.2
         double timeStep     = 0.01;            // Interval [0.001,0.01]
         int cycleStepToFile = nCycles;
         int trials          = 1;               // change to 10 when running timing

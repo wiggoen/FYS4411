@@ -325,11 +325,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
     }
 
-    // Delete enrgies that should not have been accepted
+    // Delete energies that should not have been accepted. Only affects interactions.
     if (fabs(deltaEnergy) > 100)
     {
-        deltaEnergy    = 0;
-        thrownCounter += 1;
+        deltaEnergy        = 0;
+        thrownCounter     += 1;
+        acceptanceCounter -= 1;  // To account for thrown energies
     }
 
     energySum         += deltaEnergy;
