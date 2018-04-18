@@ -1,7 +1,7 @@
 # Script for Python 3
 
 import subprocess
-#import os
+import os
 
 
 def run_cmd(cmd):
@@ -34,14 +34,14 @@ derivationType = "int"
 
 
 # Library used
-library = "-L/usr/local/Cellar/armadillo/8.400.0/lib/ -larmadillo"
+library = "-L/usr/local/Cellar/armadillo/8.400.0/lib/"
 
 # Location of include files / header files
 includes = "-I/usr/local/Cellar/armadillo/8.400.0/include/ -I/Users/trondwj/GitHub/FYS4411/Project_1"
 
 
 # Compile
-run_cmd("g++ -std=c++11 -O3 {} {} -o {}.out {}.cpp {}.cpp {}.cpp {}.cpp {}.cpp".format(library, includes, fname1, fname1, fname2, fname3, fname4, fname5))
+run_cmd("g++ -std=c++11 -O3 {} {} -o {}.out {}.cpp {}.cpp {}.cpp {}.cpp {}.cpp -larmadillo".format(library, includes, fname1, fname1, fname2, fname3, fname4, fname5))
 
 # Run
 run_cmd("./{}.out {} {} {} {} {} {} {} {} {} {}".format(fname1, nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile, trials, samplingType, derivationType))

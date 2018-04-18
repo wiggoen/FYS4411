@@ -3,17 +3,18 @@
 import subprocess
 import os
 
+
 def run_cmd(cmd):
     print ">> ", cmd
     subprocess.call(cmd, shell=True)
 
 
 # File names
-fname1 = "main"
-fname2 = "src/hamiltonian"
-fname3 = "src/tests"
-fname4 = "src/variationalmontecarlo"
-fname5 = "src/wavefunction"
+fname1 = "../main"
+fname2 = "../src/hamiltonian"
+fname3 = "../src/tests"
+fname4 = "../src/variationalmontecarlo"
+fname5 = "../src/wavefunction"
 
 
 # Parameters
@@ -31,9 +32,15 @@ samplingType = "im"
 derivationType = "int"
 
 
-# Compile
-run_cmd("g++ -std=c++11 -O3 -L/usr/include -I/usr/local/include -I/home/line/github/FYS4411/Project_1 -o %s.out %s.cpp %s.cpp %s.cpp %s.cpp %s.cpp -larmadillo" % (fname1, fname1, fname2, fname3, fname4, fname5))
+# Library used
+library = "-L/usr/include"
 
+# Location of include files / header files
+includes = "-I/usr/local/include -I/home/line/github/FYS4411/Project_1"
+
+
+# Compile
+run_cmd("g++ -std=c++11 -O3 %s %s -o %s.out %s.cpp %s.cpp %s.cpp %s.cpp %s.cpp -larmadillo" % (library, includes, fname1, fname1, fname2, fname3, fname4, fname5))
 
 # Run
 for i in range(len(nDim)):
