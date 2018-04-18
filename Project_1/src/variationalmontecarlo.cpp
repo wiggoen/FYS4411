@@ -54,6 +54,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     deltaEnergy       = 0.0;
     acceptanceWeight  = 0.0;
     acceptanceCounter = 0.0;
+    thrownCounter     = 0.0;
     psiSum            = 0.0;
     psiTimesEnergySum = 0.0;
     deltaPsi          = 0.0;
@@ -64,7 +65,6 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     double energySquared = 0.0;
     double variance = 0.0;
     double acceptanceRatio = 0.0;
-    double normalizationFactor = 1.0/(nCycles * nParticles);
 
     if (derivationType == "Interaction")  { beta = 2.82843; }
     else                                  { beta = 1.0; }
@@ -95,6 +95,10 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     // Timing finished
     auto end_time = std::chrono::high_resolution_clock::now();
     runTime = (std::chrono::duration<double> (end_time - start_time).count());
+
+    // Normalizing
+    int nCyclesNew = nCycles - thrownCounter;
+    double normalizationFactor = 1.0/(nCyclesNew * nParticles);
 
     // Calculation
     energy = energySum * normalizationFactor;
@@ -319,6 +323,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     {
         // Update energies using interaction
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
+    }
+
+    if (fabs(deltaEnergy) > 100)
+    {
+        deltaEnergy    = 0;
+        thrownCounter += 1;
     }
 
     energySum         += deltaEnergy;

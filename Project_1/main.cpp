@@ -21,7 +21,7 @@ int main(int numberOfArguments, char *arguments[])
     } else
     {
         // Default if there is no command line arguments
-        int nParticles      = 6;
+        int nParticles      = 10;
         int nDimensions     = 3;
         int nCycles         = 1e6;//nParticles;  // To make a total of 1 million samples
         double alpha        = 0.5;
@@ -40,8 +40,8 @@ int main(int numberOfArguments, char *arguments[])
         std::string derivationType = "Interaction";
 
         // CHOOSE CYCLE TYPE                            <<< --- CHOOSE ONLY ONE
-        std::string cycleType = "MonteCarlo";
-        //std::string cycleType = "SteepestDescent";
+        //std::string cycleType = "MonteCarlo";
+        std::string cycleType = "SteepestDescent";
 
         // If command line arguments are defined
         if (numberOfArguments >= 2)  { nParticles      = std::atoi(arguments[1]); }

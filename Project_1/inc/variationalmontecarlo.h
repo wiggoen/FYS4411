@@ -48,6 +48,7 @@ private:
     double beta;
     double acceptanceWeight;
     int acceptanceCounter;
+    int thrownCounter;
 };
 
 #endif // VARIATIONALMONTECARLO_H
