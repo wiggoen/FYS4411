@@ -31,34 +31,34 @@ public:
                           const double &timeStep, const int &i);
     void UpdateEnergies(const int &i);
     double SteepestDescent(const int &nParticles);
-    double waveFunctionOld;
-    double waveFunctionNew;
-    double energySum;
-    double energySquaredSum;
-    double deltaEnergy;
+    double waveFunctionOld;      /* old wave function */
+    double waveFunctionNew;      /* new wave function */
+    double energySum;            /* sum of particle energies for all Monte Carlo cycles */
+    double energySquaredSum;     /* squared sum of particle energies for all Monte Carlo cycles */
+    double deltaEnergy;          /* energy of particle we look at */
     double psiSum;
     double psiTimesEnergySum;
     double deltaPsi;
-    const double a;
+    const double a;              /* hard-core diameter of the bosons */
 private:
-    arma::mat rOld;
-    arma::mat rNew;
-    arma::mat QForceOld;
-    arma::mat QForceNew;
-    int nParticles;
-    int nDimensions;
-    int nCycles;
-    double alpha;
-    double stepLength;
-    double timeStep;
-    int cycleStepToFile;
-    std::string samplingType;
-    std::string derivationType;
-    std::string cycleType;
-    double beta;
-    double acceptanceWeight;
-    int acceptanceCounter;
-    int thrownCounter;
+    arma::mat rOld;              /* matrix of old position */
+    arma::mat rNew;              /* matrix of new position */
+    arma::mat QForceOld;         /* matrix of old quantum force */
+    arma::mat QForceNew;         /* matrix of new quantum force */
+    int nParticles;              /* number of particles */
+    int nDimensions;             /* number of dimensions */
+    int nCycles;                 /* number of Monte Carlo cycles */
+    double alpha;                /* variational parameter */
+    double stepLength;           /* step length used in brute force sampling */
+    double timeStep;             /* time step used in importance sampling */
+    int cycleStepToFile;         /* fraction of Monte Carlo cycles written to file */
+    std::string samplingType;    /* sampling choice */
+    std::string derivationType;  /* differentiation choice */
+    std::string cycleType;       /* Monte Carlo cycles or Steepest descent */
+    double beta;                 /* variational parameter */
+    double acceptanceWeight;     /* weight used for accepting or rejecting a move */
+    int acceptanceCounter;       /* number of accepted moves */
+    int thrownCounter;           /* number of cycles thrown away. Only affects interactions. */
 };
 
 #endif /* VARIATIONALMONTECARLO_H */

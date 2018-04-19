@@ -69,7 +69,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     double rSquared = 0.0;
     for (int i = 0; i < nParticles; i++)
     {
-        rSquared = 0;
+        rSquared = 0.0;
         for (int j = 0; j < nDimensions; j++)
         {
             rSquared += r(i, j) * r(i, j);
