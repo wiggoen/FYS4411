@@ -3,13 +3,13 @@
 #include <armadillo>
 
 
-Hamiltonian::Hamiltonian()
+Hamiltonian::Hamiltonian( void )
 {
 
 }
 
 
-Hamiltonian::~Hamiltonian()
+Hamiltonian::~Hamiltonian( void )
 {
 
 }
@@ -17,8 +17,8 @@ Hamiltonian::~Hamiltonian()
 
 double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha)
 {
-    double factors = -2.0 * alpha*alpha + 0.5;
-    double dimensionality = nDimensions * alpha;
+    const double factors = -2.0 * alpha*alpha + 0.5;
+    const double dimensionality = nDimensions * alpha;
 
     double localEnergy = 0;
     for (int i = 0; i < nParticles; i++)
@@ -49,7 +49,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
 
     double stepLengthSquaredFraction = 1.0 / (stepLength * stepLength);
 
-    // Kinetic energy
+    /* Kinetic energy */
     double kineticEnergy = 0.0;
     for (int i = 0; i < nParticles; i++) {
         for (int j = 0; j < nDimensions; j++) {
@@ -64,7 +64,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     }
     kineticEnergy = 0.5 * stepLengthSquaredFraction * kineticEnergy / waveFunctionCurrent;
 
-    // External potential
+    /* External potential */
     double externalPotential = 0.0;
     double rSquared = 0.0;
     for (int i = 0; i < nParticles; i++)
@@ -86,13 +86,13 @@ double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, const int &nParti
     double aSquared = a*a;
     double betaSquared = beta*beta;
 
-    double laplacianTerm = 0.0;                // first term of the second derivative of the wavefunction
-    double gradientTerm  = 0.0;                // second term of the second derivative of the wavefunction
-    double doubleSum     = 0.0;                // third term of the second derivative of the wavefunction
-    double derivativeSum = 0.0;                // fourth term of the second derivative of the wavefunction
+    double laplacianTerm = 0.0;                /* first term of the second derivative of the wavefunction */
+    double gradientTerm  = 0.0;                /* second term of the second derivative of the wavefunction */
+    double doubleSum     = 0.0;                /* third term of the second derivative of the wavefunction */
+    double derivativeSum = 0.0;                /* fourth term of the second derivative of the wavefunction */
     double secondDerivativeOfWavefunction = 0.0;
 
-    arma::mat PhiGradient = -2.0 * alpha * r;  // the first part of the gradient term
+    arma::mat PhiGradient = -2.0 * alpha * r;  /* the first part of the gradient term */
     if (nDimensions > 2)
     {
         for (int i = 0; i < nParticles; i++)
@@ -100,7 +100,7 @@ double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, const int &nParti
             PhiGradient(i, 2) *= beta;
         }
     }
-    arma::rowvec vectorSum;                    // the second part of the gradient term (sum in the gradient term)
+    arma::rowvec vectorSum;                    /* the second part of the gradient term (sum in the gradient term) */
 
     double externalPotential  = 0.0;
     double repulsivePotential = 0.0;
@@ -163,7 +163,7 @@ double Hamiltonian::DerivativeSum(const arma::mat &r, const int &nParticles, con
     double derivativeSum = 0.0;
     double distance = 0.0;
     double distanceSquared = 0.0;
-    double distanceSubtraction = 0.0;          // distance - a
+    double distanceSubtraction = 0.0;
     double distanceSubtractionSquared = 0.0;
 
     for (int j = 0; j < nParticles; j++)

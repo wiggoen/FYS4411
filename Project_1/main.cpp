@@ -1,9 +1,9 @@
-#define CATCH_CONFIG_RUNNER // Configure Catch to use this main, and not its own.
+#define CATCH_CONFIG_RUNNER /* Configure Catch to use this main, and not its own */
 #include "inc/variationalmontecarlo.h"
 #include "inc/catch.hpp"
 
 
-#define TEST false // Change to true when testing and to false when running the program.
+#define TEST false /* Change to true when testing and to false when running the program */
 
 
 int RunCatchTests()
@@ -20,30 +20,30 @@ int main(int numberOfArguments, char *arguments[])
         return RunCatchTests();
     } else
     {
-        // Default if there is no command line arguments
-        int nParticles      = 10;
+        /* Default if there is no command line arguments */
+        int nParticles      = 6;
         int nDimensions     = 3;
         int nCycles         = 1e6;
         double alpha        = 0.5;
-        double stepLength   = 0.1;             // Use 0.1 or 0.2
-        double timeStep     = 0.01;            // Interval [0.001,0.01]
+        double stepLength   = 0.1;      /* Use 0.1 or 0.2 */
+        double timeStep     = 0.01;     /* Interval [0.001,0.01] */
         int cycleStepToFile = nCycles;
-        int trials          = 1;               // change to 10 when running timing
+        int trials          = 1;        /* change to 10 when running timing */
 
-        // CHOOSE SAMPLING METHOD                       <<< --- CHOOSE ONLY ONE
+        /* CHOOSE SAMPLING METHOD                       <<< --- CHOOSE ONLY ONE */
         std::string samplingType = "BruteForce";
         //std::string samplingType = "Importance";
 
-        // CHOOSE INTEGRATION METHOD                    <<< --- CHOOSE ONLY ONE
+        /* CHOOSE INTEGRATION METHOD                    <<< --- CHOOSE ONLY ONE */
         //std::string derivationType = "Analytical";
         //std::string derivationType = "Numerical";
         std::string derivationType = "Interaction";
 
-        // CHOOSE CYCLE TYPE                            <<< --- CHOOSE ONLY ONE
+        /* CHOOSE CYCLE TYPE                            <<< --- CHOOSE ONLY ONE */
         std::string cycleType = "MonteCarlo";
         //std::string cycleType = "SteepestDescent";
 
-        // If command line arguments are defined
+        /* If command line arguments are defined */
         if (numberOfArguments >= 2)  { nParticles      = std::atoi(arguments[1]); }
         if (numberOfArguments >= 3)  { nDimensions     = std::atoi(arguments[2]); }
         if (numberOfArguments >= 4)  { nCycles         = std::atoi(arguments[3]); }
@@ -54,36 +54,38 @@ int main(int numberOfArguments, char *arguments[])
         if (numberOfArguments >= 9)  { trials          = std::atoi(arguments[8]); }
         if (numberOfArguments >= 10) {
             samplingType = std::string(arguments[9]);
-            // Renaming sampling type to run with the program implementation
+            /* Renaming sampling type to run with the program implementation */
             if      (samplingType == "bf")  { samplingType = "BruteForce"; }
             else if (samplingType == "im")  { samplingType = "Importance"; }
             else {
-                std::cerr << "Error: You have to specify sampling type. Sampling type '" << samplingType << "' is not valid." << "\n"
+                std::cerr << "Error: You have to specify sampling type. Sampling type '"
+                          << samplingType << "' is not valid." << "\n"
                           << "Options are 'bf' (brute force) or 'im' (importance sampling)." << std::endl;
                 exit(1);
             }
         }
         if (numberOfArguments >= 11) {
             derivationType = std::string(arguments[10]);
-            // Renaming integration type to run with the program implementation
+            /* Renaming integration type to run with the program implementation */
             if      (derivationType == "ana")  { derivationType = "Analytical"; }
             else if (derivationType == "num")  { derivationType = "Numerical"; }
             else if (derivationType == "int")  { derivationType = "Interaction"; }
             else {
-                std::cerr << "Error: You have to specify integration type. Integration type '" << derivationType << "' is not valid." << "\n"
+                std::cerr << "Error: You have to specify integration type. Integration type '"
+                          << derivationType << "' is not valid." << "\n"
                           << "Options are 'ana' (analytic) or 'num' (numerical) or 'int' (interaction)." << std::endl;
                 exit(1);
             }
         }
 
-        // Initialize VMC
+        /* Initialize VMC */
         VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
 
-        // Allocation of information to be printed
+        /* Allocation of information to be printed */
         arma::rowvec runVector;
         arma::mat runMatrix;
 
-        // Run VMC
+        /* Run VMC */
         for (int i = 0; i < trials; i++)
         {
             runVector = VMC->RunMonteCarloIntegration(nParticles, nDimensions, nCycles, alpha,
@@ -92,23 +94,24 @@ int main(int numberOfArguments, char *arguments[])
             runMatrix.insert_rows(i, runVector);
         }
 
-        // Used for running several trials
+        /* Used for running several trials */
         arma::rowvec columnSum;
         columnSum = arma::sum(runMatrix, 0);
 
-        // Finding averages of trials
+        /* Finding averages of trials */
         double runTime = columnSum(0)/trials;
         double energy = columnSum(1)/trials;
         double energySquared = columnSum(2)/trials;
         double variance = columnSum(3)/trials;
         double acceptanceRatio = columnSum(4)/trials;
 
-        // Setup for writing to file
+        /* Setup for printing to terminal */
         std::cout << std::endl;
-        std::cout << "Particles " << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
-                  << " Time_step " << " Time_[sec] " << "   Energy " << " Energy_squared "
-                  << " Variance " << " Acceptance_ratio " << std::endl;
+        std::cout << "Particles "  << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
+                  << " Time_step " << " Time_[sec] " << "   Energy "  << " Energy_squared "
+                  << " Variance "  << " Acceptance_ratio " << std::endl;
 
+        /* Write to terminal */
         std::cout << std::setw(9)  << std::setprecision(3) << nParticles
                   << std::setw(12) << std::setprecision(3) << nDimensions
                   << std::setw(11) << std::setprecision(8) << nCycles

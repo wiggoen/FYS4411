@@ -2,13 +2,13 @@
 #include "inc/hamiltonian.h"
 
 
-Wavefunction::Wavefunction()
+Wavefunction::Wavefunction( void )
 {
 
 }
 
 
-Wavefunction::~Wavefunction()
+Wavefunction::~Wavefunction( void )
 {
 
 }
@@ -98,13 +98,13 @@ void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce
 {
     arma::rowvec vectorSum = Hamiltonian::VectorSum(r, nParticles, nDimensions, a, k);
 
-    arma::mat R = r;  // copy of r to get beta-dependence in position because of the derivation
+    arma::mat R = r;  /* copy of r to get beta-dependence in position because of the derivation */
     if (nDimensions > 2)
     {
         for (int i = 0; i < nParticles; i++)
         {
             R(i, 2) *= beta;
-            // changing the whole column is a little CPU waste, but rowvec-operations in Armadillo is not trivial
+            /* changing the whole column is a little CPU waste, but rowvec-operations in Armadillo is not trivial */
         }
     }
 
@@ -113,7 +113,7 @@ void Wavefunction::QuantumForceInteraction(const arma::mat &r, arma::mat &QForce
 
 
 double Wavefunction::DerivativePsi(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta)
-// Returns 1/psi * psi'
+/* Returns 1/psi * psi' */
 {
     double derivative = 0;
     for (int i = 0; i < nParticles; i++)

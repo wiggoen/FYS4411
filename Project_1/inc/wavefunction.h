@@ -6,14 +6,20 @@
 class Wavefunction
 {
 public:
-    Wavefunction();
-    ~Wavefunction();
-    static double TrialWaveFunction(const arma::mat &, const int &, const int &, const double &, const double &);
-    static double TrialWaveFunctionInteraction(const arma::mat &, const int &, const int &, const double &, const double &, const double &);
-    static void QuantumForce(const arma::mat &, arma::mat &, const double &);
-    static void NumericalQuantumForce(const arma::mat &, arma::mat &, const int &, const int &, const double &, const double &, const double &);
-    static void QuantumForceInteraction(const arma::mat &, arma::mat &, const int &, const int &, const double &, const double &, const double &, const int &);
-    static double DerivativePsi(const arma::mat &, const int &, const int &, const double &);
+    Wavefunction( void );
+    ~Wavefunction( void );
+    static double TrialWaveFunction(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                    const double &alpha, const double &beta);
+    static double TrialWaveFunctionInteraction(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                               const double &alpha, const double &beta, const double &a);
+    static void QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha);
+    static void NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
+                                      const int &nDimensions, const double &alpha, const double &stepLength,
+                                      const double &beta);
+    static void QuantumForceInteraction(const arma::mat &r, arma::mat &QForce, const int &nParticles,
+                                        const int &nDimensions, const double &alpha, const double &beta, const double &a,
+                                        const int &k);
+    static double DerivativePsi(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta);
 };
 
-#endif // WAVEFUNCTION_H
+#endif /* WAVEFUNCTION_H */

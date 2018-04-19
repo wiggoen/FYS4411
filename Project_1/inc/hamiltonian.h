@@ -6,16 +6,19 @@
 class Hamiltonian
 {
 public:
-    Hamiltonian();
-    ~Hamiltonian();
-    static double LocalEnergy(const arma::mat &, const int &, const int &, const double &);
-    static double NumericalLocalEnergy(const arma::mat &, const int &, const int &, const double &, const double &, const double &);
-    static double LocalEnergyInteraction(const arma::mat &, const int &, const int &, const double &, const double &, const double &);
-    static double ParticleDistance(const arma::rowvec &, const arma::rowvec &);
-    static arma::rowvec VectorSum(const arma::mat &, const int &, const int &, const double &, const int &);
-    static double DerivativeSum(const arma::mat &, const int &, const double &, const int &);
-    static double RepulsivePotential(const arma::mat &, const int &, const double &, const int &);
+    Hamiltonian( void );
+    ~Hamiltonian( void );
+    static double LocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha);
+    static double NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                       const double &alpha, const double &stepLength, const double &beta);
+    static double LocalEnergyInteraction(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                         const double &alpha, const double &beta, const double &a);
+    static double ParticleDistance(const arma::rowvec &r_k, const arma::rowvec &r_j);
+    static arma::rowvec VectorSum(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &a,
+                                  const int &k);
+    static double DerivativeSum(const arma::mat &r, const int &nParticles, const double &a, const int &k);
+    static double RepulsivePotential(const arma::mat &r, const int &nParticles, const double &a, const int &k);
 };
 
-#endif // HAMILTONIAN_H
+#endif /* HAMILTONIAN_H */
 

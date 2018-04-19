@@ -7,20 +7,30 @@ class VariationalMonteCarlo
 {
 public:
     VariationalMonteCarlo();
-    ~VariationalMonteCarlo();
-    arma::rowvec RunMonteCarloIntegration(const int, const int, const int, const double, const double, const double, const int, const std::string, const std::string, const std::string);
-    void InitialTrialPositionsBruteForce(arma::mat &);
-    void InitialTrialPositionsImportanceSampling(arma::mat &);
-    void RedrawPositionImportanceSampling(arma::mat &, const int &);
-    void CheckInitialDistance(arma::mat &);
-    void MonteCarloCycles();
-    double UniformRandomNumber();
-    double GaussianRandomNumber();
-    void MetropolisBruteForce(arma::mat &, arma::mat &, double &, const double &);
-    void ImportanceSampling(arma::mat &, const arma::mat &, arma::mat &, const arma::mat &, double &, const double &);
-    double GreensFunction(const arma::mat &, const arma::mat &, const arma::mat &, const arma::mat &, const double &, const double &, const int &);
-    void UpdateEnergies(const int &);
-    double SteepestDescent(const int &);
+    ~VariationalMonteCarlo( void );
+    arma::rowvec RunMonteCarloIntegration(const int nParticles, const int nDimensions, const int nCycles,
+                                          const double alpha, const double stepLength,
+                                          const double timeStep, const int cycleStepToFile,
+                                          const std::string samplingType,
+                                          const std::string derivationType,
+                                          const std::string cycleType);
+    void InitialTrialPositionsBruteForce(arma::mat &r);
+    void InitialTrialPositionsImportanceSampling(arma::mat &r);
+    void RedrawPositionImportanceSampling(arma::mat &r, const int &i);
+    void CheckInitialDistance(arma::mat &rOld);
+    void MonteCarloCycles( void );
+    double UniformRandomNumber( void );
+    double GaussianRandomNumber( void );
+    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew,
+                              const double &waveFunctionOld);
+    void ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew,
+                            const arma::mat &QForceOld, double &waveFunctionNew,
+                            const double &waveFunctionOld);
+    double GreensFunction(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
+                          const arma::mat &QForceOld, const double &diffusionCoefficient,
+                          const double &timeStep, const int &i);
+    void UpdateEnergies(const int &i);
+    double SteepestDescent(const int &nParticles);
     double waveFunctionOld;
     double waveFunctionNew;
     double energySum;
@@ -51,4 +61,4 @@ private:
     int thrownCounter;
 };
 
-#endif // VARIATIONALMONTECARLO_H
+#endif /* VARIATIONALMONTECARLO_H */
