@@ -119,7 +119,7 @@ void VariationalMonteCarlo::InitialTrialPositionsBruteForce(arma::mat &r)
     {
         for (int j = 0; j < nDimensions; j++)
         {
-            r(i, j) = (UniformRandomNumber() - 0.5) * stepLength;
+            r(i, j) = (UniformRandomNumber() - 0.5);
         }
     }
 }
@@ -220,6 +220,7 @@ double VariationalMonteCarlo::GaussianRandomNumber( void )
 void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew,
                                                  const double &waveFunctionOld)
 {
+
     /* New position to test */
     for (int i = 0; i < nParticles; i++)
     {
@@ -324,13 +325,6 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     {
         /* Update energies using interaction */
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
-    }
-
-    /* Delete energies that should not have been accepted. Only affects interactions. */
-    if (fabs(deltaEnergy) > 100)
-    {
-        deltaEnergy        = 0;
-        thrownCounter     += 1;
     }
 
     energySum         += deltaEnergy;

@@ -90,6 +90,7 @@ double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, const int &nParti
     double gradientTerm  = 0.0;                /* second term of the second derivative of the wavefunction */
     double doubleSum     = 0.0;                /* third term of the second derivative of the wavefunction */
     double derivativeSum = 0.0;                /* fourth term of the second derivative of the wavefunction */
+
     double secondDerivativeOfWavefunction = 0.0;
 
     arma::mat PhiGradient = -2.0 * alpha * r;  /* the first part of the gradient term */
@@ -114,7 +115,7 @@ double Hamiltonian::LocalEnergyInteraction(const arma::mat &r, const int &nParti
 
         derivativeSum = - aSquared * DerivativeSum(r, nParticles, a, k);
 
-        doubleSum = derivativeSum*derivativeSum;
+        doubleSum = aSquared * DoubleSum(r, nParticles, a, k);
 
         secondDerivativeOfWavefunction += (laplacianTerm + gradientTerm + doubleSum + derivativeSum);
 
@@ -178,6 +179,35 @@ double Hamiltonian::DerivativeSum(const arma::mat &r, const int &nParticles, con
         }
     }
     return derivativeSum;
+}
+
+
+double Hamiltonian::DoubleSum(const arma::mat &r, const int &nParticles, const double &a, const int &k)
+{
+    double doubleSum = 0.0;
+
+    for (int j = 0; j < nParticles; j++)
+    {
+        if (j != k)
+        {
+            arma::rowvec distance_j      = r.row(k) - r.row(j);
+            double distanceSquared_j     = arma::norm(distance_j)*arma::norm(distance_j);
+            double distanceSubtraction_j = arma::norm(distance_j) - a;
+            for (int i = 0; i < nParticles; i++)
+            {
+                if (i != k)
+                {
+                    arma::rowvec distance_i      = r.row(k) - r.row(i);
+                    double distanceSquared_i     = arma::norm(distance_i)*arma::norm(distance_i);
+                    double distanceSubtraction_i = arma::norm(distance_i) - a;
+                    double denominator = distanceSquared_i * distanceSubtraction_i * distanceSquared_j * distanceSubtraction_j;
+                    doubleSum += ( arma::dot(distance_i, distance_j) / denominator );
+                }
+            }
+        }
+
+    }
+    return doubleSum;
 }
 
 

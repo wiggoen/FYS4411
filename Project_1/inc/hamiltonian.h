@@ -16,6 +16,8 @@ public:
     static double ParticleDistance(const arma::rowvec &r_k, const arma::rowvec &r_j);
     static arma::rowvec VectorSum(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &a,
                                   const int &k);
+private:
+    static double DoubleSum(const arma::mat &r, const int &nParticles, const double &a, const int &k);
     static double DerivativeSum(const arma::mat &r, const int &nParticles, const double &a, const int &k);
     static double RepulsivePotential(const arma::mat &r, const int &nParticles, const double &a, const int &k);
 };
