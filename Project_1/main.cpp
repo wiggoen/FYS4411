@@ -35,14 +35,15 @@ int main(int numberOfArguments, char *arguments[])
         //std::string samplingType = "Importance";
 
         /* CHOOSE INTEGRATION METHOD                    <<< --- CHOOSE ONLY ONE */
-        //std::string derivationType = "Analytical";
+        std::string derivationType = "Analytical";
         //std::string derivationType = "Numerical";
-        std::string derivationType = "Interaction";
+        //std::string derivationType = "Interaction";
 
         /* CHOOSE CYCLE TYPE                            <<< --- CHOOSE ONLY ONE */
-        //std::string cycleType = "MonteCarlo";
+        std::string cycleType = "MonteCarlo";
         //std::string cycleType = "SteepestDescent";
-        std::string cycleType = "OneBodyDensity";
+        //std::string cycleType = "OneBodyDensity";
+
 
         /* If command line arguments are defined */
         if (numberOfArguments >= 2)  { nParticles      = std::atoi(arguments[1]); }
@@ -56,8 +57,8 @@ int main(int numberOfArguments, char *arguments[])
         if (numberOfArguments >= 10) {
             samplingType = std::string(arguments[9]);
             /* Renaming sampling type to run with the program implementation */
-            if      (samplingType == "bf")  { samplingType = "BruteForce"; }
-            else if (samplingType == "im")  { samplingType = "Importance"; }
+            if      (samplingType == "bf") { samplingType = "BruteForce"; }
+            else if (samplingType == "im") { samplingType = "Importance"; }
             else {
                 std::cerr << "Error: You have to specify sampling type. Sampling type '"
                           << samplingType << "' is not valid." << "\n"
@@ -68,13 +69,26 @@ int main(int numberOfArguments, char *arguments[])
         if (numberOfArguments >= 11) {
             derivationType = std::string(arguments[10]);
             /* Renaming integration type to run with the program implementation */
-            if      (derivationType == "ana")  { derivationType = "Analytical"; }
-            else if (derivationType == "num")  { derivationType = "Numerical"; }
-            else if (derivationType == "int")  { derivationType = "Interaction"; }
+            if      (derivationType == "ana") { derivationType = "Analytical"; }
+            else if (derivationType == "num") { derivationType = "Numerical"; }
+            else if (derivationType == "int") { derivationType = "Interaction"; }
             else {
-                std::cerr << "Error: You have to specify integration type. Integration type '"
+                std::cerr << "Error: You have to specify derivation type. Derivation type '"
                           << derivationType << "' is not valid." << "\n"
                           << "Options are 'ana' (analytic) or 'num' (numerical) or 'int' (interaction)." << std::endl;
+                exit(1);
+            }
+        }
+        if (numberOfArguments >= 12) {
+            cycleType = std::string(arguments[11]);
+            /* Renaming integration type to run with the program implementation */
+            if      (cycleType == "mc")  { cycleType = "MonteCarlo"; }
+            else if (cycleType == "sd")  { cycleType = "SteepestDescent"; }
+            else if (cycleType == "obd") { cycleType = "OneBodyDensity"; }
+            else {
+                std::cerr << "Error: You have to specify cycle type. Cycle type '"
+                          << cycleType << "' is not valid." << "\n"
+                          << "Options are 'mc' (Monte Carlo) or 'sd' (Steepest descent) or 'obd' (One-body density)." << std::endl;
                 exit(1);
             }
         }

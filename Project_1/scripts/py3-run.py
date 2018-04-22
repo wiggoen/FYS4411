@@ -31,6 +31,8 @@ trials = 1
 samplingType = "im"
 # Choices: "ana" (Analytical) or "num" (Numerical) or "int" (Interaction)
 derivationType = "int"
+# Choices: "mc" (Monte Carlo) or "sd" (Steepest descent) or "obd"(One-body density)
+cycleType = "mc"
 
 
 # Library used
@@ -44,4 +46,4 @@ includes = "-I/usr/local/Cellar/armadillo/8.400.0/include/ -I/Users/trondwj/GitH
 run_cmd("g++ -std=c++11 -O3 {} {} -o {}.out {}.cpp {}.cpp {}.cpp {}.cpp {}.cpp -larmadillo".format(library, includes, fname1, fname1, fname2, fname3, fname4, fname5))
 
 # Run
-run_cmd("./{}.out {} {} {} {} {} {} {} {} {} {}".format(fname1, nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile, trials, samplingType, derivationType))
+run_cmd("./{}.out {} {} {} {} {} {} {} {} {} {} {}".format(fname1, nParticles, nDimensions, nCycles, alpha, stepLength, timeStep, cycleStepToFile, trials, samplingType, derivationType, cycleType))

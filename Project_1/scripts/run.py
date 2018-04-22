@@ -30,6 +30,8 @@ trials = 1
 samplingType = "im"
 # Choices: "ana" (Analytical) or "num" (Numerical) or "int" (Interaction)
 derivationType = "int"
+# Choices: "mc" (Monte Carlo) or "sd" (Steepest descent) or "obd"(One-body density)
+cycleType = "mc"
 
 
 # Library used
@@ -45,4 +47,4 @@ run_cmd("g++ -std=c++11 -O3 %s %s -o %s.out %s.cpp %s.cpp %s.cpp %s.cpp %s.cpp -
 # Run
 for i in range(len(nDimensions)):
     for j in range(len(nParticles)):
-        run_cmd("./%s.out %s %s %s %s %s %s %s %s %s %s" % (fname1, nParticles[j], nDimensions[i], nCycles, alpha, stepLength, timeStep, cycleStepToFile, trials, samplingType, derivationType))
+        run_cmd("./%s.out %s %s %s %s %s %s %s %s %s %s %s" % (fname1, nParticles[j], nDimensions[i], nCycles, alpha, stepLength, timeStep, cycleStepToFile, trials, samplingType, derivationType, cycleType))
