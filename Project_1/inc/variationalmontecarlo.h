@@ -31,6 +31,8 @@ public:
                           const double &timeStep, const int &i);
     void UpdateEnergies(const int &i);
     double SteepestDescent(const int &nParticles);
+    void SetOneBody( void );
+    void OneBodyDensity( void );
     double waveFunctionOld;      /* old wave function */
     double waveFunctionNew;      /* new wave function */
     double energySum;            /* sum of particle energies for all Monte Carlo cycles */
@@ -58,7 +60,11 @@ private:
     double beta;                 /* variational parameter */
     double acceptanceWeight;     /* weight used for accepting or rejecting a move */
     int acceptanceCounter;       /* number of accepted moves */
-    int thrownCounter;           /* number of cycles thrown away. Only affects interactions. */
+    arma::rowvec hist;
+    arma::rowvec volume;
+    double r_step;
+    int nBins;
+    bool isOneBodySetup;
 };
 
 #endif /* VARIATIONALMONTECARLO_H */

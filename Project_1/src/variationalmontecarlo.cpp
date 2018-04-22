@@ -13,7 +13,7 @@
 VariationalMonteCarlo::VariationalMonteCarlo() :
     a(0.0043)  /* hard-core diameter of the bosons */
 {
-
+    isOneBodySetup = false;
 }
 
 
@@ -54,7 +54,6 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     deltaEnergy       = 0.0;
     acceptanceWeight  = 0.0;
     acceptanceCounter = 0.0;
-    thrownCounter     = 0.0;
     psiSum            = 0.0;
     psiTimesEnergySum = 0.0;
     deltaPsi          = 0.0;
@@ -86,7 +85,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     auto start_time = std::chrono::high_resolution_clock::now();
 
     /* Run Monte Carlo cycles */
-    if (cycleType == "MonteCarlo") {
+    if (cycleType == "MonteCarlo" || cycleType == "OneBodyDensity") {
         MonteCarloCycles();
     } else if (cycleType == "SteepestDescent") {
         SteepestDescent(nParticles);
@@ -97,16 +96,32 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     runTime = (std::chrono::duration<double> (end_time - start_time).count());
 
     /* Normalizing */
-    int nCyclesNew = nCycles - thrownCounter; /* ThrownCounter only affects interactions. */
-    double normalizationFactor = 1.0/(nCyclesNew * nParticles);
+    double normalizationFactor = 1.0/(nCycles * nParticles);
 
     /* Calculation of averages */
     energy = energySum * normalizationFactor;
     energySquared = energySquaredSum * normalizationFactor;
 
     variance = (energySquared - energy*energy);
-    acceptanceCounter -= thrownCounter;  /* To account for thrown energies. Only affects interactions. */
     acceptanceRatio = acceptanceCounter * normalizationFactor;
+
+    if (cycleType == "OneBodyDensity")
+    {
+        for (int i = 0; i < nBins; i++)
+        {
+            hist(i) /= volume(i) * normalizationFactor;
+        }
+        std::ofstream histogram;  /* Write position matrix to file */
+        histogram.open("../Project_1/results/histogram.txt");
+
+        /* Loop over Monte Carlo cycles */
+        for (int i = 0; i < nBins; i++)
+        {
+            /* Write to file */
+            histogram << hist(i) << std::endl;
+        }
+        histogram.close();
+    }
 
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
     return runDetails;
@@ -174,7 +189,7 @@ void VariationalMonteCarlo::CheckInitialDistance(arma::mat &rOld)
 void VariationalMonteCarlo::MonteCarloCycles( void )
 {
     std::ofstream myfile;
-    myfile.open("../Project_1/results.txt");
+    myfile.open("../Project_1/results/results.txt");
 
     /* Loop over Monte Carlo cycles */
     for (int cycle = 0; cycle < nCycles; cycle++)
@@ -330,6 +345,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     energySum         += deltaEnergy;
     energySquaredSum  += (deltaEnergy*deltaEnergy);
 
+    if (cycleType == "OneBodyDensity")
+    {
+        OneBodyDensity();
+    }
+
+
     if (cycleType == "SteepestDescent")
     {
         deltaPsi           = Wavefunction::DerivativePsi(rNew, nParticles, nDimensions, beta);
@@ -380,4 +401,44 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
         alpha -= eta * localEnergyDerivative;
     }
     return alpha;
+}
+
+
+void VariationalMonteCarlo::SetOneBody( void )
+{
+    int max_r = 2;
+    nBins = 400;
+    r_step = (double) max_r/nBins;
+    hist = arma::zeros<arma::rowvec>(nBins);
+    volume = arma::zeros<arma::rowvec>(nBins);
+
+    volume(0) = r_step*r_step;
+    for (int i = 1; i < nBins; i++)
+    {
+
+        volume(i) = pow(r_step*(i+1), 2);
+    }
+}
+
+
+void VariationalMonteCarlo::OneBodyDensity( void )
+{
+    if (!isOneBodySetup)
+    {
+        SetOneBody();
+        isOneBodySetup = true;
+    }
+
+    for (int i = 0; i < nParticles; i++)
+    {
+        double rNorm = arma::norm(rNew.row(i));
+        for (int j = 1; j < nBins; j++)
+        {
+            if ( (rNorm < j*r_step) && ( rNorm >= (r_step*(j-1)) ) )
+            {
+                hist(j-1) += 1;
+            }
+        }
+    }
+
 }
