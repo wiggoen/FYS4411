@@ -434,7 +434,7 @@ void VariationalMonteCarlo::OneBodyDensity( void )
         double rNorm = arma::norm(rNew.row(i));
         for (int j = 1; j < nBins; j++)
         {
-            if ( (rNorm < j*r_step) && ( rNorm >= (r_step*(j-1)) ) )
+            if ( (rNorm < j*r_step) && (rNorm >= (r_step*(j-1))) )
             {
                 hist(j-1) += 1;
             }
