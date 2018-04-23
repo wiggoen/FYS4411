@@ -4,8 +4,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-NoInteractionData = "../results/histogram-non-interacting-10p-alpha0497.txt"
-InteractionData = "../results/histogram-interacting-10p-alpha0497.txt"
+NoInteractionData = "../results/histogram-non-interacting-20p-alpha0495.txt"
+InteractionData = "../results/histogram-interacting-20p-alpha0495.txt"
 NoInteraction = np.loadtxt(NoInteractionData)
 Interaction = np.loadtxt(InteractionData)
 
@@ -23,5 +23,5 @@ plt.xlabel(r"$|\mathbf{r}|$", fontsize=15)
 plt.ylabel(r"$\rho(\mathbf{r})$", fontsize=15)
 plt.legend(loc=0, fontsize=15)
 fig.set_tight_layout(True)  # Minimizing overlap of labels
-plt.savefig("../plots/obd.png")
+plt.savefig("../plots/obd_20p.png")
 plt.show()
