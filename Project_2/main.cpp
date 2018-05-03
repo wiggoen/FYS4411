@@ -9,7 +9,7 @@ using json = nlohmann::json; // for convenience
 int main()//int numberOfArguments, char *arguments[])
 {
     /* The whole project path is needed to read json on mac */
-    std::string projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";
+    std::string projectFolder = "/home/line/github/FYS4411/Project_2/";
     // --
 
     /* READ PARAMETERS */
