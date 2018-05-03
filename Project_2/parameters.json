@@ -1,4 +1,7 @@
 {
+  "nParticles": 10,
+  "nDimensions": 1,
+  "nCycles": 1e3,
   "alpha": 0.1,
   "beta": 1.0
 }
