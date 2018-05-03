@@ -9,7 +9,7 @@ public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo( void );
     arma::rowvec RunMonteCarloIntegration(const int nParticles, const int nCycles, const double alpha,
-                                          const double beta,  const double omega, const double a);
+                                          const double beta,  const double omega, const double a, const double stepLength);
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void MonteCarloCycles( void );
     double UniformRandomNumber( void );

@@ -23,7 +23,7 @@ VariationalMonteCarlo::~VariationalMonteCarlo( void )
 }
 
 arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticles, const int nCycles,
-                                                             const double alpha, const double beta, const double omega, const double a)
+                                                             const double alpha, const double beta, const double omega, const double a, const double stepLength)
 {
     /* Adding variables to member variables */
     this->nParticles      = nParticles;
@@ -31,7 +31,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     this->alpha           = alpha;
     this->beta            = beta;
     this->omega           = omega;
-    //this->stepLength      = stepLength;
+    this->stepLength      = stepLength;
     //this->timeStep        = timeStep;
     //this->cycleStepToFile = cycleStepToFile;
     //this->samplingType    = samplingType;
@@ -40,6 +40,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
 
     samplingType = "BruteForce";
     cycleType = "MonteCarlo";
+    derivationType = "Analytical";
 
     /* Initialize matrices and variables */
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -80,7 +81,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     rNew = rOld;
 
     /* Store the current value of the wave function and quantum force */
-    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, nParticles, nDimensions, alpha, beta);
+    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, a, 1);
     //Wavefunction::QuantumForce(rOld, QForceOld, alpha);
     //QForceNew = QForceOld;
 
@@ -90,6 +91,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     /* Run Monte Carlo cycles */
     if (cycleType == "MonteCarlo")//|| cycleType == "OneBodyDensity")
     {
+        std::cout << "Running MC Cycles.." << std::endl;
         MonteCarloCycles();
     } /*else if (cycleType == "SteepestDescent") {
         SteepestDescent(nParticles);
@@ -200,10 +202,13 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
         } else
         {*/
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, nParticles, nDimensions, alpha, beta);
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, a, 1);
         //}
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+        //std::cout << "wOld = " << waveFunctionOld << std::endl;
+        //std::cout << "wNew = " <<waveFunctionNew << std::endl;
+        //std::cout << "acceptW = " <<acceptanceWeight << std::endl;
 
         UpdateEnergies(i);
     }

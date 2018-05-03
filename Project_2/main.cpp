@@ -37,6 +37,7 @@ int main(int numberOfArguments, char *arguments[])
     double beta = parameter["beta"];
     double omega = parameter["omega"];
     double a = parameter["a"];
+    double stepLength = parameter["stepLength"];
 
 
     /* Initialize VMC */
@@ -50,7 +51,7 @@ int main(int numberOfArguments, char *arguments[])
     int trials = 1;                     // For timing purposes
     for (int i = 0; i < trials; i++)
     {
-        runVector = VMC->RunMonteCarloIntegration(nParticles, nCycles, alpha, beta, omega, a);
+        runVector = VMC->RunMonteCarloIntegration(nParticles, nCycles, alpha, beta, omega, a, stepLength);
         runMatrix.insert_rows(i, runVector);
     }
 
@@ -67,22 +68,23 @@ int main(int numberOfArguments, char *arguments[])
 
     /* Setup for printing to terminal */
     std::cout << std::endl;
+
     std::cout << "Particles "  << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
               << " Time_step " << " Time_[sec] " << "   Energy "  << " Energy_squared "
               << " Variance "  << " Acceptance_ratio " << std::endl;
 
     /* Write to terminal */
     std::cout << std::setw(9)  << std::setprecision(3) << nParticles
-              //<< std::setw(12) << std::setprecision(3) << nDimensions
+              << std::setw(12) << std::setprecision(3) << nDimensions
               << std::setw(11) << std::setprecision(8) << nCycles
               << std::setw(7)  << std::setprecision(3) << alpha
-              //<< std::setw(13) << std::setprecision(3) << stepLength
-              //<< std::setw(11) << std::setprecision(6) << timeStep
+              << std::setw(13) << std::setprecision(3) << stepLength
+              << std::setw(11) << std::setprecision(6) << "Ignore" //timeStep
               << std::setw(12) << std::setprecision(6) << runTime
               << std::setw(10) << std::setprecision(3) << energy
-              //<< std::setw(16) << std::setprecision(3) << energySquared
-              //<< std::setw(10) << std::setprecision(3) << variance
-              //<< std::setw(18) << std::setprecision(6) << acceptanceRatio
+              << std::setw(16) << std::setprecision(3) << energySquared
+              << std::setw(10) << std::setprecision(3) << variance
+              << std::setw(18) << std::setprecision(6) << acceptanceRatio
               << std::endl;
 
     return 0;
