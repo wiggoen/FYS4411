@@ -13,7 +13,15 @@ QMAKE_CXXFLAGS_RELEASE *= -O3  # Run this on release
 
 
 SOURCES += \
-        main.cpp
+    main.cpp \
+    src/hamiltonian.cpp \
+    src/tests.cpp \
+    src/variationalmontecarlo.cpp \
+    src/wavefunction.cpp
 
 HEADERS += \
-    inc/json.hpp
+    inc/json.hpp \
+    inc/catch.hpp \
+    inc/hamiltonian.h \
+    inc/variationalmontecarlo.h \
+    inc/wavefunction.h
