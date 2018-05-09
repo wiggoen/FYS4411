@@ -12,7 +12,7 @@ int main(int numberOfArguments, char *arguments[])
     /* The whole project path is needed to read json on mac */
 
     /* Who am I? */
-    std::string Iam = "Line";
+    std::string Iam = "Trond";
     std::string projectFolder;
     if (Iam == "Trond") {
         std::cout << "Hi, Trond!" << std::endl;
@@ -40,7 +40,7 @@ int main(int numberOfArguments, char *arguments[])
     double stepLength = parameter["stepLength"];
     double constant = parameter["constant"];
     double timeStep = parameter["timeStep"];
-
+    bool Jastrow = parameter["Jastrow"];
 
     /* Initialize VMC */
     VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
@@ -53,7 +53,7 @@ int main(int numberOfArguments, char *arguments[])
     int trials = 1;                     // For timing purposes
     for (int i = 0; i < trials; i++)
     {
-        runVector = VMC->RunMonteCarloIntegration(nParticles, nCycles, alpha, beta, omega, a, stepLength, constant, timeStep);
+        runVector = VMC->RunMonteCarloIntegration(nParticles, nCycles, alpha, beta, omega, a, stepLength, constant, timeStep, Jastrow);
         runMatrix.insert_rows(i, runVector);
     }
 
@@ -72,7 +72,7 @@ int main(int numberOfArguments, char *arguments[])
     std::cout << std::endl;
 
     std::cout << "Particles "  << " Dimensions " << "    Cycles " << " Alpha " << " Step_length "
-              << " Time_step " << " Time_[sec] " << "   Energy "  << " Energy_squared "
+              << " Time_step " << " Time_[sec] " << "      Energy "  << " Energy_squared "
               << " Variance "  << " Acceptance_ratio " << std::endl;
 
     /* Write to terminal */
@@ -83,8 +83,8 @@ int main(int numberOfArguments, char *arguments[])
               << std::setw(13) << std::setprecision(3) << stepLength
               << std::setw(11) << std::setprecision(6) << "Ignore" //timeStep
               << std::setw(12) << std::setprecision(6) << runTime
-              << std::setw(10) << std::setprecision(3) << energy
-              << std::setw(16) << std::setprecision(3) << energySquared
+              << std::setw(13) << std::setprecision(6) << energy
+              << std::setw(16) << std::setprecision(6) << energySquared
               << std::setw(10) << std::setprecision(3) << variance
               << std::setw(18) << std::setprecision(6) << acceptanceRatio
               << std::endl;

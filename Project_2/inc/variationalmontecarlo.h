@@ -10,7 +10,7 @@ public:
     ~VariationalMonteCarlo( void );
     arma::rowvec RunMonteCarloIntegration(const int nParticles, const int nCycles, const double alpha,
                                  const double beta,  const double omega, const double a, const double stepLength,
-                                 const double constant, const double timeStep);
+                                 const double constant, const double timeStep, bool Jastrow);
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void MonteCarloCycles( void );
     double UniformRandomNumber( void );
@@ -34,6 +34,7 @@ public:
     //double psiTimesEnergySum;
     //double deltaPsi;
     const int nDimensions;       /* number of dimensions */
+    bool Jastrow;
 private:
     arma::mat rOld;              /* matrix of old position */
     arma::mat rNew;              /* matrix of new position */

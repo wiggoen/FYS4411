@@ -25,7 +25,7 @@ VariationalMonteCarlo::~VariationalMonteCarlo( void )
 arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticles, const int nCycles,
                                                              const double alpha, const double beta, const double omega,
                                                              const double a, const double stepLength, const double constant,
-                                                             const double timeStep)
+                                                             const double timeStep, bool Jastrow)
 {
     /* Adding variables to member variables */
     this->nParticles      = nParticles;
@@ -41,8 +41,8 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     //this->derivationType  = derivationType;
     //this->cycleType       = cycleType;
 
-    //samplingType = "BruteForce";
-    samplingType = "Importance";
+    samplingType = "BruteForce";
+    //samplingType = "Importance";
     cycleType = "MonteCarlo";
     derivationType = "Analytical";
     //derivationType = "Numerical";
@@ -305,8 +305,13 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 
     if (derivationType == "Analytical") {
         /* Update energies (without numerical derivation and interaction) */
-        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, a);
-    }   else if (derivationType == "Numerical")
+        /*if (nParticles == 2)
+            deltaEnergy = Hamiltonian::LocalEnergyTwoElectrons(rNew, nParticles, alpha, beta, omega, a, Jastrow);
+        else {*/
+        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, a, Jastrow);
+    }
+    //}
+    else if (derivationType == "Numerical")
     {
         // Update energies using numerical derivation
         deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta, omega, a, constant);

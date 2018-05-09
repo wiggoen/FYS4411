@@ -15,38 +15,68 @@ Hamiltonian::~Hamiltonian( void )
 }
 
 
-double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const double &alpha,
-                                const double &beta, const double &omega, const double &a)
+double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const int &nParticles, const double &alpha,
+                                            const double &beta, const double &omega, const double &a, bool Jastrow)
 {
-    double localEnergy = 0;
-    double twoAlphaOmega = alpha*omega;         // REMOVE two??!?!
+    double AlphaOmega = alpha*omega;
     double omegaSquaredHalf = 0.5*omega*omega;
 
-    double betaR_ij =  beta*arma::norm(r.row(0) - r.row(1));
-    //std::cout << "norm = " << betaR_ij << std::endl;
+    double r_1Squared = r(0,0)*r(0,0) + r(0,1)*r(0,1);
+    double r_2Squared = r(1,0)*r(1,0) + r(1,1)*r(1,1);
 
-    for (int i = 0; i < nParticles; i++)
-    {
-        double numerator = a*(1 + betaR_ij) - a*betaR_ij;
-        double denominator = (1 + betaR_ij)*(1 + betaR_ij);
-        double firstFraction = numerator/denominator;
-        //double firstTerm = -0.5*(-twoAlphaOmega*arma::norm(r.row(i)) + firstFraction);
-        double firstTerm = -twoAlphaOmega*arma::norm(r.row(i)) + firstFraction;
+    if (!Jastrow) {
+        return 2*AlphaOmega + omegaSquaredHalf*(r_1Squared + r_2Squared);
+    } else {
+        double r_12 = arma::norm(r.row(0) - r.row(1));
+        double betaR_12 = beta*r_12;
+        double alphaSquared = alpha*alpha;
+        double denominator = (1 + beta*r_12);
+        double denominatorSquared = denominator*denominator;
 
-        //double secondTerm = 1 - twoAlphaOmega*arma::dot(r.row(i), r.row(i)) + firstFraction*arma::norm(r.row(i));
+        double parentheses = -AlphaOmega*r_12 + 2/r_12 + a/denominatorSquared - ((1 + 3*betaR_12))/(r_12*denominator);
+        double fractions = a/denominatorSquared * parentheses;
 
-        double secondTerm = firstFraction * (2*beta*arma::norm(r.row(i)) + 2*beta*beta*arma::norm(r.row(i)))/denominator - twoAlphaOmega;
-
-        //double thirdTerm = arma::norm(r.row(i))*(-twoAlphaOmega + (((1 + beta - a*beta)*(1 + betaR_ij) - numerator)*2*beta)/(denominator*(1 + betaR_ij)));
-
-        double thirdTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-
-        //double fourthTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-
-        localEnergy += -0.5*firstTerm*firstTerm * (-0.5)*secondTerm * thirdTerm;
+        return 2*AlphaOmega + (1 - alphaSquared)*omegaSquaredHalf*(r_1Squared + r_2Squared) - fractions;
     }
+}
 
-    return localEnergy;
+
+double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const double &alpha,
+                                const double &beta, const double &omega, const double &a, bool Jastrow)
+{
+    if (nParticles == 2) {
+        return LocalEnergyTwoElectrons(r, nParticles, alpha, beta, omega, a, Jastrow);
+    }
+    else {
+        double localEnergy = 0;
+        double AlphaOmega = alpha*omega;         // REMOVE two??!?!
+        double omegaSquaredHalf = 0.5*omega*omega;
+
+        double betaR_ij =  beta*arma::norm(r.row(0) - r.row(1));
+        //std::cout << "norm = " << betaR_ij << std::endl;
+
+        for (int i = 0; i < nParticles; i++)
+        {
+            double numerator = a*(1 + betaR_ij) - a*betaR_ij;
+            double denominator = (1 + betaR_ij)*(1 + betaR_ij);
+            double firstFraction = numerator/denominator;
+            //double firstTerm = -0.5*(-AlphaOmega*arma::norm(r.row(i)) + firstFraction);
+            double firstTerm = -AlphaOmega*arma::norm(r.row(i)) + firstFraction;
+
+            //double secondTerm = 1 - AlphaOmega*arma::dot(r.row(i), r.row(i)) + firstFraction*arma::norm(r.row(i));
+
+            double secondTerm = firstFraction * (2*beta*arma::norm(r.row(i)) + 2*beta*beta*arma::norm(r.row(i)))/denominator - AlphaOmega;
+
+            //double thirdTerm = arma::norm(r.row(i))*(-AlphaOmega + (((1 + beta - a*beta)*(1 + betaR_ij) - numerator)*2*beta)/(denominator*(1 + betaR_ij)));
+
+            double thirdTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
+
+            //double fourthTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
+
+            localEnergy += -0.5*firstTerm*firstTerm * (-0.5)*secondTerm * thirdTerm;
+        }
+        return localEnergy;
+    }
 }
 
 double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
