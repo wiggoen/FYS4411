@@ -23,7 +23,9 @@ VariationalMonteCarlo::~VariationalMonteCarlo( void )
 }
 
 arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticles, const int nCycles,
-                                                             const double alpha, const double beta, const double omega, const double a, const double stepLength)
+                                                             const double alpha, const double beta, const double omega,
+                                                             const double a, const double stepLength, const double constant,
+                                                             const double timeStep)
 {
     /* Adding variables to member variables */
     this->nParticles      = nParticles;
@@ -32,22 +34,25 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     this->beta            = beta;
     this->omega           = omega;
     this->stepLength      = stepLength;
-    //this->timeStep        = timeStep;
+    this->constant        = constant;
+    this->timeStep        = timeStep;
     //this->cycleStepToFile = cycleStepToFile;
     //this->samplingType    = samplingType;
     //this->derivationType  = derivationType;
     //this->cycleType       = cycleType;
 
-    samplingType = "BruteForce";
+    //samplingType = "BruteForce";
+    samplingType = "Importance";
     cycleType = "MonteCarlo";
     derivationType = "Analytical";
+    //derivationType = "Numerical";
+
 
     /* Initialize matrices and variables */
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
     rNew = arma::zeros<arma::mat>(nParticles, nDimensions);
-    /*
     QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
-    QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions); */
+    QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     waveFunctionOld   = 0.0;
     waveFunctionNew   = 0.0;
     energySum         = 0.0;
@@ -74,7 +79,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     */
     /* Initial trial positions */
     if (samplingType == "BruteForce")      { InitialTrialPositionsBruteForce(rOld); }
-    //else if (samplingType == "Importance") { InitialTrialPositionsImportanceSampling(rOld); }
+    else if (samplingType == "Importance") { InitialTrialPositionsImportanceSampling(rOld); }
 
     //if (derivationType == "Interaction")   { CheckInitialDistance(rOld); }
 
@@ -82,8 +87,8 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
 
     /* Store the current value of the wave function and quantum force */
     waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, a, 1);
-    //Wavefunction::QuantumForce(rOld, QForceOld, alpha);
-    //QForceNew = QForceOld;
+    Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, a, omega);
+    QForceNew = QForceOld;
 
     /* Start timing */
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -147,6 +152,26 @@ void VariationalMonteCarlo::InitialTrialPositionsBruteForce(arma::mat &r)
     }
 }
 
+void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r)
+{
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            r(i, j) = GaussianRandomNumber()*sqrt(timeStep);
+        }
+    }
+}
+
+double VariationalMonteCarlo::GaussianRandomNumber( void )
+{
+    static std::random_device rd;  /* Initialize the seed for the random number engine */
+    static std::mt19937_64 gen(rd());  /* Call the Mersenne Twister algorithm */
+    /* Set up the normal distribution for x in [0, 1] */
+    static std::normal_distribution<double> NormalDistribution(0.0,1.0);
+    return NormalDistribution(gen);
+}
+
 
 void VariationalMonteCarlo::MonteCarloCycles( void )
 {
@@ -159,10 +184,10 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         /* Sampling */
         if (samplingType == "BruteForce") {
             MetropolisBruteForce(rNew, rOld, waveFunctionNew, waveFunctionOld);
-        } /*else if (samplingType == "Importance")
+        } else if (samplingType == "Importance")
         {
             ImportanceSampling(rNew, rOld, QForceNew, QForceOld, waveFunctionNew, waveFunctionOld);
-        } */
+        }
 
         /* Write to file */
         /*
@@ -202,7 +227,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
         } else
         {*/
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, a, 1);
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, a, constant);
         //}
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
@@ -212,6 +237,53 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 
         UpdateEnergies(i);
     }
+}
+
+void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew,
+                                               const arma::mat &QForceOld, double &waveFunctionNew,
+                                               const double &waveFunctionOld)
+{
+    double diffusionCoefficient = 0.5;
+    double wavefunctionsSquared = 0.0;
+    double GreensRatio = 0.0;
+
+    /* New position to test */
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rNew(i, j) = rOld(i, j) + diffusionCoefficient*QForceOld(i, j)*timeStep + GaussianRandomNumber()*sqrt(timeStep);
+        }
+
+        /* Recalculate the value of the wave function and the quantum force */
+        if (derivationType == "Analytical")
+        {
+            waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, a, constant);
+            Wavefunction::QuantumForce(rNew, QForceNew, alpha, beta, a, omega);
+        } /*else if (derivationType == "Interaction")
+        {
+            waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
+            Wavefunction::QuantumForceInteraction(rNew, QForceNew, nParticles, nDimensions, alpha, beta, a, i);
+        }*/
+
+        wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+        GreensRatio = GreensFunction(rNew, rOld, QForceNew, QForceOld, diffusionCoefficient, timeStep, i);
+        acceptanceWeight = GreensRatio * wavefunctionsSquared;
+
+        UpdateEnergies(i);
+    }
+}
+
+double VariationalMonteCarlo::GreensFunction(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
+                                             const arma::mat &QForceOld, const double &diffusionCoefficient,
+                                             const double &timeStep, const int &i)
+{
+    double fraction = 1.0/(4.0*diffusionCoefficient*timeStep);
+    arma::rowvec yx = rNew.row(i) - rOld.row(i) - diffusionCoefficient*timeStep*QForceOld.row(i);
+    double yxSquared = arma::dot(yx, yx);
+    arma::rowvec xy = rOld.row(i) - rNew.row(i) - diffusionCoefficient*timeStep*QForceNew.row(i);
+    double xySquared = arma::dot(xy, xy);
+    return exp((-xySquared + yxSquared) * fraction) + (nParticles - 1.0);
 }
 
 
@@ -234,18 +306,22 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (derivationType == "Analytical") {
         /* Update energies (without numerical derivation and interaction) */
         deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, a);
-    } /*else if (derivationType == "Numerical")
+    }   else if (derivationType == "Numerical")
     {
         // Update energies using numerical derivation
-        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta);
-    } else if (derivationType == "Interaction")
+        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta, omega, a, constant);
+    } /*else if (derivationType == "Interaction")
     {
         // Update energies using interaction
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
     }*/
 
+    //std::cout << deltaEnergy << std::endl;
+
     energySum         += deltaEnergy;
     energySquaredSum  += (deltaEnergy*deltaEnergy);
+
+    //std::cout << energySum << std::endl;
 
     /*
     if (cycleType == "OneBodyDensity")

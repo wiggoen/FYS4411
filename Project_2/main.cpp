@@ -12,7 +12,7 @@ int main(int numberOfArguments, char *arguments[])
     /* The whole project path is needed to read json on mac */
 
     /* Who am I? */
-    std::string Iam = "Trond";
+    std::string Iam = "Line";
     std::string projectFolder;
     if (Iam == "Trond") {
         std::cout << "Hi, Trond!" << std::endl;
@@ -38,6 +38,8 @@ int main(int numberOfArguments, char *arguments[])
     double omega = parameter["omega"];
     double a = parameter["a"];
     double stepLength = parameter["stepLength"];
+    double constant = parameter["constant"];
+    double timeStep = parameter["timeStep"];
 
 
     /* Initialize VMC */
@@ -51,7 +53,7 @@ int main(int numberOfArguments, char *arguments[])
     int trials = 1;                     // For timing purposes
     for (int i = 0; i < trials; i++)
     {
-        runVector = VMC->RunMonteCarloIntegration(nParticles, nCycles, alpha, beta, omega, a, stepLength);
+        runVector = VMC->RunMonteCarloIntegration(nParticles, nCycles, alpha, beta, omega, a, stepLength, constant, timeStep);
         runMatrix.insert_rows(i, runVector);
     }
 
