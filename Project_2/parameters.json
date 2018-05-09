@@ -7,5 +7,6 @@
   "omega": 1.0,
   "stepLength": 1.0,
   "a": 1.0,
-  "constant": 1.0
+  "constant": 1.0,
+  "timeStep": 0.01
 }
