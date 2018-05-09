@@ -23,7 +23,8 @@ VariationalMonteCarlo::~VariationalMonteCarlo( void )
 }
 
 arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticles, const int nCycles,
-                                                             const double alpha, const double beta, const double omega, const double a, const double stepLength)
+                                                             const double alpha, const double beta, const double omega,
+                                                             const double a, const double stepLength, const double constant)
 {
     /* Adding variables to member variables */
     this->nParticles      = nParticles;
@@ -246,8 +247,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
     }*/
 
+    //std::cout << deltaEnergy << std::endl;
+
     energySum         += deltaEnergy;
     energySquaredSum  += (deltaEnergy*deltaEnergy);
+
+    //std::cout << energySum << std::endl;
 
     /*
     if (cycleType == "OneBodyDensity")

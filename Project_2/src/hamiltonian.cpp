@@ -63,6 +63,8 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     double waveFunctionPlus  = 0.0;
     double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, a, constant);
 
+    //std::cout << waveFunctionCurrent << std::endl;
+
     double stepLengthSquaredFraction = 1.0 / (stepLength * stepLength);
 
     /* Kinetic energy */
