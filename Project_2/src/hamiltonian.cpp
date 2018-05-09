@@ -49,3 +49,48 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
     return localEnergy;
 }
 
+double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                         const double &alpha, const double &stepLength, const double &beta,
+                                         const double &omega, const double &a, const double &constant)
+{
+    arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
+    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
+
+    rPlus = r;
+    rMinus = r;
+
+    double waveFunctionMinus = 0.0;
+    double waveFunctionPlus  = 0.0;
+    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, a, constant);
+
+    double stepLengthSquaredFraction = 1.0 / (stepLength * stepLength);
+
+    /* Kinetic energy */
+    double kineticEnergy = 0.0;
+    for (int i = 0; i < nParticles; i++) {
+        for (int j = 0; j < nDimensions; j++) {
+            rPlus(i, j) += stepLength;
+            rMinus(i, j) -= stepLength;
+            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, a, constant);
+            waveFunctionPlus = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, a, constant);
+            kineticEnergy -= (waveFunctionMinus + waveFunctionPlus - 2.0 * waveFunctionCurrent);
+            rPlus(i, j) = r(i, j);
+            rMinus(i, j) = r(i, j);
+        }
+    }
+    kineticEnergy = 0.5 * stepLengthSquaredFraction * kineticEnergy / waveFunctionCurrent;
+
+    /* External potential */
+    double externalPotential = 0.0;
+    double rSquared = 0.0;
+    for (int i = 0; i < nParticles; i++)
+    {
+        rSquared = 0.0;
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rSquared += r(i, j) * r(i, j);
+        }
+        externalPotential += 0.5 * rSquared;
+    }
+    return kineticEnergy + externalPotential;
+}

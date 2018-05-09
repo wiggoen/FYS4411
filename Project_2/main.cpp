@@ -12,7 +12,7 @@ int main(int numberOfArguments, char *arguments[])
     /* The whole project path is needed to read json on mac */
 
     /* Who am I? */
-    std::string Iam = "Trond";
+    std::string Iam = "Line";
     std::string projectFolder;
     if (Iam == "Trond") {
         std::cout << "Hi, Trond!" << std::endl;
@@ -38,6 +38,7 @@ int main(int numberOfArguments, char *arguments[])
     double omega = parameter["omega"];
     double a = parameter["a"];
     double stepLength = parameter["stepLength"];
+    double constant = parameter["constant"];
 
 
     /* Initialize VMC */

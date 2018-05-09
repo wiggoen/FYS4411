@@ -32,6 +32,7 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     this->beta            = beta;
     this->omega           = omega;
     this->stepLength      = stepLength;
+    this->constant        = constant;
     //this->timeStep        = timeStep;
     //this->cycleStepToFile = cycleStepToFile;
     //this->samplingType    = samplingType;
@@ -40,7 +41,8 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
 
     samplingType = "BruteForce";
     cycleType = "MonteCarlo";
-    derivationType = "Analytical";
+    //derivationType = "Analytical";
+    derivationType = "Numerical";
 
     /* Initialize matrices and variables */
     rOld = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -234,11 +236,11 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (derivationType == "Analytical") {
         /* Update energies (without numerical derivation and interaction) */
         deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, a);
-    } /*else if (derivationType == "Numerical")
+    }   else if (derivationType == "Numerical")
     {
         // Update energies using numerical derivation
-        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta);
-    } else if (derivationType == "Interaction")
+        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta, omega, a, constant);
+    } /*else if (derivationType == "Interaction")
     {
         // Update energies using interaction
         deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);

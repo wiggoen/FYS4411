@@ -34,6 +34,7 @@ private:
     int nCycles;                 /* number of Monte Carlo cycles */
     double alpha;                /* variational parameter */
     double stepLength;           /* step length used in brute force sampling */
+    double constant;             /* normalization factor */
     //double timeStep;             /* time step used in importance sampling */
     //int cycleStepToFile;         /* fraction of Monte Carlo cycles written to file */
     std::string samplingType;    /* sampling choice */
