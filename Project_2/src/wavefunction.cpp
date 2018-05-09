@@ -25,9 +25,14 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
     return constant*exp(argument1+argument2);
 }
 
-void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha)
+void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha,
+                                const double beta, const double a, const double omega)
 {
-    QForce = -4.0 * alpha * r;
+    double x1 = r(0,0); double x2 = r(1,0);
+    double y1 = r(0,1); double y2 = r(1,1);
+    double r12 = abs(sqrt(r(0,0)*r(0,0)+r(0,1)*r(0,1))-sqrt(r(1,0)*r(1,0)+r(1,1)*r(1,1)));
+    QForce =  -alpha*omega*r - a*(x1-x2)/(r12*(1+beta*r12)*(1+beta*r12));
+    QForce += -alpha*omega*r - a*(y1-y2)/(r12*(1+beta*r12)*(1+beta*r12));
 }
 
 

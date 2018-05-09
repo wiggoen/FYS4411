@@ -87,8 +87,8 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
 
     /* Store the current value of the wave function and quantum force */
     waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, a, 1);
-    //Wavefunction::QuantumForce(rOld, QForceOld, alpha);
-    //QForceNew = QForceOld;
+    Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, a, omega);
+    QForceNew = QForceOld;
 
     /* Start timing */
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -259,7 +259,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
         if (derivationType == "Analytical")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, a, constant);
-            Wavefunction::QuantumForce(rNew, QForceNew, alpha);
+            Wavefunction::QuantumForce(rNew, QForceNew, alpha, beta, a, omega);
         } /*else if (derivationType == "Interaction")
         {
             waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
