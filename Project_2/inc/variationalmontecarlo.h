@@ -1,3 +1,4 @@
+#pragma once
 #ifndef VARIATIONALMONTECARLO_H
 #define VARIATIONALMONTECARLO_H
 #include <armadillo>
@@ -8,9 +9,11 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo( void );
-    arma::rowvec RunMonteCarloIntegration(const int nParticles, const int nCycles, const double alpha,
-                                 const double beta,  const double omega, const double a, const double stepLength,
-                                 const double constant, const double timeStep, bool Jastrow);
+    arma::rowvec RunVMC(const int nParticles, const int nCycles, const double alpha,
+                        const double beta,  const double omega, const double spinParameter,
+                        const double stepLength, const double timeStep, const bool UseJastrowFactor,
+                        const bool UseImportanceSampling, const bool UseFermionInteraction,
+                        std::string derivationType, std::string cycleType);
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void MonteCarloCycles( void );
     double UniformRandomNumber( void );
@@ -23,8 +26,8 @@ public:
     void InitialTrialPositionsImportanceSampling(arma::mat &r);
     double GaussianRandomNumber( void );
     double GreensFunction(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
-                                 const arma::mat &QForceOld, const double &diffusionCoefficient,
-                                 const double &timeStep, const int &i);
+                          const arma::mat &QForceOld, const double &diffusionCoefficient,
+                          const double &timeStep, const int &i);
     double waveFunctionOld;      /* old wave function */
     double waveFunctionNew;      /* new wave function */
     double energySum;            /* sum of particle energies for all Monte Carlo cycles */
@@ -34,7 +37,6 @@ public:
     //double psiTimesEnergySum;
     //double deltaPsi;
     const int nDimensions;       /* number of dimensions */
-    bool Jastrow;
 private:
     arma::mat rOld;              /* matrix of old position */
     arma::mat rNew;              /* matrix of new position */
@@ -43,18 +45,20 @@ private:
     int nParticles;              /* number of particles */
     int nCycles;                 /* number of Monte Carlo cycles */
     double alpha;                /* variational parameter */
+    double beta;                 /* variational parameter */
+    double omega;
+    double spinParameter;        /* spin parameter a */
     double stepLength;           /* step length used in brute force sampling */
-    double constant;             /* normalization factor */
     double timeStep;             /* time step used in importance sampling */
-    //int cycleStepToFile;         /* fraction of Monte Carlo cycles written to file */
-    std::string samplingType;    /* sampling choice */
+    bool UseJastrowFactor;       /* Wave function with/without Jastrow factor */
+    bool UseImportanceSampling;  /* With/without importance sampling */
+    bool UseFermionInteraction;  /* With/without interaction */
     std::string derivationType;  /* differentiation choice */
     std::string cycleType;       /* Monte Carlo cycles or Steepest descent */
-    double beta;                 /* variational parameter */
+    //int cycleStepToFile;       /* fraction of Monte Carlo cycles written to file */
+    //std::string samplingType;    /* sampling choice */
     double acceptanceWeight;     /* weight used for accepting or rejecting a move */
     int acceptanceCounter;       /* number of accepted moves */
-    double a;              /* spinn parameter */
-    double omega;
     //arma::rowvec hist;
     //arma::rowvec volume;
     //double r_step;

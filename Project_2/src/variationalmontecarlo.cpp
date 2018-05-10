@@ -22,29 +22,36 @@ VariationalMonteCarlo::~VariationalMonteCarlo( void )
 
 }
 
-arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticles, const int nCycles,
-                                                             const double alpha, const double beta, const double omega,
-                                                             const double a, const double stepLength, const double constant,
-                                                             const double timeStep, bool Jastrow)
+arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycles, const double alpha,
+                                           const double beta, const double omega,
+                                           const double spinParameter, const double stepLength,
+                                           const double timeStep, const bool UseJastrowFactor,
+                                           const bool UseImportanceSampling, const bool UseFermionInteraction,
+                                           std::string derivationType, std::string cycleType)
 {
     /* Adding variables to member variables */
-    this->nParticles      = nParticles;
-    this->nCycles         = nCycles;
-    this->alpha           = alpha;
-    this->beta            = beta;
-    this->omega           = omega;
-    this->stepLength      = stepLength;
-    this->constant        = constant;
-    this->timeStep        = timeStep;
-    //this->cycleStepToFile = cycleStepToFile;
-    //this->samplingType    = samplingType;
-    //this->derivationType  = derivationType;
-    //this->cycleType       = cycleType;
+    this->nParticles            = nParticles;
+    this->nCycles               = nCycles;
+    this->alpha                 = alpha;
+    this->beta                  = beta;
+    this->omega                 = omega;
+    this->spinParameter         = spinParameter;
+    this->stepLength            = stepLength;
+    this->timeStep              = timeStep;
+    this->UseJastrowFactor      = UseJastrowFactor;
+    this->UseImportanceSampling = UseImportanceSampling;
+    this->UseFermionInteraction = UseFermionInteraction;
+    this->derivationType        = derivationType;
+    this->cycleType             = cycleType;
+    //this->cycleStepToFile       = cycleStepToFile;
+    //this->samplingType          = samplingType;
 
-    samplingType = "BruteForce";
+
+
+    //samplingType = "BruteForce";
     //samplingType = "Importance";
-    cycleType = "MonteCarlo";
-    derivationType = "Analytical";
+    //cycleType = "MonteCarlo";
+    //derivationType = "Analytical";
     //derivationType = "Numerical";
 
 
@@ -77,17 +84,23 @@ arma::rowvec VariationalMonteCarlo::RunMonteCarloIntegration(const int nParticle
     if (derivationType == "Interaction")  { beta = 2.82843; }
     else                                  { beta = 1.0; }
     */
+
     /* Initial trial positions */
-    if (samplingType == "BruteForce")      { InitialTrialPositionsBruteForce(rOld); }
-    else if (samplingType == "Importance") { InitialTrialPositionsImportanceSampling(rOld); }
+    if (!UseImportanceSampling) { InitialTrialPositionsBruteForce(rOld); }
+    else                        { InitialTrialPositionsImportanceSampling(rOld); }
 
     //if (derivationType == "Interaction")   { CheckInitialDistance(rOld); }
 
     rNew = rOld;
 
+    /*
+    std::cout << "r = " << std::endl;
+    std::cout << rNew << std::endl;
+    */
+
     /* Store the current value of the wave function and quantum force */
-    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, a, 1);
-    Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, a, omega);
+    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
+    Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, omega, spinParameter);
     QForceNew = QForceOld;
 
     /* Start timing */
@@ -182,9 +195,10 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
         /* Sampling */
-        if (samplingType == "BruteForce") {
+        if (!UseImportanceSampling) /* Brute force */
+        {
             MetropolisBruteForce(rNew, rOld, waveFunctionNew, waveFunctionOld);
-        } else if (samplingType == "Importance")
+        } else /* Importance sampling */
         {
             ImportanceSampling(rNew, rOld, QForceNew, QForceOld, waveFunctionNew, waveFunctionOld);
         }
@@ -224,10 +238,10 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         /* Recalculate the value of the wave function */
         /*if (derivationType == "Interaction")
         {
-            waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
+            waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, spinParameter);
         } else
         {*/
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, a, constant);
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
         //}
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
@@ -258,12 +272,12 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
         /* Recalculate the value of the wave function and the quantum force */
         if (derivationType == "Analytical")
         {
-            waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, a, constant);
-            Wavefunction::QuantumForce(rNew, QForceNew, alpha, beta, a, omega);
+            waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
+            Wavefunction::QuantumForce(rNew, QForceNew, alpha, beta, omega, spinParameter);
         } /*else if (derivationType == "Interaction")
         {
-            waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
-            Wavefunction::QuantumForceInteraction(rNew, QForceNew, nParticles, nDimensions, alpha, beta, a, i);
+            waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, spinParameter);
+            Wavefunction::QuantumForceInteraction(rNew, QForceNew, nParticles, nDimensions, alpha, beta, spinParameter, i);
         }*/
 
         wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
@@ -306,19 +320,19 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (derivationType == "Analytical") {
         /* Update energies (without numerical derivation and interaction) */
         /*if (nParticles == 2)
-            deltaEnergy = Hamiltonian::LocalEnergyTwoElectrons(rNew, nParticles, alpha, beta, omega, a, Jastrow);
+            deltaEnergy = Hamiltonian::LocalEnergyTwoElectrons(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor);
         else {*/
-        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, a, Jastrow);
+        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor);
     }
     //}
     else if (derivationType == "Numerical")
     {
         // Update energies using numerical derivation
-        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, stepLength, beta, omega, a, constant);
+        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega, spinParameter, stepLength, UseJastrowFactor);
     } /*else if (derivationType == "Interaction")
     {
         // Update energies using interaction
-        deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, a);
+        deltaEnergy = Hamiltonian::LocalEnergyInteraction(rNew, nParticles, nDimensions, alpha, beta, spinParameter);
     }*/
 
     //std::cout << deltaEnergy << std::endl;

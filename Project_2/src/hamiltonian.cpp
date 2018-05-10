@@ -15,8 +15,8 @@ Hamiltonian::~Hamiltonian( void )
 }
 
 
-double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const int &nParticles, const double &alpha,
-                                            const double &beta, const double &omega, const double &a, bool Jastrow)
+double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &alpha, const double &beta,
+                                            const double &omega, const double &spinParameter, bool UseJastrowFactor)
 {
     double AlphaOmega = alpha*omega;
     double omegaSquaredHalf = 0.5*omega*omega;
@@ -24,7 +24,7 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const int &nPart
     double r_1Squared = r(0,0)*r(0,0) + r(0,1)*r(0,1);
     double r_2Squared = r(1,0)*r(1,0) + r(1,1)*r(1,1);
 
-    if (!Jastrow) {
+    if (!UseJastrowFactor) {
         return 2*AlphaOmega + omegaSquaredHalf*(r_1Squared + r_2Squared);
     } else {
         double r_12 = arma::norm(r.row(0) - r.row(1));
@@ -33,23 +33,25 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const int &nPart
         double denominator = (1 + beta*r_12);
         double denominatorSquared = denominator*denominator;
 
-        double parentheses = -AlphaOmega*r_12 + 2/r_12 + a/denominatorSquared - ((1 + 3*betaR_12))/(r_12*denominator);
-        double fractions = a/denominatorSquared * parentheses;
+        double parentheses = -AlphaOmega*r_12 + 2/r_12 + spinParameter/denominatorSquared - ((1 + 3*betaR_12))/(r_12*denominator);
+        double fractions = spinParameter/denominatorSquared * parentheses;
 
         return 2*AlphaOmega + (1 - alphaSquared)*omegaSquaredHalf*(r_1Squared + r_2Squared) - fractions;
     }
 }
 
 
-double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const double &alpha,
-                                const double &beta, const double &omega, const double &a, bool Jastrow)
+double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &beta,
+                                const double &omega, const double &spinParameter, bool UseJastrowFactor)
 {
     if (nParticles == 2) {
-        return LocalEnergyTwoElectrons(r, nParticles, alpha, beta, omega, a, Jastrow);
+        return LocalEnergyTwoElectrons(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
     }
+    /* Husk å legg til med / uten Jastrow for flere partikler */
+    //if (!UseJastrowFactor) {}
     else {
         double localEnergy = 0;
-        double AlphaOmega = alpha*omega;         // REMOVE two??!?!
+        double AlphaOmega = alpha*omega;
         double omegaSquaredHalf = 0.5*omega*omega;
 
         double betaR_ij =  beta*arma::norm(r.row(0) - r.row(1));
@@ -57,7 +59,7 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
 
         for (int i = 0; i < nParticles; i++)
         {
-            double numerator = a*(1 + betaR_ij) - a*betaR_ij;
+            double numerator = spinParameter*(1 + betaR_ij) - spinParameter*betaR_ij;
             double denominator = (1 + betaR_ij)*(1 + betaR_ij);
             double firstFraction = numerator/denominator;
             //double firstTerm = -0.5*(-AlphaOmega*arma::norm(r.row(i)) + firstFraction);
@@ -80,8 +82,8 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
 }
 
 double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
-                                         const double &alpha, const double &stepLength, const double &beta,
-                                         const double &omega, const double &a, const double &constant)
+                                         const double &alpha, const double &beta, const double &omega,
+                                         const double &spinParameter, const double &stepLength, const bool UseJastrowFactor)
 {
     arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -91,7 +93,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
 
     double waveFunctionMinus = 0.0;
     double waveFunctionPlus  = 0.0;
-    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, a, constant);
+    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
 
     //std::cout << waveFunctionCurrent << std::endl;
 
@@ -103,8 +105,8 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
         for (int j = 0; j < nDimensions; j++) {
             rPlus(i, j) += stepLength;
             rMinus(i, j) -= stepLength;
-            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, a, constant);
-            waveFunctionPlus = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, a, constant);
+            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, spinParameter, UseJastrowFactor);
+            waveFunctionPlus = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, spinParameter, UseJastrowFactor);
             kineticEnergy -= (waveFunctionMinus + waveFunctionPlus - 2.0 * waveFunctionCurrent);
             rPlus(i, j) = r(i, j);
             rMinus(i, j) = r(i, j);
@@ -113,6 +115,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     kineticEnergy = 0.5 * stepLengthSquaredFraction * kineticEnergy / waveFunctionCurrent;
 
     /* External potential */
+    /*
     double externalPotential = 0.0;
     double rSquared = 0.0;
     for (int i = 0; i < nParticles; i++)
@@ -123,6 +126,6 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
             rSquared += r(i, j) * r(i, j);
         }
         externalPotential += 0.5 * rSquared;
-    }
-    return kineticEnergy + externalPotential;
+    }*/
+    return kineticEnergy;// + externalPotential;
 }
