@@ -21,20 +21,19 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
     double AlphaOmega = alpha*omega;
     double omegaSquaredHalf = 0.5*omega*omega;
 
-    double r_1Squared = r(0,0)*r(0,0) + r(0,1)*r(0,1);
-    double r_2Squared = r(1,0)*r(1,0) + r(1,1)*r(1,1);
+    double r_1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
+    double r_2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
 
     if (!UseJastrowFactor) {
         return 2*AlphaOmega + omegaSquaredHalf*(r_1Squared + r_2Squared);
     } else {
         double r_12 = arma::norm(r.row(0) - r.row(1));
-        double betaR_12 = beta*r_12;
         double alphaSquared = alpha*alpha;
         double denominator = (1 + beta*r_12);
         double denominatorSquared = denominator*denominator;
 
-        double parentheses = -AlphaOmega*r_12 + 2/r_12 + spinParameter/denominatorSquared - ((1 + 3*betaR_12))/(r_12*denominator);
-        double fractions = spinParameter/denominatorSquared * parentheses;
+        double parentheses = -AlphaOmega*r_12 + 2/r_12 + spinParameter/denominatorSquared - (1 + 3*beta*r_12)/(r_12*denominator);
+        double fractions = (spinParameter/denominatorSquared) * parentheses;
 
         return 2*AlphaOmega + (1 - alphaSquared)*omegaSquaredHalf*(r_1Squared + r_2Squared) - fractions;
     }
@@ -49,6 +48,7 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
     }
     /* Husk å legg til med / uten Jastrow for flere partikler */
     //if (!UseJastrowFactor) {}
+
     else {
         double localEnergy = 0;
         double AlphaOmega = alpha*omega;

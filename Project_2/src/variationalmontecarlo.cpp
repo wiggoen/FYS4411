@@ -22,9 +22,8 @@ VariationalMonteCarlo::~VariationalMonteCarlo( void )
 
 }
 
-arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycles, const double alpha,
-                                           const double beta, const double omega,
-                                           const double spinParameter, const double stepLength,
+arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycles, const double alpha, const double beta,
+                                           const double omega, const double spinParameter, const double stepLength,
                                            const double timeStep, const bool UseJastrowFactor,
                                            const bool UseImportanceSampling, const bool UseFermionInteraction,
                                            std::string derivationType, std::string cycleType)

@@ -14,24 +14,24 @@ Wavefunction::~Wavefunction( void )
 }
 
 
-double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, const double &beta,
-                                       const double &omega, const double &spinParameter, const bool &UseJastrowFactor)
+double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
+                                       const double &spinParameter, const bool &UseJastrowFactor)
 {
-    double r_1Squared = r(0,0)*r(0,0) + r(0,1)*r(0,1);
-    double r_2Squared = r(1,0)*r(1,0) + r(1,1)*r(1,1);
-    double argument1 = -0.5*alpha*omega*(r_1Squared + r_2Squared);
+    double r_1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
+    double r_2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
+    double unperturbed = -0.5*alpha*omega*(r_1Squared + r_2Squared);
 
     if (!UseJastrowFactor) {
-        return exp(argument1);
+        return exp(unperturbed);
     } else {
-        double r_ij = fabs(sqrt(r_1Squared)-sqrt(r_2Squared));
-        double argument2 = spinParameter*r_ij/(1+beta*r_ij);
-        return exp(argument1+argument2);
+        double r_12 = arma::norm(r.row(0) - r.row(1));;
+        double jastrow = (spinParameter*r_12)/(1 + beta*r_12);
+        return exp(unperturbed + jastrow);
     }
 }
 
-void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha,
-                                const double &beta, const double &omega, const double &spinParameter)
+void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &beta,
+                                const double &omega, const double &spinParameter)
 {
     double x1 = r(0,0); double x2 = r(1,0);
     double y1 = r(0,1); double y2 = r(1,1);
@@ -43,8 +43,8 @@ void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const dou
 
 /*
 void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
-                                         const int &nDimensions, const double &alpha, const double &beta, const double &omega,
-                                         const double &spinParameter, const double &stepLength)
+                                         const int &nDimensions, const double &alpha, const double &beta,
+                                         const double &omega, const double &spinParameter, const double &stepLength)
 {
     arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);

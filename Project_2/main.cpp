@@ -67,9 +67,8 @@ int main()//int numberOfArguments, char *arguments[])
     /* Run VMC */
     for (int i = 0; i < trials; i++)
     {
-        runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength,
-                                timeStep, UseJastrowFactor, UseImportanceSampling, UseFermionInteraction,
-                                derivationType, cycleType);
+        runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
+                                UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, derivationType, cycleType);
         runMatrix.insert_rows(i, runVector);
     }
 
@@ -105,8 +104,8 @@ int main()//int numberOfArguments, char *arguments[])
 
     /* Write to terminal */
     std::cout << std::endl;
-    std::cout << "Jastrow_factor "  << " Importance_sampling " << " Fermion_interaction " << " MPI "
-              << " Average_timing " << " Derivation_type " << "       Cycle_type " << std::endl;
+    std::cout << "Jastrow_factor "  << " Importance_sampling " << " Fermion_interaction " << " MPI " << " Average_timing "
+              << " Derivation_type " << "       Cycle_type " << std::endl;
 
     std::cout << std::setw(14) << Jastrow
               << std::setw(21) << Importance
@@ -114,14 +113,12 @@ int main()//int numberOfArguments, char *arguments[])
               << std::setw(5)  << Parallel
               << std::setw(16) << Timing
               << std::setw(17) << derivationType
-              << std::setw(18) << "SteepestDescent"//cycleType
-              << std::endl;
+              << std::setw(18) << cycleType << std::endl;
 
 
     std::cout << "Particles "  << " Dimensions " << "    Cycles " << " Alpha " << " Beta " << " Omega "
-              << " Spin_parameter "  << " Step_length " << " Time_step " << " Time_[sec] "
-              << "      Energy "  << " Energy_squared " << " Variance "  << " Acceptance_ratio "
-              << std::endl;
+              << " Spin_parameter "  << " Step_length " << " Time_step " << " Time_[sec] " << "      Energy "
+              << " Energy_squared " << " Variance "  << " Acceptance_ratio " << std::endl;
 
     std::cout << std::setw(9)  << std::setprecision(3) << nParticles
               << std::setw(12) << std::setprecision(3) << nDimensions
@@ -136,8 +133,7 @@ int main()//int numberOfArguments, char *arguments[])
               << std::setw(13) << std::setprecision(6) << energy
               << std::setw(16) << std::setprecision(6) << energySquared
               << std::setw(10) << std::setprecision(3) << variance
-              << std::setw(18) << std::setprecision(6) << acceptanceRatio
-              << std::endl;
+              << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
 
     return 0;
 }
