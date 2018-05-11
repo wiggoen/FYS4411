@@ -17,7 +17,7 @@ int main()//int numberOfArguments, char *arguments[])
     /* The whole project path is needed to read json on mac */
 
     /* Who am I? */
-    std::string Iam = "Line";
+    std::string Iam = "Trond";
     std::string projectFolder;
     if (Iam == "Trond") {
         std::cout << "Hi, Trond!" << std::endl;
@@ -53,7 +53,7 @@ int main()//int numberOfArguments, char *arguments[])
         bool UseFermionInteraction = parameter["Use Fermion interaction"];
         bool UseMPI = parameter["Use MPI"];
         bool UseAverageTiming = parameter["Use Average timing"];
-        std::string derivationType = parameter["Derivation type"];
+        bool UseAnalyticalExpressions = parameter["Use analytical expressions"];
         std::string cycleType = parameter["Cycle type"];
 
 
@@ -78,7 +78,7 @@ int main()//int numberOfArguments, char *arguments[])
         for (int i = 0; i < trials; i++)
         {
             runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
-                                    UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, derivationType, cycleType);
+                                    UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions, cycleType);
             runMatrix.insert_rows(i, runVector);
         }
 
@@ -111,18 +111,20 @@ int main()//int numberOfArguments, char *arguments[])
         std::string Timing;
         UseAverageTiming ? Timing = "On" : Timing = "Off";
 
+        std::string AnalyticExpressions;
+        UseAnalyticalExpressions ? AnalyticExpressions = "On" : AnalyticExpressions = "Off";
 
         /* Write to terminal */
         std::cout << std::endl;
         std::cout << "Jastrow_factor "  << " Importance_sampling " << " Fermion_interaction " << " MPI " << " Average_timing "
-                  << " Derivation_type " << "       Cycle_type " << std::endl;
+                  << " Analytical_expressions " << "       Cycle_type " << std::endl;
 
         std::cout << std::setw(14) << Jastrow
                   << std::setw(21) << Importance
                   << std::setw(21) << Interaction
                   << std::setw(5)  << Parallel
                   << std::setw(16) << Timing
-                  << std::setw(17) << derivationType
+                  << std::setw(24) << AnalyticExpressions
                   << std::setw(18) << cycleType << std::endl;
 
 

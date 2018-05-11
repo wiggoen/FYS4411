@@ -13,7 +13,7 @@
     "Use Fermion interaction": false,
     "Use MPI": false,
     "Use Average timing": false,
-    "Derivation type": "Analytical",
+    "Use analytical expressions": true,
     "Cycle type": "MonteCarlo",
     "Cycle step to file": 0
 }

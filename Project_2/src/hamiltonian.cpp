@@ -27,11 +27,13 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
 
     double energyWithoutJastrow = 2*AlphaOmega + omegaSquaredHalf*(1 - alphaSquared)*(r_1Squared + r_2Squared);
 
-    if (!UseJastrowFactor) /* Energy without Jastrow term */
+    if (!UseJastrowFactor)
     {
+        /* Energy without Jastrow term */
         return energyWithoutJastrow;
-    } else /* Energy with Jastrow term */
+    } else
     {
+        /* Energy with Jastrow term */
         double r_12 = arma::norm(r.row(0) - r.row(1));
         double betaR_12 = beta*r_12;
         double denominator = 1 + betaR_12;
@@ -54,7 +56,8 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
     /* Husk å legg til med / uten Jastrow for flere partikler */
     //if (!UseJastrowFactor) {}
 
-    else {
+    else
+    {
         double localEnergy = 0;
         double AlphaOmega = alpha*omega;
         double omegaSquaredHalf = 0.5*omega*omega;
