@@ -22,8 +22,10 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
     double unperturbed = -0.5*alpha*omega*(r_1Squared + r_2Squared);
 
     if (!UseJastrowFactor) {
+        /* Without Jastrow factor */
         return exp(unperturbed);
     } else {
+        /* With Jastrow factor */
         double r_12 = arma::norm(r.row(0) - r.row(1));;
         double jastrow = (spinParameter*r_12)/(1 + beta*r_12);
         return exp(unperturbed + jastrow);

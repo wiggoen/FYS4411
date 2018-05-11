@@ -15,8 +15,22 @@ Hamiltonian::~Hamiltonian( void )
 }
 
 
+inline double Hamiltonian::ParticleDistance(const arma::rowvec &r_i, const arma::rowvec &r_j)
+{
+    return arma::norm(r_i - r_j);
+}
+
+
+inline double Hamiltonian::RepulsiveInteraction(const arma::rowvec &r_i, const arma::rowvec &r_j)
+{
+    double distance = ParticleDistance(r_i, r_j);
+    return 1 / distance;
+}
+
+
 double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &alpha, const double &beta,
-                                            const double &omega, const double &spinParameter, bool UseJastrowFactor)
+                                            const double &omega, const double &spinParameter, const bool UseJastrowFactor,
+                                            const bool UseFermionInteraction)
 {
     double AlphaOmega = alpha*omega;
     double omegaSquaredHalf = 0.5*omega*omega;
@@ -30,7 +44,15 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
     if (!UseJastrowFactor)
     {
         /* Energy without Jastrow term */
-        return energyWithoutJastrow;
+        if (!UseFermionInteraction) {
+            /* Without interaction */
+            return energyWithoutJastrow;
+        } else
+        {
+            /* With interaction */
+            double interaction = RepulsiveInteraction(r.row(0), r.row(1));
+            return energyWithoutJastrow + interaction;
+        }
     } else
     {
         /* Energy with Jastrow term */
@@ -42,52 +64,62 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
         double parentheses = -AlphaOmega*r_12 + spinParameter/denominatorSquared - (1 - betaR_12)/(r_12*denominator);
         double JastrowTerm = (spinParameter/denominatorSquared) * parentheses;
 
-        return energyWithoutJastrow - JastrowTerm;
+        if (!UseFermionInteraction) {
+            /* Without interaction */
+            return energyWithoutJastrow - JastrowTerm;
+        } else {
+            /* With interaction */
+            double interaction = RepulsiveInteraction(r.row(0), r.row(1));;
+            return energyWithoutJastrow - JastrowTerm + interaction;
+        }
     }
 }
 
 
 double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &beta,
-                                const double &omega, const double &spinParameter, bool UseJastrowFactor)
+                                const double &omega, const double &spinParameter, bool UseJastrowFactor,
+                                const bool UseFermionInteraction)
 {
     if (nParticles == 2) {
-        return LocalEnergyTwoElectrons(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
-    }
-    /* Husk å legg til med / uten Jastrow for flere partikler */
-    //if (!UseJastrowFactor) {}
-
-    else
+        return LocalEnergyTwoElectrons(r, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
+    } else
     {
-        double localEnergy = 0;
-        double AlphaOmega = alpha*omega;
-        double omegaSquaredHalf = 0.5*omega*omega;
+        /* Husk å legg til med / uten Jastrow for flere partikler */
+        //if (!UseJastrowFactor) {}
 
-        double betaR_ij =  beta*arma::norm(r.row(0) - r.row(1));
-        //std::cout << "norm = " << betaR_ij << std::endl;
 
-        for (int i = 0; i < nParticles; i++)
-        {
-            double numerator = spinParameter*(1 + betaR_ij) - spinParameter*betaR_ij;
-            double denominator = (1 + betaR_ij)*(1 + betaR_ij);
-            double firstFraction = numerator/denominator;
-            //double firstTerm = -0.5*(-AlphaOmega*arma::norm(r.row(i)) + firstFraction);
-            double firstTerm = -AlphaOmega*arma::norm(r.row(i)) + firstFraction;
-
-            //double secondTerm = 1 - AlphaOmega*arma::dot(r.row(i), r.row(i)) + firstFraction*arma::norm(r.row(i));
-
-            double secondTerm = firstFraction * (2*beta*arma::norm(r.row(i)) + 2*beta*beta*arma::norm(r.row(i)))/denominator - AlphaOmega;
-
-            //double thirdTerm = arma::norm(r.row(i))*(-AlphaOmega + (((1 + beta - a*beta)*(1 + betaR_ij) - numerator)*2*beta)/(denominator*(1 + betaR_ij)));
-
-            double thirdTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-
-            //double fourthTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-
-            localEnergy += -0.5*firstTerm*firstTerm * (-0.5)*secondTerm * thirdTerm;
-        }
-        return localEnergy;
+        //double localEnergy = 0;
+        //double AlphaOmega = alpha*omega;
+        //double omegaSquaredHalf = 0.5*omega*omega;
+        //
+        //double betaR_ij =  beta*arma::norm(r.row(0) - r.row(1));
+        ////std::cout << "norm = " << betaR_ij << std::endl;
+        //
+        //for (int i = 0; i < nParticles; i++)
+        //{
+        //    double numerator = spinParameter*(1 + betaR_ij) - spinParameter*betaR_ij;
+        //    double denominator = (1 + betaR_ij)*(1 + betaR_ij);
+        //    double firstFraction = numerator/denominator;
+        //    //double firstTerm = -0.5*(-AlphaOmega*arma::norm(r.row(i)) + firstFraction);
+        //    double firstTerm = -AlphaOmega*arma::norm(r.row(i)) + firstFraction;
+        //
+        //    //double secondTerm = 1 - AlphaOmega*arma::dot(r.row(i), r.row(i)) + firstFraction*arma::norm(r.row(i));
+        //
+        //    double secondTerm = firstFraction * (2*beta*arma::norm(r.row(i)) + 2*beta*beta*arma::norm(r.row(i)))/denominator - AlphaOmega;
+        //
+        //    //double thirdTerm = arma::norm(r.row(i))*(-AlphaOmega + (((1 + beta - a*beta)*(1 + betaR_ij) - numerator)*2*beta)/(denominator*(1 + betaR_ij)));
+        //
+        //    double thirdTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
+        //
+        //    //double fourthTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
+        //
+        //    localEnergy += -0.5*firstTerm*firstTerm * (-0.5)*secondTerm * thirdTerm;
+        //}
+        //return localEnergy;
+        return 0;
     }
 }
+
 
 double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                          const double &alpha, const double &beta, const double &omega,

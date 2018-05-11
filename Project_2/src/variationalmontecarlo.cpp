@@ -354,7 +354,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega, spinParameter, stepLength, UseJastrowFactor);
     } else {
         /* Update energies (without numerical expressions and interaction) */
-        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor);
+        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
     }
 
     energySum         += deltaEnergy;
