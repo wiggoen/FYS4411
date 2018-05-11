@@ -1,5 +1,4 @@
 #ifndef CATCH_HPP
-#include <string>
 #include "inc/catch.hpp"
 #include "inc/variationalmontecarlo.h"
 
