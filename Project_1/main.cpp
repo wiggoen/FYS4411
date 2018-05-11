@@ -20,7 +20,7 @@ int main(int numberOfArguments, char *arguments[])
         return RunCatchTests();
     } else
     {
-        /* Default if there is no command line arguments */
+        /* Default if' there is no command line arguments */
         int nParticles      = 10;
         int nDimensions     = 3;
         int nCycles         = 1e6;

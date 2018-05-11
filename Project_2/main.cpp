@@ -12,7 +12,7 @@ int main()//int numberOfArguments, char *arguments[])
     /* The whole project path is needed to read json on mac */
 
     /* Who am I? */
-    std::string Iam = "Trond";
+    std::string Iam = "Line";
     std::string projectFolder;
     if (Iam == "Trond") {
         std::cout << "Hi, Trond!" << std::endl;
@@ -24,7 +24,6 @@ int main()//int numberOfArguments, char *arguments[])
         std::cerr << "I don't know who you are.." << std::endl;
         exit(1);
     }
-
 
     /* READ PARAMETERS */
     std::ifstream inputFile(projectFolder+"parameters.json", std::ios::in);

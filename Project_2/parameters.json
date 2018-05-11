@@ -1,7 +1,7 @@
 {
     "nParticles": 2,
     "nCycles": 1048576,
-    "alpha": 1.0,
+    "alpha": 0.5,
     "beta": 1.0,
     "omega": 1.0,
     "spin parameter": 1.0,
@@ -13,6 +13,6 @@
     "Use MPI": false,
     "Use Average timing": false,
     "Derivation type": "Analytical",
-    "Cycle type": "MonteCarlo",
+    "Cycle type": "SteepestDescent",
     "Cycle step to file": 0
 }
