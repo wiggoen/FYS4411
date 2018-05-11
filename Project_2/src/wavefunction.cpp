@@ -33,14 +33,9 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
 }
 
 
-void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &beta,
-                                const double &omega, const double &spinParameter)
+void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &omega)
 {
-    double x1 = r(0,0); double x2 = r(1,0);
-    double y1 = r(0,1); double y2 = r(1,1);
-    double r12 = abs(sqrt(x1*x1+y2*y2)-sqrt(x2*x2+y2*y2));
-    QForce =  -alpha*omega*r - spinParameter*(x1-x2)/(r12*(1+beta*r12)*(1+beta*r12));
-    QForce += -alpha*omega*r - spinParameter*(y1-y2)/(r12*(1+beta*r12)*(1+beta*r12));
+    QForce = -2*alpha*omega*r;
 }
 
 
@@ -52,7 +47,7 @@ double Wavefunction::DerivativePsi(const arma::mat &r, const double &alpha, cons
     arma::rowvec r_1 = r.row(0);
     arma::rowvec r_2 = r.row(1);
 
-    return -alpha*omega*(r_1 + r_2);
+    return -alpha*omega*r;
     */
     return 0;
 }

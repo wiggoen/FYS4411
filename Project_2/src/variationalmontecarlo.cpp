@@ -85,7 +85,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
 
     /* Store the current value of the wave function and quantum force */
     waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
-    Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, omega, spinParameter);
+    Wavefunction::QuantumForce(rOld, QForceOld, alpha, omega);
     QForceNew = QForceOld;
 
     /* Start timing */
@@ -261,16 +261,16 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
 
         /* Recalculate the value of the wave function */
-        if (!UseFermionInteraction)
-        {
-            /* without interaction */
-            waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
+        //if (!UseFermionInteraction)
+        //{
+        /* without interaction */
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
 
-        } else
-        {
-            /* with interaction */
-            //waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, spinParameter);
-        }
+        //} else
+        //{
+        /* with interaction */
+        //waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, spinParameter);
+        //}
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
         //std::cout << "wOld = " << waveFunctionOld << std::endl;
@@ -298,17 +298,8 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
         }
 
         /* Recalculate the value of the wave function and the quantum force */
-        if (!UseFermionInteraction)
-        {
-            /* without interaction */
-            waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
-            Wavefunction::QuantumForce(rNew, QForceNew, alpha, beta, omega, spinParameter);
-        } else
-        {
-            /* with interaction */
-            //waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, spinParameter);
-            //Wavefunction::QuantumForceInteraction(rNew, QForceNew, nParticles, nDimensions, alpha, beta, spinParameter, i);
-        }
+        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
+        Wavefunction::QuantumForce(rNew, QForceNew, alpha, omega);
 
         wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
         GreensRatio = GreensFunction(rNew, rOld, QForceNew, QForceOld, diffusionCoefficient, timeStep, i);
@@ -353,7 +344,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         // Update energies using numerical expressions
         deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega, spinParameter, stepLength, UseJastrowFactor);
     } else {
-        /* Update energies (without numerical expressions and interaction) */
+        /* Update energies using analytical expressions */
         deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
     }
 
