@@ -1,4 +1,5 @@
 {
+    "Run tests": false,
     "nParticles": 2,
     "nCycles": 1048576,
     "alpha": 0.5,
