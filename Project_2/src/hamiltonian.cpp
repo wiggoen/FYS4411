@@ -23,19 +23,24 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
 
     double r_1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
     double r_2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
+    double alphaSquared = alpha*alpha;
 
-    if (!UseJastrowFactor) {
-        return 2*AlphaOmega + omegaSquaredHalf*(r_1Squared + r_2Squared);
-    } else {
+    double energyWithoutJastrow = 2*AlphaOmega + omegaSquaredHalf*(1 - alphaSquared)*(r_1Squared + r_2Squared);
+
+    if (!UseJastrowFactor) /* Energy without Jastrow term */
+    {
+        return energyWithoutJastrow;
+    } else /* Energy with Jastrow term */
+    {
         double r_12 = arma::norm(r.row(0) - r.row(1));
-        double alphaSquared = alpha*alpha;
-        double denominator = (1 + beta*r_12);
+        double betaR_12 = beta*r_12;
+        double denominator = 1 + betaR_12;
         double denominatorSquared = denominator*denominator;
 
-        double parentheses = -AlphaOmega*r_12 + 2/r_12 + spinParameter/denominatorSquared - (1 + 3*beta*r_12)/(r_12*denominator);
-        double fractions = (spinParameter/denominatorSquared) * parentheses;
+        double parentheses = -AlphaOmega*r_12 + spinParameter/denominatorSquared - (1 - betaR_12)/(r_12*denominator);
+        double JastrowTerm = (spinParameter/denominatorSquared) * parentheses;
 
-        return 2*AlphaOmega + (1 - alphaSquared)*omegaSquaredHalf*(r_1Squared + r_2Squared) - fractions;
+        return energyWithoutJastrow - JastrowTerm;
     }
 }
 
