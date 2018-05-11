@@ -45,7 +45,6 @@ double Wavefunction::DerivativePsi(const arma::mat &r, const double &alpha, cons
 {
     double x1 = r(0,0); double x2 = r(1,0);
     double y1 = r(0,1); double y2 = r(1,1);
-    double r12 = abs(sqrt(x1*x1+y2*y2)-sqrt(x2*x2+y2*y2));
     return -alpha*omega*(x1+x2+y1+y2);
 }
 
