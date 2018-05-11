@@ -28,14 +28,15 @@ public:
     double GreensFunction(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
                           const arma::mat &QForceOld, const double &diffusionCoefficient,
                           const double &timeStep, const int &i);
+    double SteepestDescent(const int &nParticles);
     double waveFunctionOld;      /* old wave function */
     double waveFunctionNew;      /* new wave function */
     double energySum;            /* sum of particle energies for all Monte Carlo cycles */
     double energySquaredSum;     /* squared sum of particle energies for all Monte Carlo cycles */
     double deltaEnergy;          /* energy of particle we look at */
-    //double psiSum;
-    //double psiTimesEnergySum;
-    //double deltaPsi;
+    double psiSum;
+    double psiTimesEnergySum;
+    double deltaPsi;
     const int nDimensions;       /* number of dimensions */
 private:
     arma::mat rOld;              /* matrix of old position */

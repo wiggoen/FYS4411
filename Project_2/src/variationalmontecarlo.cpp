@@ -110,9 +110,9 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     {
         std::cout << "Running MC Cycles.." << std::endl;
         MonteCarloCycles();
-    } /*else if (cycleType == "SteepestDescent") {
+    } else if (cycleType == "SteepestDescent") {
         SteepestDescent(nParticles);
-    }*/
+    }
 
     /* Timing finished */
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -345,13 +345,57 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (cycleType == "OneBodyDensity")
     {
         OneBodyDensity();
-    }
+    }*/
 
 
     if (cycleType == "SteepestDescent")
     {
-        deltaPsi           = Wavefunction::DerivativePsi(rNew, nParticles, nDimensions, beta);
+        deltaPsi           = Wavefunction::DerivativePsi(rNew, alpha, omega);
         psiSum            += deltaPsi;
         psiTimesEnergySum += deltaPsi*deltaEnergy;
-    }*/
+    }
+}
+
+double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
+{
+    std::cout << "Running steepest descent..." << std::endl;
+    double eta                   = 0.001;
+    int nAlpha                   = 500;
+    double averagePsi            = 0.0;
+    double averageEnergy         = 0.0;
+    double averagePsiTimesEnergy = 0.0;
+    double localEnergyDerivative = 0.0;
+    double scalingFactor         = 1.0/(nCycles*nParticles);
+
+    /* Loop over number of alphas */
+    for (int i = 0; i < nAlpha; i++)
+    {
+        acceptanceCounter = 0;
+        waveFunctionOld   = 0.0;
+        waveFunctionNew   = 0.0;
+        energySum         = 0.0;
+        energySquaredSum  = 0.0;
+        deltaEnergy       = 0.0;
+        acceptanceWeight  = 0.0;
+        psiSum            = 0.0;
+        psiTimesEnergySum = 0.0;
+        deltaPsi          = 0.0;
+
+        /* Run Monte Carlo cycles */
+        MonteCarloCycles();
+
+        /* Update energies */
+        averagePsi    = psiSum*scalingFactor;
+        averageEnergy = energySum*scalingFactor;
+        averagePsiTimesEnergy = psiTimesEnergySum*scalingFactor;
+        localEnergyDerivative = 2.0*(averagePsiTimesEnergy - averagePsi*averageEnergy);
+
+        /* Calculate alpha */
+        std::cout << "New alpha: "  << alpha << std::endl;
+        /*          << " Average energy: " << averageEnergy << std::endl;
+        std::cout << acceptanceCounter*scalingFactor << "   " << acceptanceCounter << std::endl; */
+        std::cout << "Change in alpha: " << -eta * localEnergyDerivative << std::endl;
+        alpha -= eta * localEnergyDerivative;
+    }
+    return alpha;
 }
