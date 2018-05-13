@@ -17,7 +17,7 @@ int main()//int numberOfArguments, char *arguments[])
     /* The whole project path is needed to read json on mac */
 
     /* Who am I? */
-    std::string Iam = "Line";
+    std::string Iam = "Trond";
     std::string projectFolder;
     if (Iam == "Trond") {
         std::cout << "Hi, Trond!" << std::endl;

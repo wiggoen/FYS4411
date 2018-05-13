@@ -25,9 +25,9 @@ public:
     void UpdateEnergies(const int &i);
     void InitialTrialPositionsImportanceSampling(arma::mat &r);
     double GaussianRandomNumber( void );
-    double GreensFunction(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
-                          const arma::mat &QForceOld, const double &diffusionCoefficient,
-                          const double &timeStep, const int &i);
+    double GreensRatio(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
+                       const arma::mat &QForceOld, const double &diffusionCoefficient,
+                       const double &timeStep, const int &i);
     double SteepestDescent(const int &nParticles);
     double waveFunctionOld;         /* old wave function */
     double waveFunctionNew;         /* new wave function */

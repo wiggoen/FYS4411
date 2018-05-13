@@ -60,12 +60,6 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     deltaEnergy       = 0.0;
     acceptanceWeight  = 0.0;
     acceptanceCounter = 0.0;
-    /*
-    psiSum            = 0.0;
-    psiTimesEnergySum = 0.0;
-    deltaPsi          = 0.0;
-    */
-
 
     arma::rowvec runDetails;
     double runTime = 0.0;
@@ -73,7 +67,6 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     double energySquared = 0.0;
     double variance = 0.0;
     double acceptanceRatio = 0.0;
-
 
 
     /* Initial trial positions */
@@ -259,18 +252,8 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         {
             rNew(i, j) = rOld(i, j) + (UniformRandomNumber() - 0.5) * stepLength;
         }
-
         /* Recalculate the value of the wave function */
-        //if (!UseFermionInteraction)
-        //{
-        /* without interaction */
         waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
-
-        //} else
-        //{
-        /* with interaction */
-        //waveFunctionNew = Wavefunction::TrialWaveFunctionInteraction(rNew, nParticles, nDimensions, alpha, beta, spinParameter);
-        //}
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
         //std::cout << "wOld = " << waveFunctionOld << std::endl;
@@ -286,8 +269,6 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
                                                const double &waveFunctionOld)
 {
     double diffusionCoefficient = 0.5;
-    double wavefunctionsSquared = 0.0;
-    double GreensRatio = 0.0;
 
     /* New position to test */
     for (int i = 0; i < nParticles; i++)
@@ -296,23 +277,30 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
         {
             rNew(i, j) = rOld(i, j) + diffusionCoefficient*QForceOld(i, j)*timeStep + GaussianRandomNumber()*sqrt(timeStep);
         }
-
         /* Recalculate the value of the wave function and the quantum force */
         waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
-        Wavefunction::QuantumForce(rNew, QForceNew, alpha, omega);
-
-        wavefunctionsSquared = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-        GreensRatio = GreensFunction(rNew, rOld, QForceNew, QForceOld, diffusionCoefficient, timeStep, i);
-        acceptanceWeight = GreensRatio * wavefunctionsSquared;
+        if (!UseAnalyticalExpressions)
+        {
+            /* using numerical expressions */
+            Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, beta, omega, spinParameter,
+                                                stepLength, UseJastrowFactor);
+        } else
+        {
+            /* using analytical expressions */
+            Wavefunction::QuantumForce(rNew, QForceNew, alpha, omega);
+        }
+        double wavefunctionRatio = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+        double greensRatio = GreensRatio(rNew, rOld, QForceNew, QForceOld, diffusionCoefficient, timeStep, i);
+        acceptanceWeight = greensRatio * wavefunctionRatio;
 
         UpdateEnergies(i);
     }
 }
 
 
-double VariationalMonteCarlo::GreensFunction(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
-                                             const arma::mat &QForceOld, const double &diffusionCoefficient,
-                                             const double &timeStep, const int &i)
+double VariationalMonteCarlo::GreensRatio(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
+                                          const arma::mat &QForceOld, const double &diffusionCoefficient,
+                                          const double &timeStep, const int &i)
 {
     double fraction = 1.0/(4.0*diffusionCoefficient*timeStep);
     arma::rowvec yx = rNew.row(i) - rOld.row(i) - diffusionCoefficient*timeStep*QForceOld.row(i);
@@ -338,25 +326,19 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         QForceNew.row(i) = QForceOld.row(i);
         //waveFunctionNew = waveFunctionOld;  /* Probably unnecessary since the wavefunction didn't change. */
     }
+
+    /* Update energies */
     if (!UseAnalyticalExpressions)
     {
-        // Update energies using numerical expressions
+        /* using numerical expressions */
         deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega, spinParameter, stepLength, UseJastrowFactor);
-    } else {
-        /* Update energies using analytical expressions */
+    } else
+    {
+        /* using analytical expressions */
         deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
     }
-
     energySum         += deltaEnergy;
     energySquaredSum  += (deltaEnergy*deltaEnergy);
-
-
-    /*
-    if (cycleType == "OneBodyDensity")
-    {
-        OneBodyDensity();
-    }*/
-
 
     if (cycleType == "SteepestDescent")
     {
@@ -364,6 +346,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         psiSum            += deltaPsi;
         psiTimesEnergySum += deltaPsi*deltaEnergy;
     }
+
+    /*
+    if (cycleType == "OneBodyDensity")
+    {
+        OneBodyDensity();
+    }*/
 }
 
 
