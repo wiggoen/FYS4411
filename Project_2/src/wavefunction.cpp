@@ -52,36 +52,3 @@ double Wavefunction::DerivativePsi(const arma::mat &r, const double &alpha, cons
     return 0;
 }
 
-
-/*
-void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
-                                         const int &nDimensions, const double &alpha, const double &beta,
-                                         const double &omega, const double &spinParameter, const double &stepLength)
-{
-    arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
-    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
-
-    rPlus = r;
-    rMinus = r;
-
-    double waveFunctionMinus = 0.0;
-    double waveFunctionPlus = 0.0;
-    double waveFunctionCurrent = TrialWaveFunction(r, alpha, beta, omega, spinParameter);
-
-    double stepLengthFraction = 1.0 / stepLength;
-
-    for (int i = 0; i < nParticles; i++)
-    {
-        for (int j = 0; j < nDimensions; j++)
-        {
-            rPlus(i, j) += stepLength;
-            rMinus(i, j) -= stepLength;
-            waveFunctionMinus = TrialWaveFunction(rMinus, alpha, beta, omega, spinParameter);
-            waveFunctionPlus = TrialWaveFunction(rPlus, alpha, beta, omega, spinParameter);
-            QForce(i, j) = (waveFunctionPlus - waveFunctionMinus);
-            rPlus(i, j) = r(i, j);
-            rMinus(i, j) = r(i, j);
-        }
-    }
-    QForce = QForce * stepLengthFraction / waveFunctionCurrent;
-} */

@@ -338,7 +338,6 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         QForceNew.row(i) = QForceOld.row(i);
         //waveFunctionNew = waveFunctionOld;  /* Probably unnecessary since the wavefunction didn't change. */
     }
-
     if (!UseAnalyticalExpressions)
     {
         // Update energies using numerical expressions
