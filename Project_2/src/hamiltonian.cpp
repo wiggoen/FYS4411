@@ -125,6 +125,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
                                          const double &alpha, const double &beta, const double &omega,
                                          const double &spinParameter, const double &stepLength, const bool UseJastrowFactor)
 {
+    //std::cout << "Numerical energy" << std::endl;
     arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
 
@@ -134,8 +135,6 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     double waveFunctionMinus = 0.0;
     double waveFunctionPlus  = 0.0;
     double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
-
-    //std::cout << waveFunctionCurrent << std::endl;
 
     double stepLengthSquaredFraction = 1.0 / (stepLength * stepLength);
 
@@ -153,19 +152,5 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
         }
     }
     kineticEnergy = 0.5 * stepLengthSquaredFraction * kineticEnergy / waveFunctionCurrent;
-
-    /* External potential */
-    /*
-    double externalPotential = 0.0;
-    double rSquared = 0.0;
-    for (int i = 0; i < nParticles; i++)
-    {
-        rSquared = 0.0;
-        for (int j = 0; j < nDimensions; j++)
-        {
-            rSquared += r(i, j) * r(i, j);
-        }
-        externalPotential += 0.5 * rSquared;
-    }*/
-    return kineticEnergy;// + externalPotential;
+    return kineticEnergy;
 }
