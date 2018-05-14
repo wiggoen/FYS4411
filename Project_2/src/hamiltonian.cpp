@@ -61,7 +61,7 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
         double denominator = 1 + betaR_12;
         double denominatorSquared = denominator*denominator;
 
-        double parentheses = -AlphaOmega*r_12 + spinParameter/denominatorSquared - (1 - betaR_12)/(r_12*denominator);
+        double parentheses = -AlphaOmega*r_12 + spinParameter/denominatorSquared + (1 - betaR_12)/(r_12*denominator);
         double JastrowTerm = (spinParameter/denominatorSquared) * parentheses;
 
         if (!UseFermionInteraction) {
