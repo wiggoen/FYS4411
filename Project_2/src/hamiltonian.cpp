@@ -136,7 +136,7 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     double waveFunctionPlus  = 0.0;
     double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
 
-    double h = 1e-5;
+    double h = 1e-4;
     double hSquared = h*h;
 
     /* Kinetic energy */

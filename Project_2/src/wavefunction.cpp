@@ -76,7 +76,7 @@ void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, 
     double waveFunctionPlus  = 0.0;
     double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
 
-    double h = 1e-5;
+    double h = 1e-4;
 
     for (int i = 0; i < nParticles; i++)
     {
