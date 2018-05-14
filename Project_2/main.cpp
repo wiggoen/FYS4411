@@ -54,6 +54,7 @@ int main()//int numberOfArguments, char *arguments[])
         bool UseMPI = parameter["Use MPI"];
         bool UseAverageTiming = parameter["Use Average timing"];
         bool UseAnalyticalExpressions = parameter["Use analytical expressions"];
+        bool UseNumericalPotentialEnergy = parameter["Use numerical potential energy"];
         std::string cycleType = parameter["Cycle type"];
 
 
@@ -78,7 +79,8 @@ int main()//int numberOfArguments, char *arguments[])
         for (int i = 0; i < trials; i++)
         {
             runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
-                                    UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions, cycleType);
+                                    UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
+                                    UseNumericalPotentialEnergy, cycleType);
             runMatrix.insert_rows(i, runVector);
         }
 
@@ -114,10 +116,13 @@ int main()//int numberOfArguments, char *arguments[])
         std::string AnalyticExpressions;
         UseAnalyticalExpressions ? AnalyticExpressions = "On" : AnalyticExpressions = "Off";
 
+        std::string NumericalPotentialEnergy;
+        UseNumericalPotentialEnergy ? NumericalPotentialEnergy = "On" : NumericalPotentialEnergy = "Off";
+
         /* Write to terminal */
         std::cout << std::endl;
         std::cout << "Jastrow_factor "  << " Importance_sampling " << " Fermion_interaction " << " MPI " << " Average_timing "
-                  << " Analytical_expressions " << "       Cycle_type " << std::endl;
+                  << " Analytical_expressions " << " Numerical_potential_energy " << "      Cycle_type " << std::endl;
 
         std::cout << std::setw(14) << Jastrow
                   << std::setw(21) << Importance
@@ -125,7 +130,8 @@ int main()//int numberOfArguments, char *arguments[])
                   << std::setw(5)  << Parallel
                   << std::setw(16) << Timing
                   << std::setw(24) << AnalyticExpressions
-                  << std::setw(18) << cycleType << std::endl;
+                  << std::setw(28) << NumericalPotentialEnergy
+                  << std::setw(17) << cycleType << std::endl;
 
 
         std::cout << "Particles "  << " Dimensions " << "    Cycles " << " Alpha " << " Beta " << " Omega "

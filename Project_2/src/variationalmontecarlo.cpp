@@ -29,23 +29,25 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
                                            const double omega, const double spinParameter, const double stepLength,
                                            const double timeStep, const bool UseJastrowFactor,
                                            const bool UseImportanceSampling, const bool UseFermionInteraction,
-                                           const bool UseAnalyticalExpressions, std::string cycleType)
+                                           const bool UseAnalyticalExpressions, bool UseNumericalPotentialEnergy,
+                                           std::string cycleType)
 {
     /* Adding variables to member variables */
-    this->nParticles               = nParticles;
-    this->nCycles                  = nCycles;
-    this->alpha                    = alpha;
-    this->beta                     = beta;
-    this->omega                    = omega;
-    this->spinParameter            = spinParameter;
-    this->stepLength               = stepLength;
-    this->timeStep                 = timeStep;
-    this->UseJastrowFactor         = UseJastrowFactor;
-    this->UseImportanceSampling    = UseImportanceSampling;
-    this->UseFermionInteraction    = UseFermionInteraction;
-    this->UseAnalyticalExpressions = UseAnalyticalExpressions;
-    this->cycleType                = cycleType;
-    //this->cycleStepToFile          = cycleStepToFile;
+    this->nParticles                  = nParticles;
+    this->nCycles                     = nCycles;
+    this->alpha                       = alpha;
+    this->beta                        = beta;
+    this->omega                       = omega;
+    this->spinParameter               = spinParameter;
+    this->stepLength                  = stepLength;
+    this->timeStep                    = timeStep;
+    this->UseJastrowFactor            = UseJastrowFactor;
+    this->UseImportanceSampling       = UseImportanceSampling;
+    this->UseFermionInteraction       = UseFermionInteraction;
+    this->UseAnalyticalExpressions    = UseAnalyticalExpressions;
+    this->UseNumericalPotentialEnergy = UseNumericalPotentialEnergy;
+    this->cycleType                   = cycleType;
+    //this->cycleStepToFile             = cycleStepToFile;
 
 
     /* Initialize matrices and variables */
@@ -283,7 +285,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
         {
             /* using numerical expressions */
             Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, beta, omega, spinParameter,
-                                                stepLength, UseJastrowFactor);
+                                                UseJastrowFactor);
         } else
         {
             /* using analytical expressions */
@@ -331,11 +333,13 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (!UseAnalyticalExpressions)
     {
         /* using numerical expressions */
-        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega, spinParameter, stepLength, UseJastrowFactor);
+        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega, spinParameter,
+                                                        UseJastrowFactor, UseNumericalPotentialEnergy);
     } else
     {
         /* using analytical expressions */
-        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
+        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor,
+                                               UseFermionInteraction);
     }
     energySum         += deltaEnergy;
     energySquaredSum  += (deltaEnergy*deltaEnergy);

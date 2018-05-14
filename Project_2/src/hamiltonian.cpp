@@ -123,7 +123,8 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
 
 double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                          const double &alpha, const double &beta, const double &omega,
-                                         const double &spinParameter, const double &stepLength, const bool UseJastrowFactor)
+                                         const double &spinParameter, const bool UseJastrowFactor,
+                                         const bool UseNumericalPotentialEnergy)
 {
     arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -135,7 +136,8 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     double waveFunctionPlus  = 0.0;
     double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
 
-    double stepLengthSquared = stepLength*stepLength;
+    double h = 1e-5;
+    double hSquared = h*h;
 
     /* Kinetic energy */
     double kineticEnergy = 0.0;
@@ -143,8 +145,8 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
     {
         for (int j = 0; j < nDimensions; j++)
         {
-            rPlus(i, j) += stepLength;
-            rMinus(i, j) -= stepLength;
+            rPlus(i, j) += h;
+            rMinus(i, j) -= h;
             waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, spinParameter, UseJastrowFactor);
             waveFunctionPlus = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, spinParameter, UseJastrowFactor);
             kineticEnergy -= (waveFunctionPlus + waveFunctionMinus - 2.0 * waveFunctionCurrent);
@@ -152,6 +154,25 @@ double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticl
             rMinus(i, j) = r(i, j);
         }
     }
-    kineticEnergy = 0.5 * kineticEnergy / (waveFunctionCurrent * stepLengthSquared);
-    return kineticEnergy;
+    kineticEnergy = 0.5 * kineticEnergy / (waveFunctionCurrent * hSquared);
+
+    if (!UseNumericalPotentialEnergy)
+    {
+        return kineticEnergy;
+    } else
+    {
+        /* External potential */
+        double externalPotential = 0.0;
+        double rSquared = 0.0;
+        for (int i = 0; i < nParticles; i++)
+        {
+            rSquared = 0.0;
+            for (int j = 0; j < nDimensions; j++)
+            {
+                rSquared += r(i, j) * r(i, j);
+            }
+            externalPotential += 0.5 * omega*omega * rSquared;
+        }
+        return kineticEnergy + externalPotential;
+    }
 }

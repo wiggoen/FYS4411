@@ -19,7 +19,8 @@ public:
                               const bool UseFermionInteraction);
     static double NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                        const double &alpha, const double &beta, const double &omega,
-                                       const double &spinParameter, const double &stepLength, const bool UseJastrowFactor);
+                                       const double &spinParameter, const bool UseJastrowFactor,
+                                       const bool UseNumericalPotentialEnergy);
 private:
 };
 
