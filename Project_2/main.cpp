@@ -12,26 +12,40 @@ int RunCatchTests()
 }
 
 
-int main()//int numberOfArguments, char *arguments[])
+int main(int argumentCount, char *argumentVector[])
 {
-    /* The whole project path is needed to read json on mac */
+    /* Allocating input file for parameters */
+    std::ifstream inputFile;
 
-    /* Who am I? */
-    std::string Iam = "Trond";
-    std::string projectFolder;
-    if (Iam == "Trond") {
-        std::cout << "Hi, Trond!" << std::endl;
-        projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";
-    } else if (Iam == "Line") {
-        std::cout << "Hi, Line!" << std::endl;
-        projectFolder = "/home/line/github/FYS4411/Project_2/";
-    } else {
-        std::cerr << "I don't know who you are.." << std::endl;
-        exit(1);
+    /* Check the number of command line arguments */
+    if (argumentCount < 2) {
+        /* Who am I? */
+        std::string Iam = "Trond";
+
+        /* The whole project path is needed to read json file */
+        std::string projectFolder;
+        if (Iam == "Trond") {
+            std::cout << "Hi, Trond!" << std::endl;
+            projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";
+            inputFile.open(projectFolder+"parameters.json", std::ios::in);
+        } else if (Iam == "Line") {
+            std::cout << "Hi, Line!" << std::endl;
+            projectFolder = "/home/line/github/FYS4411/Project_2/";
+            inputFile.open(projectFolder+"parameters.json", std::ios::in);
+        } else {
+            std::cerr << "You have to give the parameter file as command line argument." << std::endl;
+            std::cerr << "Compile: g++ -std=c++11 -O3 -L '/armadillo/lib/' -I '/armadillo/include/' -I 'project folder' -o main.out main.cpp src/*.cpp -larmadillo" << std::endl;
+            std::cerr << "Remember to include the paths of armadillo library and headers as stated above, and in addition the project folder." << std::endl;
+            std::cerr << "Usage: ./main.out parameters.json" << std::endl;
+            exit(1);
+        }
+    } else
+    {
+        /* Input file from command line arguments */
+        inputFile.open(argumentVector[1], std::ios::in);
     }
 
     /* READ PARAMETERS */
-    std::ifstream inputFile(projectFolder+"parameters.json", std::ios::in);
     json parameter;
     inputFile >> parameter;
     bool TEST = parameter["Run tests"];
