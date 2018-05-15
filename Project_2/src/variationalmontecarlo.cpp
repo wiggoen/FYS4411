@@ -238,7 +238,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         }
 
         /* Write to file */
-        if (cycleStepToFile != 0 && cycle % cycleStepToFile == 0)
+        if (cycleStepToFile != 0 && cycle > 0 && cycle % cycleStepToFile == 0)
         {
             outputFile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
         }
