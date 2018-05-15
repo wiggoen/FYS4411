@@ -18,8 +18,8 @@ def RelativeError(data):
 xa, ya = RelativeError(analytical_data)
 xn, yn = RelativeError(numerical_data)
 
-plt.plot(xa, ya, linestyle="-", label="Analytical")
-plt.plot(xn, yn, linestyle="-", label="Numerical")
+plt.plot(xa, ya, color="red", linestyle="-", label="Analytical")
+plt.plot(xn, yn, color="blue", linestyle="-.", label="Numerical")
 plt.xlabel("Cycles")
 plt.ylabel(r"Energy $[\hbar \omega]$")
 plt.legend(loc="best")
