@@ -24,12 +24,13 @@ TEST_CASE("Local energy two electrons", "[Hamiltonian]")
     bool UseAnalyticalExpressions = true;
     bool UseNumericalPotentialEnergy = false;
     std::string cycleType = "MonteCarlo";
+    int cycleStepToFile = 0;
 
 
     arma::rowvec runVector;
     runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
                             UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
-                            UseNumericalPotentialEnergy, cycleType);
+                            UseNumericalPotentialEnergy, cycleType, cycleStepToFile);
     double energy = runVector(1);
     REQUIRE(energy == 2);
     double variance = runVector(3);

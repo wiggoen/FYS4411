@@ -70,6 +70,7 @@ int main(int argumentCount, char *argumentVector[])
         bool UseAnalyticalExpressions = parameter["Use analytical expressions"];
         bool UseNumericalPotentialEnergy = parameter["Use numerical potential energy"];
         std::string cycleType = parameter["Cycle type"];
+        int cycleStepToFile = parameter["Cycle step to file"];
 
 
         /* Initialize VMC */
@@ -94,7 +95,7 @@ int main(int argumentCount, char *argumentVector[])
         {
             runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
                                     UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
-                                    UseNumericalPotentialEnergy, cycleType);
+                                    UseNumericalPotentialEnergy, cycleType, cycleStepToFile);
             runMatrix.insert_rows(i, runVector);
         }
 
@@ -133,10 +134,15 @@ int main(int argumentCount, char *argumentVector[])
         std::string NumericalPotentialEnergy;
         UseNumericalPotentialEnergy ? NumericalPotentialEnergy = "On" : NumericalPotentialEnergy = "Off";
 
+        std::string WriteToFile;
+        if (cycleStepToFile == 0) { WriteToFile = "Off"; }
+        else                      { WriteToFile = "On"; }
+
         /* Write to terminal */
         std::cout << std::endl;
         std::cout << "Jastrow_factor "  << " Importance_sampling " << " Fermion_interaction " << " MPI " << " Average_timing "
-                  << " Analytical_expressions " << " Numerical_potential_energy " << "      Cycle_type " << std::endl;
+                  << " Analytical_expressions " << " Numerical_potential_energy " << "      Cycle_type " << " Write_to_file "
+                  << std::endl;
 
         std::cout << std::setw(14) << Jastrow
                   << std::setw(21) << Importance
@@ -145,7 +151,8 @@ int main(int argumentCount, char *argumentVector[])
                   << std::setw(16) << Timing
                   << std::setw(24) << AnalyticExpressions
                   << std::setw(28) << NumericalPotentialEnergy
-                  << std::setw(17) << cycleType << std::endl;
+                  << std::setw(17) << cycleType
+                  << std::setw(15) << WriteToFile << std::endl;
 
 
         std::cout << "Particles "  << " Dimensions " << "    Cycles " << " Alpha " << " Beta " << " Omega "

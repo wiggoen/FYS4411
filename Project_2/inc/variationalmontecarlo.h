@@ -13,7 +13,8 @@ public:
                         const double beta,  const double omega, const double spinParameter,
                         const double stepLength, const double timeStep, const bool UseJastrowFactor,
                         const bool UseImportanceSampling, const bool UseFermionInteraction,
-                        const bool UseAnalyticalExpressions, bool UseNumericalPotentialEnergy, std::string cycleType);
+                        const bool UseAnalyticalExpressions, bool UseNumericalPotentialEnergy, std::string cycleType,
+                        const int cycleStepToFile);
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void MonteCarloCycles( void );
     double UniformRandomNumber( void );
@@ -57,7 +58,7 @@ private:
     bool UseAnalyticalExpressions;     /* differentiation choice */
     bool UseNumericalPotentialEnergy;  /* Choice between numerical kinetic energy or full numerical energy */
     std::string cycleType;             /* Monte Carlo cycles or Steepest descent */
-    //int cycleStepToFile;               /* fraction of Monte Carlo cycles written to file */
+    int cycleStepToFile;               /* fraction of Monte Carlo cycles written to file */
     double acceptanceWeight;           /* weight used for accepting or rejecting a move */
     int acceptanceCounter;             /* number of accepted moves */
     //arma::rowvec hist;

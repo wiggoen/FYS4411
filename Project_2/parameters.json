@@ -16,5 +16,5 @@
     "Use analytical expressions": false,
     "Use numerical potential energy": true,
     "Cycle type": "MonteCarlo",
-    "Cycle step to file": 0
+    "Cycle step to file": 1024
 }

@@ -30,7 +30,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
                                            const double timeStep, const bool UseJastrowFactor,
                                            const bool UseImportanceSampling, const bool UseFermionInteraction,
                                            const bool UseAnalyticalExpressions, bool UseNumericalPotentialEnergy,
-                                           std::string cycleType)
+                                           std::string cycleType, const int cycleStepToFile)
 {
     /* Adding variables to member variables */
     this->nParticles                  = nParticles;
@@ -47,7 +47,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     this->UseAnalyticalExpressions    = UseAnalyticalExpressions;
     this->UseNumericalPotentialEnergy = UseNumericalPotentialEnergy;
     this->cycleType                   = cycleType;
-    //this->cycleStepToFile             = cycleStepToFile;
+    this->cycleStepToFile             = cycleStepToFile;
 
 
     /* Initialize matrices and variables */
@@ -216,8 +216,12 @@ double VariationalMonteCarlo::GaussianRandomNumber( void )
 
 void VariationalMonteCarlo::MonteCarloCycles( void )
 {
-    //std::ofstream myfile;
-    //myfile.open("../Project_1/results/results.txt");
+    /* Open outputfile to write */
+    std::ofstream outputFile;
+    if (cycleStepToFile != 0)
+    {
+        outputFile.open("../Project_2/results/results.txt");
+    }
 
     /* Loop over Monte Carlo cycles */
     for (int cycle = 0; cycle < nCycles; cycle++)
@@ -234,13 +238,16 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         }
 
         /* Write to file */
-        /*
-        if (cycle % cycleStepToFile == 0)
+        if (cycleStepToFile != 0 && cycle % cycleStepToFile == 0)
         {
-            myfile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
-        } */
+            outputFile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
+        }
     }
-    //myfile.close();
+    /* Close output file */
+    if (cycleStepToFile != 0)
+    {
+        outputFile.close();
+    }
 }
 
 
