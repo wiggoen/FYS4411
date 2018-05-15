@@ -1,6 +1,9 @@
 # Script for Python 3
 import os
 
+machine = "Linux"
+#machine = "Mac"
+
 
 def run_cmd(cmd):
     print(" ")
@@ -15,10 +18,16 @@ src = "src/*.cpp"
 parameterfile = "parameters.json"
 
 # Library used
-library = "-L/usr/local/Cellar/armadillo/8.400.0/lib/"
+if (machine == "Linux"):
+    library = "-L/usr/lib"
+elif (machine == "Mac"):
+    library = "-L/usr/local/Cellar/armadillo/8.400.0/lib/"
 
 # Location of include files / header files
-includes = "-I/usr/local/Cellar/armadillo/8.400.0/include/ -I/Users/trondwj/GitHub/FYS4411/Project_2"
+if (machine == "Linux"):
+    includes = "-I/usr/include -I/home/twj/Documents/GitHub/FYS4411/Project_2"
+elif (machine == "Mac"):
+    includes = "-I/usr/local/Cellar/armadillo/8.400.0/include/ -I/Users/trondwj/GitHub/FYS4411/Project_2"
 
 # Compile
 run_cmd("g++ -std=c++11 -O3 {} {} -o main.out main.cpp {} -larmadillo".format(library, includes, src))
