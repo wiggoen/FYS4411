@@ -220,7 +220,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     std::ofstream outputFile;
     if (cycleStepToFile != 0)
     {
-        outputFile.open("../Project_2/results/results.txt");
+        outputFile.open("../Project_2/energies.txt");
     }
 
     /* Loop over Monte Carlo cycles */
