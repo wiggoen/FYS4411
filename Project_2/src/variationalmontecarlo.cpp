@@ -9,7 +9,7 @@
 #include <string>
 #include <cmath>
 #include <stdlib.h>  /* Exit failure, to force the program to stop: exit(EXIT_FAILURE); */
-
+#include <mpi.h>
 
 
 VariationalMonteCarlo::VariationalMonteCarlo() :

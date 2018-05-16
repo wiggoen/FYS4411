@@ -2,8 +2,8 @@
     "Run tests": false,
     "nParticles": 2,
     "nCycles": 1048576,
-    "alpha": 0.99,
-    "beta": 0.40,
+    "alpha": 1.0,
+    "beta": 1.0,
     "omega": 1.0,
     "spin parameter": 1.0,
     "stepLength": 1.5,
@@ -16,5 +16,5 @@
     "Use analytical expressions": false,
     "Use numerical potential energy": true,
     "Cycle type": "MonteCarlo",
-    "Cycle step to file": 1024
+    "Cycle step to file": 0
 }

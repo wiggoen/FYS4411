@@ -18,7 +18,7 @@ int main(int argumentCount, char *argumentVector[])
     std::ifstream inputFile;
 
     /* Check the number of command line arguments */
-    if (argumentCount < 2) {
+    if (argumentCount == 1) {
         /* Who am I? */
         std::string Iam = "Trond";
 
@@ -39,10 +39,13 @@ int main(int argumentCount, char *argumentVector[])
             std::cerr << "Usage: ./main.out parameters.json" << std::endl;
             exit(1);
         }
-    } else
+    } else if ()
     {
         /* Input file from command line arguments */
         inputFile.open(argumentVector[1], std::ios::in);
+    }
+    {
+
     }
 
     /* READ PARAMETERS */
