@@ -9,7 +9,8 @@
 #include <string>
 #include <cmath>
 #include <stdlib.h>  /* Exit failure, to force the program to stop: exit(EXIT_FAILURE); */
-#include <mpi.h>
+//#include "mpi.h"
+//#include <stdio.h>
 
 
 VariationalMonteCarlo::VariationalMonteCarlo() :
@@ -30,7 +31,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
                                            const double timeStep, const bool UseJastrowFactor,
                                            const bool UseImportanceSampling, const bool UseFermionInteraction,
                                            const bool UseAnalyticalExpressions, bool UseNumericalPotentialEnergy,
-                                           std::string cycleType, const int cycleStepToFile)
+                                           std::string cycleType, const int cycleStepToFile, bool UseMPI)
 {
     /* Adding variables to member variables */
     this->nParticles                  = nParticles;
@@ -83,6 +84,33 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     Wavefunction::QuantumForce(rOld, QForceOld, alpha, omega);
     QForceNew = QForceOld;
 
+    /* MPI */
+    //if (UseMPI)
+    //{
+    //    /* Initialize the MPI environment */
+    //    MPI_Init(NULL, NULL);
+    //
+    //    /* Get number of processes */
+    //    int world_size;
+    //    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    //
+    //    /* Get the rank of the process */
+    //    int world_rank;
+    //    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    //
+    //    /* Get the name of the processor */
+    //    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    //    int name_len;
+    //    MPI_Get_processor_name(processor_name, &name_len);
+    //
+    //    /* Print off a hello world message */
+    //    //printf("Hello world from processor %s, rank %d"
+    //    //       " out of %d processors\n",
+    //    //       processor_name, world_rank, world_size);
+    //    std::cout << "Hello world from processor " << processor_name << ", rank " << world_rank
+    //              << " out of " << world_size << "processors." << std::endl;
+    //}
+
     /* Start timing */
     auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -129,7 +157,13 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     }
     */
 
+
+    /* Vector containing the results of the run */
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
+
+    /* Finalize the MPI environment */
+    //if (UseMPI) { MPI_Finalize(); }
+
     return runDetails;
 }
 

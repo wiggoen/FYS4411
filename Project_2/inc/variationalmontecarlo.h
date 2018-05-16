@@ -14,7 +14,7 @@ public:
                         const double stepLength, const double timeStep, const bool UseJastrowFactor,
                         const bool UseImportanceSampling, const bool UseFermionInteraction,
                         const bool UseAnalyticalExpressions, bool UseNumericalPotentialEnergy, std::string cycleType,
-                        const int cycleStepToFile);
+                        const int cycleStepToFile, bool UseMPI);
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void MonteCarloCycles( void );
     double UniformRandomNumber( void );

@@ -17,10 +17,15 @@ int main(int argumentCount, char *argumentVector[])
     /* Allocating input file for parameters */
     std::ifstream inputFile;
 
+    for (int i = 0; i < argumentCount; i++)
+    {
+        std::cout << i << "          " << argumentVector[i] << std::endl;
+    }
+
     /* Check the number of command line arguments */
     if (argumentCount == 1) {
         /* Who am I? */
-        std::string Iam = "Line";
+        std::string Iam = "Trond";
 
         /* The whole project path is needed to read json file */
         std::string projectFolder;
@@ -45,7 +50,14 @@ int main(int argumentCount, char *argumentVector[])
         inputFile.open(argumentVector[1], std::ios::in);
     } else
     {
-        // MPI
+        /* Using MPI */
+        /* Input file from command line arguments */
+
+
+        //inputFile.open(argumentVector[5], std::ios::in);  /* Command line */
+
+        std::string projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";
+        inputFile.open(projectFolder+argumentVector[5], std::ios::in);
     }
 
     /* READ PARAMETERS */
@@ -68,12 +80,12 @@ int main(int argumentCount, char *argumentVector[])
         bool UseJastrowFactor = parameter["Use Jastrow factor"];
         bool UseImportanceSampling = parameter["Use Importance sampling"];
         bool UseFermionInteraction = parameter["Use Fermion interaction"];
-        bool UseMPI = parameter["Use MPI"];
         bool UseAverageTiming = parameter["Use Average timing"];
         bool UseAnalyticalExpressions = parameter["Use analytical expressions"];
         bool UseNumericalPotentialEnergy = parameter["Use numerical potential energy"];
         std::string cycleType = parameter["Cycle type"];
         int cycleStepToFile = parameter["Cycle step to file"];
+        bool UseMPI = parameter["Use MPI"];
 
 
         /* Initialize VMC */
@@ -98,7 +110,7 @@ int main(int argumentCount, char *argumentVector[])
         {
             runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
                                     UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
-                                    UseNumericalPotentialEnergy, cycleType, cycleStepToFile);
+                                    UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
             runMatrix.insert_rows(i, runVector);
         }
 
