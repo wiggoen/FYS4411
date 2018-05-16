@@ -24,6 +24,18 @@ HEADERS += \
     inc/variationalmontecarlo.h \
     inc/wavefunction.h
 
-INCLUDEPATH += /usr/local/Cellar/armadillo/8.400.0/include/
 
-LIBS += -L/usr/local/Cellar/armadillo/8.400.0/lib/ -larmadillo
+# Linux specific
+unix:!macx {
+
+}
+
+# Mac specific
+macx: {
+    INCLUDEPATH += /usr/local/Cellar/armadillo/8.500.1/include/ \
+                   /usr/local/Cellar/open-mpi/3.1.0/include
+
+    LIBS += -L/usr/local/Cellar/armadillo/8.500.1/lib/ -larmadillo \
+            -L/usr/local/opt/libevent/lib -L/usr/local/Cellar/open-mpi/3.1.0/lib -lmpi
+}
+
