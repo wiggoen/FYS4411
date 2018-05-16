@@ -20,7 +20,7 @@ int main(int argumentCount, char *argumentVector[])
     /* Check the number of command line arguments */
     if (argumentCount < 2) {
         /* Who am I? */
-        std::string Iam = "Trond";
+        std::string Iam = "Line";
 
         /* The whole project path is needed to read json file */
         std::string projectFolder;
