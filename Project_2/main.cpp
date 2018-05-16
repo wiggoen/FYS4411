@@ -39,13 +39,13 @@ int main(int argumentCount, char *argumentVector[])
             std::cerr << "Usage: ./main.out parameters.json" << std::endl;
             exit(1);
         }
-    } else if ()
+    } else if (argumentCount == 2)
     {
         /* Input file from command line arguments */
         inputFile.open(argumentVector[1], std::ios::in);
-    }
+    } else
     {
-
+        // MPI
     }
 
     /* READ PARAMETERS */
