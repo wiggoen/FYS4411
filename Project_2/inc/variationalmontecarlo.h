@@ -39,6 +39,14 @@ public:
     double psiTimesEnergySum;
     double deltaPsi;
     const int nDimensions;             /* number of dimensions */
+    double dPsiOfAlpha;
+    double dPsiOfBeta;
+    double psiSumAlpha;
+    double psiSumBeta;
+    double psiTimesEnergyA;
+    double psiTimesEnergyB;
+    double psiOfAlphaTimesEnergySum;
+    double psiOfBetaTimesEnergySum;
 private:
     arma::mat rOld;                    /* matrix of old position */
     arma::mat rNew;                    /* matrix of new position */

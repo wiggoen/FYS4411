@@ -353,9 +353,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 
     if (cycleType == "SteepestDescent")
     {
-        deltaPsi           = Wavefunction::DerivativePsi(rNew, alpha, omega);
-        psiSum            += deltaPsi;
-        psiTimesEnergySum += deltaPsi*deltaEnergy;
+        dPsiOfAlpha        = Wavefunction::DerivativePsiOfAlpha(rNew, alpha, omega);
+        dPsiOfBeta         = Wavefunction::DerivativePsiOfBeta(rNew, alpha, omega);
+        psiSumAlpha       += dPsiOfAlpha;
+        psiSumBeta        += dPsiOfBeta;
+        psiOfAlphaTimesEnergySum   += dPsiOfAlpha*deltaEnergy;
+        psiOfBetaTimesEnergySum   += dPsiOfBeta*deltaEnergy;
     }
 
     /*
@@ -369,14 +372,18 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
 {
     std::cout << "Running steepest descent..." << std::endl;
-    double eta                   = 0.001;
-    int nAlpha                   = 500;
-    double averagePsi            = 0.0;
+    double eta                   = 0.1;
+    int nAlpha                   = 1000;
+    double averagePsiAlpha       = 0.0;
+    double averagePsiBeta        = 0.0;
     double averageEnergy         = 0.0;
-    double averagePsiTimesEnergy = 0.0;
-    double localEnergyDerivative = 0.0;
+    double alphaEnergyDerivative = 0.0;
+    double betaEnergyDerivative  = 0.0;
     double scalingFactor         = 1.0/(nCycles*nParticles);
+    double averagePsiOfAlphaTimesEnergy = 0.0;
+    double averagePsiOfBetaTimesEnergy = 0.0;
 
+    std::cout << "New alpha:    New beta:" << std::endl;
     /* Loop over number of alphas */
     for (int i = 0; i < nAlpha; i++)
     {
@@ -387,25 +394,36 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
         energySquaredSum  = 0.0;
         deltaEnergy       = 0.0;
         acceptanceWeight  = 0.0;
-        psiSum            = 0.0;
-        psiTimesEnergySum = 0.0;
+        psiSumAlpha       = 0.0;
+        psiSumBeta        = 0.0;
         deltaPsi          = 0.0;
+        psiOfAlphaTimesEnergySum = 0.0;
+        psiOfBetaTimesEnergySum  = 0.0;
+
 
         /* Run Monte Carlo cycles */
         MonteCarloCycles();
 
         /* Update energies */
-        averagePsi    = psiSum*scalingFactor;
-        averageEnergy = energySum*scalingFactor;
-        averagePsiTimesEnergy = psiTimesEnergySum*scalingFactor;
-        localEnergyDerivative = 2.0*(averagePsiTimesEnergy - averagePsi*averageEnergy);
+        averagePsiAlpha    = psiSumAlpha*scalingFactor;
+        averagePsiBeta     = psiSumBeta*scalingFactor;
+        averageEnergy      = energySum*scalingFactor;
+        averagePsiOfAlphaTimesEnergy = psiOfAlphaTimesEnergySum*scalingFactor;
+        averagePsiOfBetaTimesEnergy  = psiOfBetaTimesEnergySum*scalingFactor;
+        alphaEnergyDerivative = 2.0*(averagePsiOfAlphaTimesEnergy - averagePsiAlpha*averageEnergy);
+        betaEnergyDerivative  = 2.0*(averagePsiOfBetaTimesEnergy - averagePsiBeta*averageEnergy);
 
-        /* Calculate alpha */
-        std::cout << "New alpha: "  << alpha << std::endl;
-        /*          << " Average energy: " << averageEnergy << std::endl;
-        std::cout << acceptanceCounter*scalingFactor << "   " << acceptanceCounter << std::endl; */
-        std::cout << "Change in alpha: " << -eta * localEnergyDerivative << std::endl;
-        alpha -= eta * localEnergyDerivative;
+        if (alphaEnergyDerivative == 0 && betaEnergyDerivative ==0)
+        {
+            std::cout << "Optimal parameters found, stopping steepest descent" << std::endl;
+            i=nAlpha-1;
+        }
+
+        //std::cout << averagePsiOfAlphaTimesEnergy << std::endl;
+        /* Calculate alpha and beta */
+        alpha -= eta * alphaEnergyDerivative;
+        beta  -= eta * betaEnergyDerivative;
+        std::cout << alpha << "     " << beta  << std::endl;
     }
     return alpha;
 }

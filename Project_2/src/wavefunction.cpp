@@ -48,19 +48,25 @@ void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const dou
 }
 
 
-double Wavefunction::DerivativePsi(const arma::mat &r, const double &alpha, const double omega)
-/* Returns 1/psi * psi' */
+double Wavefunction::DerivativePsiOfAlpha(const arma::mat &r, const double &alpha, const double omega)
+/* Returns 1/Psi * dPsi/dAlpha */
 {
-    /* Without Jastrow */
-    /*
-    arma::rowvec r_1 = r.row(0);
-    arma::rowvec r_2 = r.row(1);
-
-    return -alpha*omega*r;
-    */
-    return 0;
+    // Without Jastrow factor:
+    double r_1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
+    double r_2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
+    return -omega*(r_1Squared+r_2Squared)/2.0;
 }
 
+double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &alpha, const double omega)
+/* Returns 1/Psi * dPsi/dBeta */
+{
+    // Without Jastrow factor:
+    double r1 = sqrt(r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1));
+    double r2 = sqrt(r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1));
+    double r12 = abs(r1-r2);
+    return -r12;
+    //return 0;
+}
 
 void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                          const int &nDimensions, const double &alpha, const double &beta,
