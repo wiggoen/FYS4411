@@ -24,6 +24,16 @@ HEADERS += \
     inc/variationalmontecarlo.h \
     inc/wavefunction.h
 
+    # MPI Settings
+    QMAKE_CXX = mpicxx
+    QMAKE_CXX_RELEASE = $$QMAKE_CXX
+    QMAKE_CXX_DEBUG = $$QMAKE_CXX
+    QMAKE_LINK = $$QMAKE_CXX
+    QMAKE_CC = mpicc
+    QMAKE_CFLAGS += -O3 -std=c++11 $$system(mpicc --showme:compile)
+    QMAKE_LFLAGS += $$system(mpicxx --showme:link)
+    QMAKE_CXXFLAGS += -O3 -std=c++11 $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
+    QMAKE_CXXFLAGS_RELEASE += -O3 -std=c++11 $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
 
 
 # Linux specific
@@ -33,24 +43,7 @@ unix:!macx {
 
 # Mac specific
 macx: {
-    # MPI header
-    #HEADERS += /usr/local/Cellar/open-mpi/3.1.0/include/mpi.h
+    INCLUDEPATH += /usr/local/Cellar/armadillo/8.500.1/include/
 
-    # MPI Settings
-    #QMAKE_CC = $$system(/usr/local/bin/mpicc)    # C compiler
-    #QMAKE_CXX = $$system(/usr/local/bin/mpicxx)  # C++ compiler
-    #QMAKE_CXX_RELEASE = $$QMAKE_CXX
-    #QMAKE_CXX_DEBUG = $$QMAKE_CXX
-    #QMAKE_LINK = $$QMAKE_CXX
-
-    #QMAKE_CFLAGS += $$system(/usr/local/bin/mpicc --showme:compile) -DMPICH_IGNORE_CXX_SEEK -DMPICH_SKIP_MPICXX
-    #QMAKE_LFLAGS += $$system(/usr/local/bin/mpicxx --showme:link)
-    ##QMAKE_CXXFLAGS += $$system(/usr/local/bin/mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK -DMPICH_SKIP_MPICXX
-    ##QMAKE_CXXFLAGS_RELEASE += $$system(/usr/local/bin/mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK -DMPICH_SKIP_MPICXX
-
-    INCLUDEPATH += /usr/local/Cellar/armadillo/8.500.1/include/ #\
-                   #/usr/local/Cellar/open-mpi/3.1.0/include
-
-    LIBS += -L/usr/local/Cellar/armadillo/8.500.1/lib/ -larmadillo #\
-            #-L/usr/local/opt/libevent/lib -L/usr/local/Cellar/open-mpi/3.1.0/lib -lmpi
+    LIBS += -L/usr/local/Cellar/armadillo/8.500.1/lib/ -larmadillo
 }
