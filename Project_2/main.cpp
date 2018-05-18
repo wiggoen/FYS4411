@@ -3,6 +3,9 @@
 #include "inc/catch.hpp"
 #include "inc/json.hpp"
 
+//#ifndef MPI_ON
+//    #define MPI_ON
+//#endif
 
 using json = nlohmann::json; // for convenience
 
@@ -22,16 +25,19 @@ int main(int argumentCount, char *argumentVector[])
         std::cout << i << "          " << argumentVector[i] << std::endl;
     }
 
+
+    /* Who am I? */
+    std::string Iam = "Trond";
+
+    /* The whole project path is needed to read json file */
+    std::string projectFolder;
+
     /* Check the number of command line arguments */
     if (argumentCount == 1) {
-        /* Who am I? */
-        std::string Iam = "Trond";
-
-        /* The whole project path is needed to read json file */
-        std::string projectFolder;
         if (Iam == "Trond") {
             std::cout << "Hi, Trond!" << std::endl;
-            projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";
+            projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";         // Mac
+            //projectFolder = "/home/twj/Documents/GitHub/FYS4411/Project_2/";  // Linux
             inputFile.open(projectFolder+"parameters.json", std::ios::in);
         } else if (Iam == "Line") {
             std::cout << "Hi, Line!" << std::endl;
@@ -52,12 +58,21 @@ int main(int argumentCount, char *argumentVector[])
     {
         /* Using MPI */
         /* Input file from command line arguments */
-
-
         //inputFile.open(argumentVector[5], std::ios::in);  /* Command line */
 
-        std::string projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";
-        inputFile.open(projectFolder+argumentVector[5], std::ios::in);
+        if (Iam == "Trond")
+        {
+            projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";         // Mac
+            //projectFolder = "/home/twj/Documents/GitHub/FYS4411/Project_2/";  // Linux
+            inputFile.open(projectFolder+argumentVector[5], std::ios::in);
+        } else if (Iam == "Line")
+        {
+            projectFolder = "/home/line/github/FYS4411/Project_2/";
+            inputFile.open(projectFolder+argumentVector[5], std::ios::in);
+        } else
+        {
+            inputFile.open(argumentVector[5], std::ios::in);
+        }
     }
 
     /* READ PARAMETERS */

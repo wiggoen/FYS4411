@@ -26,13 +26,13 @@ print(UseMPI)
 
 # Library used
 if (machine == "Linux"):
-    library = "-L/usr/lib"
+    library = "-L/usr/lib -pthread -Wl,-rpath -Wl,/usr/lib/openmpi/lib -Wl,--enable-new-dtags -L/usr/lib/openmpi/lib -lmpi_cxx -lmpi"
 elif (machine == "Mac"):
     library = "-L/usr/local/Cellar/armadillo/8.500.1/lib/ -L/usr/local/opt/libevent/lib -L/usr/local/Cellar/open-mpi/3.1.0/lib -lmpi"
 
 # Location of include files / header files
 if (machine == "Linux"):
-    includes = "-I/usr/include -I/home/twj/Documents/GitHub/FYS4411/Project_2"
+    includes = "-I/usr/include -I/home/twj/Documents/GitHub/FYS4411/Project_2 -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent/include -I/usr/lib/openmpi/include -I/usr/lib/openmpi/include/openmpi -pthread"
 elif (machine == "Mac"):
     includes = "-I/usr/local/Cellar/armadillo/8.500.1/include/ -I/Users/trondwj/GitHub/FYS4411/Project_2 -I/usr/local/Cellar/open-mpi/3.1.0/include"
 
