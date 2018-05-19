@@ -50,25 +50,25 @@ void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const dou
 }
 
 
-double Wavefunction::DerivativePsiOfAlpha(const arma::mat &r, const double &alpha, const double omega)
+double Wavefunction::DerivativePsiOfAlpha(const arma::mat &r, const double &alpha, const double &omega)
 /* Returns 1/Psi * dPsi/dAlpha */
 {
-    // Without Jastrow factor:
+    /* Without Jastrow factor */
     double r_1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
     double r_2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
-    return -omega*(r_1Squared+r_2Squared)/2.0;
+    return -0.5*omega*(r_1Squared + r_2Squared);
 }
 
-double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &alpha, const double omega)
+
+double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &beta, const double &spinParameter)
 /* Returns 1/Psi * dPsi/dBeta */
 {
-    // Without Jastrow factor:
-    double r1 = sqrt(r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1));
-    double r2 = sqrt(r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1));
-    double r12 = abs(r1-r2);
-    return -r12;
-    //return 0;
+    /* With Jastrow factor */
+    double r_12 = arma::norm(r.row(0) - r.row(1));
+    double denominator = (1 + beta*r_12)*(1 + beta*r_12);
+    return -(spinParameter*(r_12*r_12))/denominator;
 }
+
 
 void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                          const int &nDimensions, const double &alpha, const double &beta,

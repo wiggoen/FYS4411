@@ -399,10 +399,10 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (cycleType == "SteepestDescent")
     {
         dPsiOfAlpha        = Wavefunction::DerivativePsiOfAlpha(rNew, alpha, omega);
-        dPsiOfBeta         = Wavefunction::DerivativePsiOfBeta(rNew, alpha, omega);
+        dPsiOfBeta         = Wavefunction::DerivativePsiOfBeta(rNew, beta, spinParameter);
         psiSumAlpha       += dPsiOfAlpha;
         psiSumBeta        += dPsiOfBeta;
-        psiOfAlphaTimesEnergySum   += dPsiOfAlpha*deltaEnergy;
+        psiOfAlphaTimesEnergySum  += dPsiOfAlpha*deltaEnergy;
         psiOfBetaTimesEnergySum   += dPsiOfBeta*deltaEnergy;
     }
 
@@ -426,7 +426,7 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
     double betaEnergyDerivative  = 0.0;
     double scalingFactor         = 1.0/(nCycles*nParticles);
     double averagePsiOfAlphaTimesEnergy = 0.0;
-    double averagePsiOfBetaTimesEnergy = 0.0;
+    double averagePsiOfBetaTimesEnergy  = 0.0;
 
     std::cout << "New alpha:    New beta:" << std::endl;
     /* Loop over number of alphas */
@@ -458,7 +458,7 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
         alphaEnergyDerivative = 2.0*(averagePsiOfAlphaTimesEnergy - averagePsiAlpha*averageEnergy);
         betaEnergyDerivative  = 2.0*(averagePsiOfBetaTimesEnergy - averagePsiBeta*averageEnergy);
 
-        if (alphaEnergyDerivative == 0 && betaEnergyDerivative ==0)
+        if (alphaEnergyDerivative == 0 && betaEnergyDerivative == 0)
         {
             std::cout << "Optimal parameters found, stopping steepest descent" << std::endl;
             i=nAlpha-1;
