@@ -81,7 +81,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
 
     /* Store the current value of the wave function and quantum force */
     waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
-    Wavefunction::QuantumForce(rOld, QForceOld, alpha, omega);
+    Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
     QForceNew = QForceOld;
 
     /* MPI */
@@ -250,11 +250,13 @@ double VariationalMonteCarlo::GaussianRandomNumber( void )
 
 void VariationalMonteCarlo::MonteCarloCycles( void )
 {
-    /* Open outputfile to write */
-    std::ofstream outputFile;
+    /* Open outputfiles to write */
+    std::ofstream outputEnergy;
+    std::ofstream outputDistance;
     if (cycleStepToFile != 0)
     {
-        outputFile.open("../Project_2/energies.txt");
+        outputEnergy.open("../Project_2/energies.txt");
+        outputDistance.open("../Project_2/distances.txt");
     }
 
     /* Loop over Monte Carlo cycles */
@@ -272,15 +274,24 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         }
 
         /* Write to file */
-        if (cycleStepToFile != 0 && cycle > 0 && cycle % cycleStepToFile == 0)
+        if (cycleStepToFile != 0 && cycle % cycleStepToFile == 0)
         {
-            outputFile << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles) << std::endl;
+            if (cycle > 0)
+            {
+                outputEnergy << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles)
+                             << std::endl;
+            }
+
+            double particleDistance = Hamiltonian::ParticleDistance(rNew.row(0), rNew.row(1));
+            outputDistance << std::setw(10) << cycle << "     " << std::setprecision(6)
+                           << particleDistance << std::endl;
         }
     }
     /* Close output file */
     if (cycleStepToFile != 0)
     {
-        outputFile.close();
+        outputEnergy.close();
+        outputDistance.close();
     }
 }
 
@@ -330,7 +341,7 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
         } else
         {
             /* using analytical expressions */
-            Wavefunction::QuantumForce(rNew, QForceNew, alpha, omega);
+            Wavefunction::QuantumForce(rNew, QForceNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
         }
         double wavefunctionRatio = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
         double greensRatio = GreensRatio(rNew, rOld, QForceNew, QForceOld, diffusionCoefficient, timeStep, i);

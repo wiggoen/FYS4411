@@ -26,25 +26,27 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
         return exp(unperturbed);
     } else {
         /* With Jastrow factor */
-        double r_12 = arma::norm(r.row(0) - r.row(1));;
+        double r_12 = arma::norm(r.row(0) - r.row(1));
         double jastrow = (spinParameter*r_12)/(1 + beta*r_12);
         return exp(unperturbed + jastrow);
     }
 }
 
 
-void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &omega)
+void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &beta,
+                                const double &omega, const double &spinParameter, const bool &UseJastrowFactor)
 {
-    /* Without Jastrow factor */
-    //if (!UseJastrowFactor) {
-
-    QForce = -2*alpha*omega*r;
-
-    //}
-    //else {
-    /* With Jastrow factor */
-    //QForce = ?;
-    //}
+    if (!UseJastrowFactor) {
+        /* Without Jastrow factor */
+        QForce = -2*alpha*omega*r;
+    }
+    else {
+        /* With Jastrow factor */
+        double r_12 = arma::norm(r.row(0) - r.row(1));
+        arma::rowvec JastrowDependence = (spinParameter*(r.row(0) - r.row(1)))/(r_12 * ((1 + beta*r_12)*(1 + beta*r_12)));
+        QForce.row(0) = 2*(-alpha*omega*r.row(0) + JastrowDependence);
+        QForce.row(1) = 2*(-alpha*omega*r.row(1) - JastrowDependence);
+    }
 }
 
 

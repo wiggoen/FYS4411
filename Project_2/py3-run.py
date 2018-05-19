@@ -40,7 +40,7 @@ elif (machine == "Mac"):
 if (UseMPI):
     run_cmd("mpicxx -std=c++11 -O3 {} {} -o main.out main.cpp {} -larmadillo".format(library, includes, src))
 else:
-    run_cmd("g++ -std=c++11 -O3 {} {} -o main.out main.cpp {} -larmadillo".format(library, includes, src))
+    run_cmd("g++ -Wall -std=c++11 -O3 {} {} -o main.out main.cpp {} -larmadillo".format(library, includes, src))
 
 # Run
 if (UseMPI):

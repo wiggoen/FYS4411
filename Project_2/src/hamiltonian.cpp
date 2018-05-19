@@ -15,13 +15,13 @@ Hamiltonian::~Hamiltonian( void )
 }
 
 
-inline double Hamiltonian::ParticleDistance(const arma::rowvec &r_i, const arma::rowvec &r_j)
+double Hamiltonian::ParticleDistance(const arma::rowvec &r_i, const arma::rowvec &r_j)
 {
     return arma::norm(r_i - r_j);
 }
 
 
-inline double Hamiltonian::RepulsiveInteraction(const arma::rowvec &r_i, const arma::rowvec &r_j)
+double Hamiltonian::RepulsiveInteraction(const arma::rowvec &r_i, const arma::rowvec &r_j)
 {
     double distance = ParticleDistance(r_i, r_j);
     return 1 / distance;

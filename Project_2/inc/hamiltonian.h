@@ -9,8 +9,8 @@ class Hamiltonian
 public:
     Hamiltonian( void );
     ~Hamiltonian( void );
-    static inline double ParticleDistance(const arma::rowvec &r_i, const arma::rowvec &r_j);
-    static inline double RepulsiveInteraction(const arma::rowvec &r_i, const arma::rowvec &r_j);
+    static double ParticleDistance(const arma::rowvec &r_i, const arma::rowvec &r_j);
+    static double RepulsiveInteraction(const arma::rowvec &r_i, const arma::rowvec &r_j);
     static double LocalEnergyTwoElectrons(const arma::mat &r, const double &alpha, const double &beta,
                                           const double &omega, const double &spinParameter, const bool UseJastrowFactor,
                                           const bool UseFermionInteraction);
