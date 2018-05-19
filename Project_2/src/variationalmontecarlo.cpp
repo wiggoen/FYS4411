@@ -253,7 +253,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     /* Open outputfiles to write */
     std::ofstream outputEnergy;
     std::ofstream outputDistance;
-    if (cycleStepToFile != 0)
+    if (cycleStepToFile != 0 && world_rank == 0)
     {
         outputEnergy.open("../Project_2/energies.txt");
         outputDistance.open("../Project_2/distances.txt");
@@ -274,7 +274,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         }
 
         /* Write to file */
-        if (cycleStepToFile != 0 && cycle % cycleStepToFile == 0)
+        if (cycleStepToFile != 0 && world_rank == 0 && cycle % cycleStepToFile == 0)
         {
             if (cycle > 0)
             {
@@ -288,7 +288,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         }
     }
     /* Close output file */
-    if (cycleStepToFile != 0)
+    if (cycleStepToFile != 0 && world_rank == 0)
     {
         outputEnergy.close();
         outputDistance.close();
