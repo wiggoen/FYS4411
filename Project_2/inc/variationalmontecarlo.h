@@ -47,6 +47,7 @@ public:
     double psiTimesEnergyB;
     double psiOfAlphaTimesEnergySum;
     double psiOfBetaTimesEnergySum;
+    int world_rank;                    /* to use with MPI; holds the processor rank */
 private:
     arma::mat rOld;                    /* matrix of old position */
     arma::mat rNew;                    /* matrix of new position */

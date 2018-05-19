@@ -50,7 +50,7 @@ void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const dou
 }
 
 
-double Wavefunction::DerivativePsiOfAlpha(const arma::mat &r, const double &alpha, const double &omega)
+double Wavefunction::DerivativePsiOfAlpha(const arma::mat &r, const double &omega)
 /* Returns 1/Psi * dPsi/dAlpha */
 {
     /* Without Jastrow factor */

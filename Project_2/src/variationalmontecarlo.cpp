@@ -95,7 +95,6 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
         /* Get the rank of the process */
-        int world_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
         /* Get the name of the processor */
@@ -398,7 +397,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 
     if (cycleType == "SteepestDescent")
     {
-        dPsiOfAlpha        = Wavefunction::DerivativePsiOfAlpha(rNew, alpha, omega);
+        dPsiOfAlpha        = Wavefunction::DerivativePsiOfAlpha(rNew, omega);
         dPsiOfBeta         = Wavefunction::DerivativePsiOfBeta(rNew, beta, spinParameter);
         psiSumAlpha       += dPsiOfAlpha;
         psiSumBeta        += dPsiOfBeta;
