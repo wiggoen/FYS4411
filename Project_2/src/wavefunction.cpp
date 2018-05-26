@@ -51,13 +51,15 @@ double Wavefunction::TrialWaveFunctionManyParticles(const double nParticles, con
 
 double Wavefunction::SlaterDeterminant(int nParticles)
 {
-    // Create NxN matrix
-    //double arma::mat Slater = arma::mat(nParticles, nParticles);
+    /* Create NxN matrix */
+    arma::mat Slater = arma::zeros<arma::mat>(nParticles, nParticles);
+
+    /* Fill Jastrow matrix */
     for (int i = 0; i < nParticles; i++)
     {
         for (int j=0; j < nParticles; j++)
         {
-           // Slater(i,j) = phi()
+           Slater(i,j) = phi(i,j)
         }
     }
 }
