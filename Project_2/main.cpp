@@ -3,10 +3,11 @@
 #include "inc/catch.hpp"
 #include "inc/json.hpp"
 
-//#ifndef MPI_ON
-//    #define MPI_ON
-//#endif
-
+/*
+ * #ifndef MPI_ON
+    #define MPI_ON
+#endif
+*/
 using json = nlohmann::json; // for convenience
 
 int RunCatchTests()
@@ -27,7 +28,7 @@ int main(int argumentCount, char *argumentVector[])
 
 
     /* Who am I? */
-    std::string Iam = "Trond";
+    std::string Iam = "Line";
 
     /* The whole project path is needed to read json file */
     std::string projectFolder;

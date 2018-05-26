@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include "inc/variationalmontecarlo.h"
 #include "inc/wavefunction.h"
 #include "inc/hamiltonian.h"
@@ -9,7 +10,7 @@
 #include <string>
 #include <cmath>
 #include <stdlib.h>  /* Exit failure, to force the program to stop: exit(EXIT_FAILURE); */
-#include <mpi.h>
+
 //#include <stdio.h>
 
 
