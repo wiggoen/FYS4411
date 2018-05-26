@@ -43,7 +43,6 @@ HEADERS += \
 # Linux specific
 unix:!macx {
     LIBS += -llapack -lblas -larmadillo
-    #INCLUDEPATH += /usr/lib/openmpi/include/
 }
 
 # Mac specific

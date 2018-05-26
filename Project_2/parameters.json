@@ -8,13 +8,13 @@
     "spin parameter": 1.0,
     "stepLength": 1.5,
     "timeStep": 0.01,
-    "Use Jastrow factor": false,
+    "Use Jastrow factor": true,
     "Use Importance sampling": false,
-    "Use Fermion interaction": false,
+    "Use Fermion interaction": true,
     "Use Average timing": false,
     "Use analytical expressions": true,
     "Use numerical potential energy": false,
-    "Cycle type": "MonteCarlo",
+    "Cycle type": "SteepestDescent",
     "Cycle step to file": 0,
     "Use MPI": false
 }
