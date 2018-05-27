@@ -87,7 +87,7 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
         double LocalEnergy = LocalEnergyMoreParticles(r,nParticles,beta,omega,spinParameter,UseFermionInteraction);
         if (UseJastrowFactor) {
             Wavefunction wavefunc;
-            double slater = wavefunc.SlaterDeterminant(nParticles,r,alpha,beta,omega);
+            double slater = wavefunc.SlaterDeterminant(nParticles,r,alpha,omega);
             LocalEnergy *= slater;
             }
         return LocalEnergy;
@@ -96,25 +96,38 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
 
 
 double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &beta,
-                                             const double &omega, const double &spinParameter, const bool UseFermionInteraction)
+                                             const double omega, const double &spinParameter, const bool UseFermionInteraction)
 {
     double energy = 0;
+    double halfOmegaSquared = 0.5*omega*omega;
+    for (int j=0; j<nParticles; j++)
+    {
+        for (int i=0; i<nParticles; i++)
+        {
+            double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
+            double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
+
+            double top = -0.5*2*spinParameter*beta;
+            double bot = (1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj));
+            energy += top/bot + halfOmegaSquared*Ri*Ri;
+        }
+    }
     if (!UseFermionInteraction)
     /* Without interaction */
     {
+        return energy;
+    } else {
+        double interactionTerm = 0;
         for (int j=0; j<nParticles; j++)
         {
-            for (int i=0; i<j; i++)
+            for (int i=0; i<nParticles; i++)
             {
                 double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
                 double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
-
-                double top = -0.5*2*spinParameter*beta;
-                double bot = (1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj));
-                energy += top/bot;
+                interactionTerm += 1.0/abs(Ri-Rj);
             }
         }
-        return energy;
+        return energy + interactionTerm;
     }
 }
 

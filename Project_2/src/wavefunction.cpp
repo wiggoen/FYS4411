@@ -32,10 +32,11 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
     }
 }
 
-double Wavefunction::TrialWaveFunctionManyParticles(const double nParticles, const arma::mat &r, const double &alpha, const double &beta, const double &omega,
+double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const double nParticles, const double &alpha, const double &beta, const double &omega,
                                                     const double &spinParameter, const bool &UseJastrowFactor)
 {
     double wavefuncProd = 1;
+    double slater       = 1;
     for (int i=0; i<nParticles; i++)
     {
         for (int j=0; j<nParticles; j++)
@@ -45,12 +46,15 @@ double Wavefunction::TrialWaveFunctionManyParticles(const double nParticles, con
             wavefuncProd *= exp(expontential);
         }
     }
-    double slater = SlaterDeterminant(nParticles, r, alpha, beta, omega);
+    if (UseJastrowFactor)
+    {
+        slater = SlaterDeterminant(nParticles, r, alpha, omega);
+    }
     return wavefuncProd*slater;
 }
 
 
-double Wavefunction::SlaterDeterminant(int nParticles, const arma::mat &r, const double &alpha, const double &beta, const double &omega)
+double Wavefunction::SlaterDeterminant(const int nParticles, const arma::mat &r, const double &alpha, const double &omega)
 {
     /* Create NxN matrix */
     arma::mat slater = arma::zeros<arma::mat>(nParticles, nParticles);
