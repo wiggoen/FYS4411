@@ -417,7 +417,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
 {
     std::cout << "Running steepest descent..." << std::endl;
-    double eta                   = 0.1;
+    double eta                   = 0.001;
     int nAlpha                   = 1000;
     double averagePsiAlpha       = 0.0;
     double averagePsiBeta        = 0.0;
@@ -458,7 +458,7 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
         alphaEnergyDerivative = 2.0*(averagePsiOfAlphaTimesEnergy - averagePsiAlpha*averageEnergy);
         betaEnergyDerivative  = 2.0*(averagePsiOfBetaTimesEnergy - averagePsiBeta*averageEnergy);
 
-        if (alphaEnergyDerivative == 0 && betaEnergyDerivative == 0)
+        if (alphaEnergyDerivative == 0 && betaEnergyDerivative == 0 && i>10)
         {
             std::cout << "Optimal parameters found, stopping steepest descent" << std::endl;
             i=nAlpha-1;
@@ -469,6 +469,7 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
         alpha -= eta * alphaEnergyDerivative;
         beta  -= eta * betaEnergyDerivative;
         std::cout << alpha << "     " << beta  << std::endl;
+        std::cout << "Energy: " << averageEnergy << std::endl;
     }
     return alpha;
 }

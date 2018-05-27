@@ -32,6 +32,38 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
     }
 }
 
+double Wavefunction::TrialWaveFunctionManyParticles(const double nParticles, const arma::mat &r, const double &alpha, const double &beta, const double &omega,
+                                                    const double &spinParameter, const bool &UseJastrowFactor)
+{
+    double wavefuncProd = 1;
+    for (int i=0; i<nParticles; i++)
+    {
+        for (int j=0; j<nParticles; j++)
+        {
+            double Rij = arma::norm(r.row(i) - r.row(j));
+            double expontential = spinParameter*Rij/(1+beta*Rij);
+            wavefuncProd *= exp(expontential);
+        }
+    }
+    return wavefuncProd;
+}
+
+
+double Wavefunction::SlaterDeterminant(int nParticles)
+{
+    // Create NxN matrix
+    //double arma::mat Slater = arma::mat(nParticles, nParticles);
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j=0; j < nParticles; j++)
+        {
+           // Slater(i,j) = phi()
+        }
+    }
+}
+
+
+
 
 void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &beta,
                                 const double &omega, const double &spinParameter, const bool &UseJastrowFactor)
