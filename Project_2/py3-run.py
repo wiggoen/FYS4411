@@ -1,11 +1,15 @@
 # Script for Python 3
 import os
+import sys
 import json
+import subprocess
 
-
-# Choice of machine type
-#machine = "Linux"
-machine = "Mac"
+c_compile_sh = subprocess.run("mpicc --showme:compile", stdout=subprocess.PIPE, shell=True)
+c_compile = c_compile_sh.stdout.decode("utf-8").strip()
+cxx_link_sh = subprocess.run("mpicxx --showme:link", stdout=subprocess.PIPE, shell=True)
+cxx_link = cxx_link_sh.stdout.decode("utf-8").strip()
+cxx_compile_sh = subprocess.run("mpicxx --showme:compile", stdout=subprocess.PIPE, shell=True)
+cxx_compile = cxx_compile_sh.stdout.decode("utf-8").strip()
 
 
 def run_cmd(cmd):
@@ -22,25 +26,33 @@ parameterfile = "parameters.json"
 with open(parameterfile) as data:
     parameters = json.load(data)
 UseMPI = parameters["Use MPI"]
-print(UseMPI)
+#print(UseMPI)
 
-# Library used
-if (machine == "Linux"):
-    library = "-L/usr/lib -pthread -Wl,-rpath -Wl,/usr/lib/openmpi/lib -Wl,--enable-new-dtags -L/usr/lib/openmpi/lib -lmpi_cxx -lmpi"
-elif (machine == "Mac"):
-    library = "-L/usr/local/Cellar/armadillo/8.500.1/lib/ -L/usr/local/opt/libevent/lib -L/usr/local/Cellar/open-mpi/3.1.0/lib -lmpi"
-
-# Location of include files / header files
-if (machine == "Linux"):
-    includes = "-I/usr/include -I/home/twj/Documents/GitHub/FYS4411/Project_2 -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent/include -I/usr/lib/openmpi/include -I/usr/lib/openmpi/include/openmpi -pthread"
-elif (machine == "Mac"):
-    includes = "-I/usr/local/Cellar/armadillo/8.500.1/include/ -I/Users/trondwj/GitHub/FYS4411/Project_2 -I/usr/local/Cellar/open-mpi/3.1.0/include"
+# Location of include files / header files and libraries used
+if sys.platform.startswith("linux"):    # Linux specific
+    armadillo_include = "-I/usr/include"
+    project_folder = "-I/home/twj/Documents/GitHub/FYS4411/Project_2"
+    if UseMPI:
+        includes = "{} {} -DMPICH_IGNORE_CXX_SEEK {} {}".format(c_compile, cxx_compile, armadillo_include, project_folder)
+        libraries = "{} -L/usr/lib".format(cxx_link)
+    else:
+        includes = "{} {}".format(armadillo_include, project_folder)
+        libraries = "-L/usr/lib"
+elif sys.platform.startswith("darwin"): # Mac specific
+    armadillo_include = "-I/usr/local/Cellar/armadillo/8.500.1/include/"
+    project_folder = "-I/Users/trondwj/GitHub/FYS4411/Project_2"
+    if UseMPI:
+        includes = "{} {} -DMPICH_IGNORE_CXX_SEEK {} {}".format(c_compile, cxx_compile, armadillo_include, project_folder)
+        libraries = "{} -L/usr/local/Cellar/armadillo/8.500.1/lib/".format(cxx_link)
+    else:
+        includes = "{} {}".format(armadillo_include, project_folder)
+        libraries = "-L/usr/local/Cellar/armadillo/8.500.1/lib/"
 
 # Compile
 if (UseMPI):
-    run_cmd("mpicxx -std=c++11 -O3 {} {} -o main.out main.cpp {} -larmadillo".format(library, includes, src))
+    run_cmd("mpicxx -std=c++11 -O3 {} {} -o main.out main.cpp {} -larmadillo -DMPI_ON".format(includes, libraries, src))
 else:
-    run_cmd("g++ -Wall -std=c++11 -O3 {} {} -o main.out main.cpp {} -larmadillo".format(library, includes, src))
+    run_cmd("g++ -Wall -std=c++11 -O3 {} {} -o main.out main.cpp {} -llapack -lblas -larmadillo".format(includes, libraries, src))
 
 # Run
 if (UseMPI):

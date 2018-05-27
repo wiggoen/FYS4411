@@ -3,12 +3,8 @@
 #include "inc/catch.hpp"
 #include "inc/json.hpp"
 
-/*
- * #ifndef MPI_ON
-    #define MPI_ON
-#endif
-*/
-using json = nlohmann::json; // for convenience
+
+using json = nlohmann::json; /* for convenience */
 
 int RunCatchTests()
 {

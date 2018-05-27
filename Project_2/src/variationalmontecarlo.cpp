@@ -1,4 +1,3 @@
-#include <mpi.h>
 #include "inc/variationalmontecarlo.h"
 #include "inc/wavefunction.h"
 #include "inc/hamiltonian.h"
@@ -11,7 +10,9 @@
 #include <cmath>
 #include <stdlib.h>  /* Exit failure, to force the program to stop: exit(EXIT_FAILURE); */
 
-//#include <stdio.h>
+#ifdef MPI_ON
+#include <mpi.h>
+#endif
 
 
 VariationalMonteCarlo::VariationalMonteCarlo() :
@@ -86,6 +87,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     QForceNew = QForceOld;
 
     /* MPI */
+    #ifdef MPI_ON
     if (UseMPI)
     {
         /* Initialize the MPI environment */
@@ -110,6 +112,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         std::cout << "Hello world from processor " << processor_name << ", rank " << world_rank
                   << " out of " << world_size << " processors." << std::endl;
     }
+    #endif
 
     /* Start timing */
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -162,7 +165,9 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
 
     /* Finalize the MPI environment */
+    #ifdef MPI_ON
     if (UseMPI) { MPI_Finalize(); }
+    #endif
 
     return runDetails;
 }
