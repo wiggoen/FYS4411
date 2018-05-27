@@ -21,7 +21,7 @@ public:
     double TrialWaveFunctionManyParticles(const double nParticles, const arma::mat &r, const double &alpha, const double &beta, const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
     double SlaterDeterminant(int nParticles, const arma::mat &r, const double &alpha, const double &beta, const double &omega);
     static double findPossibleNxNy(unsigned int i, const arma::vec &p);
-    static double Phi(const int &i, const int &j, const arma::mat &r, const double &alpha, const double &beta, const double &omega);
+    static double Phi(const int &i, const int &j, const arma::mat &r, const double &alpha, const double &omega);
 };
 
 

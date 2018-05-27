@@ -1,6 +1,6 @@
 {
     "Run tests": false,
-    "nParticles": 2,
+    "nParticles": 6,
     "nCycles": 1048576,
     "alpha": 1.0,
     "beta": 1.0,
@@ -10,11 +10,11 @@
     "timeStep": 0.01,
     "Use Jastrow factor": true,
     "Use Importance sampling": false,
-    "Use Fermion interaction": true,
+    "Use Fermion interaction": false,
     "Use Average timing": false,
     "Use analytical expressions": true,
     "Use numerical potential energy": false,
-    "Cycle type": "SteepestDescent",
+    "Cycle type": "MonteCarlo",
     "Cycle step to file": 0,
     "Use MPI": false
 }
