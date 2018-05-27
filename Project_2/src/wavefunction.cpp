@@ -1,5 +1,6 @@
 #include "inc/wavefunction.h"
 #include "inc/hamiltonian.h"
+#include "inc/hermite.h"
 
 
 Wavefunction::Wavefunction( void )
@@ -60,23 +61,37 @@ double Wavefunction::SlaterDeterminant(const int nParticles, const arma::mat &r,
     arma::mat slater = arma::zeros<arma::mat>(nParticles, nParticles);
 
     /* Fill Jastrow matrix */
-    for (int i = 0; i < nParticles; i++)
+    int nx=0;
+    int ny=0;    //HOW TO FIX THESE??
+    for (int iParticle = 0; iParticle < nParticles; iParticle++)
     {
-        for (int j=0; j < nParticles; j++)
+        if (iParticle<2){nx=0;}
+        else if (iParticle<6){nx=1;}
+        else if (iParticle<12){nx=2;}
+        else {std::cout << "Too many particles!" << std::endl
+                        << "Please use nParticles=2, 6 or 12." << std::endl;}
+        for (int jPosition=0; jPosition < nParticles; jPosition++)
         {
-           slater(i,j) = Phi(i, j, r, alpha, omega);
+            if (jPosition<2){ny=0;}
+            else if (jPosition<6){ny=1;}
+            else if (jPosition<12){ny=2;}
+            slater(iParticle,jPosition) = phi(iParticle, jPosition, r, nParticles, alpha, omega, nx, ny);
         }
     }
     return det(slater);
 }
 
 
-double Wavefunction::Phi(const int &i, const int &j, const arma::mat &r, const double &alpha, const double &omega)
+double Wavefunction::phi(const int &i, const int &j, const arma::mat &r, const int nParticles, const double &alpha, const double &omega,
+                         const int &nx, const int &ny)
 {
-    double r_iSquared = r(i, 0)*r(i, 0) + r(i, 1)*r(i, 1);
-    double r_jSquared = r(j, 0)*r(j, 0) + r(j, 1)*r(j, 1);
-    double unperturbed = -0.5*alpha*omega*(r_iSquared + r_jSquared);
-    return unperturbed;
+    /* Single particle states, given by Hermite polynomials */
+    double sqrtOmega = sqrt(omega);
+    double xPosition = r(i,0);
+    double yPosition = r(i,1);
+    double hermiteNx = H(sqrtOmega*xPosition, nx);
+    double hermiteNy = H(sqrtOmega*yPosition, ny);
+    return hermiteNx*hermiteNy*exp(-omega*(xPosition*xPosition + yPosition*yPosition)/2.0);
 }
 
 

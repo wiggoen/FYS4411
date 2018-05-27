@@ -22,6 +22,7 @@ public:
                                        const double &spinParameter, const bool UseJastrowFactor,
                                        const bool UseNumericalPotentialEnergy);
     static double LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &beta, const double omega, const double &spinParameter, const bool UseFermionInteraction);
+    //static void findPossibleQnumbers();
 private:
 };
 

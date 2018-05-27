@@ -36,11 +36,11 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
     double AlphaOmega = alpha*omega;
     double omegaSquaredHalf = 0.5*omega*omega;
 
-    double r_1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
-    double r_2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
+    double r1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
+    double r2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
     double alphaSquared = alpha*alpha;
 
-    double energyWithoutJastrow = 2*AlphaOmega + omegaSquaredHalf*(1 - alphaSquared)*(r_1Squared + r_2Squared);
+    double energyWithoutJastrow = 2*AlphaOmega + omegaSquaredHalf*(1 - alphaSquared)*(r1Squared + r2Squared);
 
     if (!UseJastrowFactor)
     {
@@ -113,12 +113,12 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
             energy += top/bot + halfOmegaSquared*Ri*Ri;
         }
     }
+    double interactionTerm = 0;
     if (!UseFermionInteraction)
     /* Without interaction */
     {
         return energy;
     } else {
-        double interactionTerm = 0;
         for (int j=0; j<nParticles; j++)
         {
             for (int i=0; i<nParticles; i++)
@@ -128,20 +128,29 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
                 interactionTerm += 1.0/abs(Ri-Rj);
             }
         }
-        return energy + interactionTerm;
     }
+    return energy + interactionTerm;
 }
 
+/*
+void Hamiltonian::findPossibleQnumbers()
+/* Find possible quantum numbers nx and ny */
+/*{
+    arma::mat nxny = arma::zeros<arma::mat>(2,1);
+    for (int i=0; i<)
+    std::cout << nxny << std::endl;
+}
+*/
 
 double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                          const double &alpha, const double &beta, const double &omega,
                                          const double &spinParameter, const bool UseJastrowFactor,
                                          const bool UseNumericalPotentialEnergy)
 {
-    arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
+    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
 
-    rPlus = r;
+    rPlus  = r;
     rMinus = r;
 
     double waveFunctionMinus = 0.0;
