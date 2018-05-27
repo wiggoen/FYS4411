@@ -69,8 +69,8 @@ double Wavefunction::SlaterDeterminant(int nParticles, const arma::mat &r, const
 
 double Wavefunction::Phi(const int &i, const int &j, const arma::mat &r, const double &alpha, const double &omega)
 {
-    double r_iSquared = r(i, i)*r(i, i) + r(i, j)*r(i, j);
-    double r_jSquared = r(j, i)*r(j, i) + r(j, j)*r(j, j);
+    double r_iSquared = r(i, 0)*r(i, 0) + r(i, 1)*r(i, 1);
+    double r_jSquared = r(j, 0)*r(j, 0) + r(j, 1)*r(j, 1);
     double unperturbed = -0.5*alpha*omega*(r_iSquared + r_jSquared);
     return unperturbed;
 }

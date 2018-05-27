@@ -84,39 +84,37 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
         return LocalEnergyTwoElectrons(r, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
     } else
     {
-        /* Husk å legg til med / uten Jastrow for flere partikler */
-        //if (!UseJastrowFactor) {}
+        double LocalEnergy = LocalEnergyMoreParticles(r,nParticles,beta,omega,spinParameter,UseFermionInteraction);
+        if (UseJastrowFactor) {
+            Wavefunction wavefunc;
+            double slater = wavefunc.SlaterDeterminant(nParticles,r,alpha,beta,omega);
+            LocalEnergy *= slater;
+            }
+        return LocalEnergy;
+        }
+}
 
 
-        //double localEnergy = 0;
-        //double AlphaOmega = alpha*omega;
-        //double omegaSquaredHalf = 0.5*omega*omega;
-        //
-        //double betaR_ij =  beta*arma::norm(r.row(0) - r.row(1));
-        ////std::cout << "norm = " << betaR_ij << std::endl;
-        //
-        //for (int i = 0; i < nParticles; i++)
-        //{
-        //    double numerator = spinParameter*(1 + betaR_ij) - spinParameter*betaR_ij;
-        //    double denominator = (1 + betaR_ij)*(1 + betaR_ij);
-        //    double firstFraction = numerator/denominator;
-        //    //double firstTerm = -0.5*(-AlphaOmega*arma::norm(r.row(i)) + firstFraction);
-        //    double firstTerm = -AlphaOmega*arma::norm(r.row(i)) + firstFraction;
-        //
-        //    //double secondTerm = 1 - AlphaOmega*arma::dot(r.row(i), r.row(i)) + firstFraction*arma::norm(r.row(i));
-        //
-        //    double secondTerm = firstFraction * (2*beta*arma::norm(r.row(i)) + 2*beta*beta*arma::norm(r.row(i)))/denominator - AlphaOmega;
-        //
-        //    //double thirdTerm = arma::norm(r.row(i))*(-AlphaOmega + (((1 + beta - a*beta)*(1 + betaR_ij) - numerator)*2*beta)/(denominator*(1 + betaR_ij)));
-        //
-        //    double thirdTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-        //
-        //    //double fourthTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-        //
-        //    localEnergy += -0.5*firstTerm*firstTerm * (-0.5)*secondTerm * thirdTerm;
-        //}
-        //return localEnergy;
-        return 0;
+double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &beta,
+                                             const double &omega, const double &spinParameter, const bool UseFermionInteraction)
+{
+    double energy = 0;
+    if (!UseFermionInteraction)
+    /* Without interaction */
+    {
+        for (int j=0; j<nParticles; j++)
+        {
+            for (int i=0; i<j; i++)
+            {
+                double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
+                double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
+
+                double top = -0.5*2*spinParameter*beta;
+                double bot = (1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj));
+                energy += top/bot;
+            }
+        }
+        return energy;
     }
 }
 
