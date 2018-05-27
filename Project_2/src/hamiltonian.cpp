@@ -1,5 +1,6 @@
 #include "inc/hamiltonian.h"
 #include "inc/wavefunction.h"
+#include "inc/hermite.h"
 #include <armadillo>
 
 
