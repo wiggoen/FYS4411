@@ -49,7 +49,7 @@ double Wavefunction::TrialWaveFunctionManyParticles(const double nParticles, con
 }
 
 
-double Wavefunction::SlaterDeterminant(int nParticles)
+double Wavefunction::SlaterDeterminant(int nParticles, const arma::mat &r, const double &alpha, const double &beta, const double &omega)
 {
     /* Create NxN matrix */
     arma::mat Slater = arma::zeros<arma::mat>(nParticles, nParticles);
@@ -59,9 +59,18 @@ double Wavefunction::SlaterDeterminant(int nParticles)
     {
         for (int j=0; j < nParticles; j++)
         {
-           Slater(i,j) = phi(i,j)
+           Slater(i,j) = Phi(i, j, r, alpha, beta, omega);
         }
     }
+}
+
+
+double Wavefunction::Phi(const int &i, const int &j, const arma::mat &r, const double &alpha, const double &beta, const double &omega)
+{
+    double r_iSquared = r(i, i)*r(i, i) + r(i, j)*r(i, j);
+    double r_jSquared = r(j, i)*r(j, i) + r(j, j)*r(j, j);
+    double unperturbed = -0.5*alpha*omega*(r_iSquared + r_jSquared);
+    return unperturbed;
 }
 
 
