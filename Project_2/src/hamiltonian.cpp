@@ -87,8 +87,8 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
     {
         double LocalEnergy = LocalEnergyMoreParticles(r,nParticles,beta,omega,spinParameter,UseFermionInteraction);
         if (UseJastrowFactor) {
-            Wavefunction wavefunc;
-            double slater = wavefunc.SlaterDeterminant(nParticles,r,alpha,omega);
+            arma::mat positions = Wavefunction::Positions(nParticles);
+            double slater = SlaterEnergy(r,nParticles,omega,positions);
             LocalEnergy *= slater;
             }
         return LocalEnergy;
@@ -103,7 +103,7 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
     double halfOmegaSquared = 0.5*omega*omega;
     for (int j=0; j<nParticles; j++)
     {
-        for (int i=0; i<nParticles; i++)
+        for (int i=0; i<j; i++)
         {
             double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
             double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
@@ -132,15 +132,42 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
     return energy + interactionTerm;
 }
 
-/*
-void Hamiltonian::findPossibleQnumbers()
-/* Find possible quantum numbers nx and ny */
-/*{
-    arma::mat nxny = arma::zeros<arma::mat>(2,1);
-    for (int i=0; i<)
-    std::cout << nxny << std::endl;
+double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, const double &omega, arma::mat &positions)
+{
+    double slaterEnergy = 0;
+    for (int iParticle = 0; iParticle < nParticles; iParticle++)
+    {
+        for (int jPosition=0; jPosition < nParticles; jPosition++)
+        {
+            double nx = positions(jPosition,0);
+            double ny = positions(jPosition,1);
+            double xPosition = (r(iParticle,0));
+            double yPosition = (r(iParticle,1));
+            slaterEnergy += DerivativeSlater(omega, xPosition, yPosition, nx, ny);
+        }
+    }
+    //arma::mat D = Wavefunction::SlaterDeterminant(nParticles,r,omega);
+    return slaterEnergy;
 }
-*/
+
+double Hamiltonian::DerivativeSlater(const double &omega, const double &xPosition, const double &yPosition, const int &nx, const int &ny)
+{
+    double x = xPosition;
+    double y = yPosition;
+    double normFactor    = 1.0;
+    double omegaSquared  = omega*omega;
+    double derivativeExp = normFactor*omegaSquared*(0.5+x*x+y*y);
+    double firstHermit   = DerivativeHermite(nx,omega,x);
+    double secondHermit  = DerivativeHermite(ny,omega,y);
+    return firstHermit + secondHermit + derivativeExp;
+}
+
+double Hamiltonian::DerivativeHermite(const int &n, const double &omega, const double &x)
+{
+    if (n==0) {return 0;}
+    if (n==1) {return sqrt(omega);}
+    if (n==2) {return 2*omega*x;}
+}
 
 double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                          const double &alpha, const double &beta, const double &omega,

@@ -22,7 +22,9 @@ public:
                                        const double &spinParameter, const bool UseJastrowFactor,
                                        const bool UseNumericalPotentialEnergy);
     static double LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &beta, const double omega, const double &spinParameter, const bool UseFermionInteraction);
-    //static void findPossibleQnumbers();
+    static double DerivativeHermite(const int &n, const double &omega, const double &x);
+    static double DerivativeSlater(const double &omega, const double &xPosition, const double &yPosition, const int &nx, const int &ny);
+    static double SlaterEnergy(const arma::mat &r, const int &nParticles, const double &omega, arma::mat &positions);
 private:
 };
 

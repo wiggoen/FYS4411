@@ -33,7 +33,7 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
     }
 }
 
-double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const double nParticles, const double &alpha, const double &beta, const double &omega,
+double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const double nParticles, const double &beta, const double &omega,
                                                     const double &spinParameter, const bool &UseJastrowFactor)
 {
     double wavefuncProd = 1;
@@ -49,48 +49,72 @@ double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const do
     }
     if (UseJastrowFactor)
     {
-        slater = SlaterDeterminant(nParticles, r, alpha, omega);
+        slater = SlaterDeterminant(nParticles, r, omega);
     }
     return wavefuncProd*slater;
 }
 
-
-double Wavefunction::SlaterDeterminant(const int nParticles, const arma::mat &r, const double &alpha, const double &omega)
+arma::mat Wavefunction::Positions(const int nParticles)
 {
-    /* Create NxN matrix */
-    arma::mat slater = arma::zeros<arma::mat>(nParticles, nParticles);
-
-    /* Fill Jastrow matrix */
-    int nx=0;
-    int ny=0;    //HOW TO FIX THESE??
-    for (int iParticle = 0; iParticle < nParticles; iParticle++)
+    arma::mat positions = arma::mat(nParticles,2);
+    arma::mat possibleQuantumNumbers = arma::mat(nParticles/3,1);
+    for (int i=0; i<nParticles/3; i++)
     {
-        if (iParticle<2){nx=0;}
-        else if (iParticle<6){nx=1;}
-        else if (iParticle<12){nx=2;}
-        else {std::cout << "Too many particles!" << std::endl
-                        << "Please use nParticles=2, 6 or 12." << std::endl;}
-        for (int jPosition=0; jPosition < nParticles; jPosition++)
-        {
-            if (jPosition<2){ny=0;}
-            else if (jPosition<6){ny=1;}
-            else if (jPosition<12){ny=2;}
-            slater(iParticle,jPosition) = phi(iParticle, jPosition, r, nParticles, alpha, omega, nx, ny);
-        }
+        possibleQuantumNumbers(i) = i;
     }
-    return det(slater);
+    int nx=0; int ny=0;
+    for (int i=0; i<nParticles; i++)
+    {
+        if (i==2) {nx+=1;} if (i==4){nx-=1; ny+=1;}
+        if (i==6) {nx+=1;} if (i==8){nx+=1; ny-=1;} // CAN THIS BE OPTIMIZED?
+        if (i==10) {nx-=2; ny+=2;}
+        positions(i,0) = possibleQuantumNumbers(nx);
+        positions(i,1) = possibleQuantumNumbers(ny);
+    }
+    return positions;
+}
+
+int factorial(int n)
+{
+  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
 }
 
 
-double Wavefunction::phi(const int &i, const int &j, const arma::mat &r, const int nParticles, const double &alpha, const double &omega,
-                         const int &nx, const int &ny)
+double Wavefunction::SlaterDeterminant(const int nParticles, const arma::mat &r, const double &omega)
+{
+    /* Create NxN matrix */
+    arma::mat positions = Positions(nParticles);
+    arma::mat slater = arma::zeros<arma::mat>(nParticles, nParticles);
+    int nx=0; int ny=0;
+    double normFactor = 1.0/sqrt(factorial(nParticles));
+    /*   Fill Jastrow matrix   */
+    /* Particle i at position j */
+    for (int iParticle = 0; iParticle < nParticles; iParticle++)
+    {
+        for (int jPosition=0; jPosition < nParticles; jPosition++)
+        {
+            nx = positions(jPosition,0);
+            ny = positions(jPosition,1);
+            slater(iParticle,jPosition) = phi(iParticle, r, omega, nx, ny);
+        }
+    }
+    //std::cout << "Slater:" << std::endl;
+    //std::cout << slater << std::endl;
+    //std::cout << "Determinant: " << arma::det(slater) << std::endl;
+    return arma::det(slater)*normFactor;
+}
+
+
+double Wavefunction::phi(const int &j, const arma::mat &r,
+                         const double &omega, const int &nx, const int &ny)
 {
     /* Single particle states, given by Hermite polynomials */
     double sqrtOmega = sqrt(omega);
-    double xPosition = r(i,0);
-    double yPosition = r(i,1);
+    double xPosition = r(j,0);
+    double yPosition = r(j,1);
     double hermiteNx = H(sqrtOmega*xPosition, nx);
     double hermiteNy = H(sqrtOmega*yPosition, ny);
+    //std::cout << hermiteNx << std::endl;
     return hermiteNx*hermiteNy*exp(-omega*(xPosition*xPosition + yPosition*yPosition)/2.0);
 }
 
