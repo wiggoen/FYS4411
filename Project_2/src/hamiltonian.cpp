@@ -164,9 +164,12 @@ double Hamiltonian::DerivativeSlater(const double &omega, const double &xPositio
 
 double Hamiltonian::DerivativeHermite(const int &n, const double &omega, const double &x)
 {
-    if (n==0) {return 0;}
-    else if (n==1) {return sqrt(omega);}
-    else if (n==2) {return 2*omega*x;}
+    double sqrtOmega = sqrt(omega);
+    if      (n==0) { return 0; }
+    else if (n==1) { return 2*sqrtOmega; }
+    else if (n==2) { return 8*omega*x; }
+    else if (n==3) { return 24*omega*sqrtOmega*x*x - 12*sqrtOmega; }
+    else if (n==4) { return 64*omega*omega*x*x*x - 96*omega*x; }
     else {std::cerr << "Something went wrong in the DerivateHermite function" << std::endl; exit(1);}
 }
 
