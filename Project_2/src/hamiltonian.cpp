@@ -134,10 +134,11 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
 
 double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, const double &omega, arma::mat &positions)
 {
+    std::cout << "Calculating Slater Energy" << std::endl;
     double slaterEnergy = 0;
-    for (int iParticle = 0; iParticle < nParticles; iParticle++)
+    for (int iParticle = 0; iParticle < nParticles/2; iParticle++)
     {
-        for (int jPosition=0; jPosition < nParticles; jPosition++)
+        for (int jPosition=0; jPosition < nParticles/2; jPosition++)
         {
             double nx = positions(jPosition,0);
             double ny = positions(jPosition,1);
@@ -146,7 +147,7 @@ double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, cons
             slaterEnergy += DerivativeSlater(omega, xPosition, yPosition, nx, ny);
         }
     }
-    //arma::mat D = Wavefunction::SlaterDeterminant(nParticles,r,omega);
+    arma::mat D = Wavefunction::SlaterDeterminant(r,nParticles,omega);
     return slaterEnergy;
 }
 

@@ -49,28 +49,30 @@ double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const do
     }
     if (UseJastrowFactor)
     {
-        slater = SlaterDeterminant(r, nParticles, omega);
+        //slater = SlaterDeterminant(r, nParticles, omega);
     }
     return wavefuncProd*slater;
 }
 
 arma::mat Wavefunction::Positions(const int &nParticles)
 {
-    arma::mat positions = arma::mat(nParticles,2);
+    arma::mat positions = arma::mat(nParticles/2,2);
     arma::mat possibleQuantumNumbers = arma::mat(nParticles/3,1);
     for (int i=0; i<nParticles/3; i++)
     {
         possibleQuantumNumbers(i) = i;
     }
     int nx=0; int ny=0;
-    for (int i=0; i<nParticles; i++)
+    for (int i=0; i<nParticles/2; i++)
     {
-        if (i==2) {nx+=1;} if (i==4){nx-=1; ny+=1;}
-        if (i==6) {nx+=1;} if (i==8){nx+=1; ny-=1;} // CAN THIS BE OPTIMIZED?
-        if (i==10) {nx-=2; ny+=2;}
+        if (i==1) {nx+=1;} if (i==2){nx-=1; ny+=1;}
+        if (i==3) {nx+=1;} if (i==4){nx+=1; ny-=1;} // CAN THIS BE OPTIMIZED?
+        if (i==5) {nx-=2; ny+=2;}
         positions(i,0) = possibleQuantumNumbers(nx);
         positions(i,1) = possibleQuantumNumbers(ny);
     }
+    std::cout << "Position vector: " << std::endl;
+    std::cout << positions << std::endl << std::endl;
     return positions;
 }
 
@@ -79,29 +81,29 @@ int factorial(int n)
   return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
 }
 
-
-double Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &omega)
+arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &omega)
 {
     /* Create NxN matrix */
+    std::cout << "I am in Slater!" << std::endl;
     arma::mat positions = Positions(nParticles);
-    arma::mat slater = arma::zeros<arma::mat>(nParticles, nParticles);
+    arma::mat slater = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
     int nx=0; int ny=0;
     double normFactor = 1.0/sqrt(factorial(nParticles));
     /*   Fill Jastrow matrix   */
     /* Particle i at position j */
-    for (int iParticle = 0; iParticle < nParticles; iParticle++)
+    for (int iParticle = 0; iParticle < nParticles/2; iParticle++)
     {
-        for (int jPosition=0; jPosition < nParticles; jPosition++)
+        for (int jPosition=0; jPosition < nParticles/2; jPosition++)
         {
             nx = positions(jPosition,0);
             ny = positions(jPosition,1);
             slater(iParticle,jPosition) = phi(r, omega, nx, ny, iParticle);
         }
     }
-    //std::cout << "Slater:" << std::endl;
-    //std::cout << slater << std::endl;
+    std::cout << "Slater:" << std::endl;
+    std::cout << slater << std::endl;
     //std::cout << "Determinant: " << arma::det(slater) << std::endl;
-    return arma::det(slater)*normFactor;
+    return slater;
 }
 
 
