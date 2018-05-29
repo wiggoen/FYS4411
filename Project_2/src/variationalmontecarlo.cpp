@@ -18,7 +18,7 @@
 VariationalMonteCarlo::VariationalMonteCarlo() :
     nDimensions(2)
 {
-
+    isOneBodySetup = false;
 }
 
 
@@ -67,19 +67,23 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     acceptanceCounter = 0.0;
 
     arma::rowvec runDetails;
-    double runTime = 0.0;
-    double energy = 0.0;
-    double energySquared = 0.0;
-    double variance = 0.0;
+    double runTime         = 0.0;
+    double energy          = 0.0;
+    double energySquared   = 0.0;
+    double variance        = 0.0;
     double acceptanceRatio = 0.0;
 
+    if (!UseAnalyticalExpressions)
+    {
+        numericalEnergyVector = arma::zeros<arma::rowvec>(nDimensions+1);
+        kineticEnergySum   = 0.0;
+        potentialEnergySum = 0.0;
+    }
 
     /* Initial trial positions */
     if (!UseImportanceSampling) { InitialTrialPositionsBruteForce(rOld); }
     else                        { InitialTrialPositionsImportanceSampling(rOld); }
     rNew = rOld;
-
-    //if (UseFermionInteraction)  { CheckInitialDistance(rOld); }
 
     /* Store the current value of the wave function and quantum force */
     waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
@@ -87,7 +91,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     QForceNew = QForceOld;
 
     /* MPI */
-    #ifdef MPI_ON
+#ifdef MPI_ON
     if (UseMPI)
     {
         /* Initialize the MPI environment */
@@ -106,19 +110,16 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         MPI_Get_processor_name(processor_name, &name_len);
 
         /* Print off a hello world message */
-        //printf("Hello world from processor %s, rank %d"
-        //       " out of %d processors\n",
-        //       processor_name, world_rank, world_size);
         std::cout << "Hello world from processor " << processor_name << ", rank " << world_rank
                   << " out of " << world_size << " processors." << std::endl;
     }
-    #endif
+#endif
 
     /* Start timing */
     auto start_time = std::chrono::high_resolution_clock::now();
 
     /* Run Monte Carlo cycles */
-    if (cycleType == "MonteCarlo")//|| cycleType == "OneBodyDensity")
+    if (cycleType == "MonteCarlo" || cycleType == "OneBodyDensity")
     {
         std::cout << "Running MC Cycles.." << std::endl;
         MonteCarloCycles();
@@ -137,37 +138,47 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     energy = energySum * normalizationFactor;
     energySquared = energySquaredSum * normalizationFactor;
 
+    if (!UseAnalyticalExpressions)
+    {
+        kineticEnergy   = kineticEnergySum * normalizationFactor;
+        potentialEnergy = potentialEnergySum * normalizationFactor;
+    }
+
     variance = (energySquared - energy*energy);
     acceptanceRatio = acceptanceCounter * normalizationFactor;
 
-    /*
+
     if (cycleType == "OneBodyDensity")
     {
         for (int i = 0; i < nBins; i++)
         {
             hist(i) /= volume(i) * normalizationFactor;
         }
-        std::ofstream histogram;  // Write position matrix to file
-        histogram.open("../Project_1/results/histogram.txt");
+        std::ofstream histogram;  /* Write position matrix to file */
+        histogram.open("../Project_2/results/histogram.txt");
 
-        // Loop over Monte Carlo cycles
+        /* Loop over bins */
         for (int i = 0; i < nBins; i++)
         {
-            // Write to file
+            /* Write to file */
             histogram << hist(i) << std::endl;
         }
         histogram.close();
     }
-    */
-
 
     /* Vector containing the results of the run */
-    runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
+    if (!UseAnalyticalExpressions)
+    {
+        runDetails << runTime << energy << energySquared << variance << acceptanceRatio << kineticEnergy << potentialEnergy;
+    } else
+    {
+        runDetails << runTime << energy << energySquared << variance << acceptanceRatio;
+    }
 
     /* Finalize the MPI environment */
-    #ifdef MPI_ON
+#ifdef MPI_ON
     if (UseMPI) { MPI_Finalize(); }
-    #endif
+#endif
 
     return runDetails;
 }
@@ -197,42 +208,6 @@ void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r
 }
 
 
-//void VariationalMonteCarlo::RedrawPosition(arma::mat &r, const int &i)
-//{
-//    for (int j = 0; j < nDimensions; j++)
-//    {
-//        if (!UseImportanceSampling)
-//        {
-//            /* Brute force sampling */
-//            r(i, j) = (UniformRandomNumber() - 0.5) * stepLength;
-//        } else
-//        {
-//            /* Importance sampling */
-//            r(i, j) = GaussianRandomNumber()*sqrt(timeStep);
-//        }
-//    }
-//}
-
-
-//void VariationalMonteCarlo::CheckInitialDistance(arma::mat &rOld)
-//{
-//    double distance = 0;
-//    for (int i = 0; i < nParticles; i++)
-//    {
-//        for (int j = i+1; j < nParticles; j++)
-//        {
-//            distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
-//            while (distance < a)
-//            {
-//                /* Making sure that no particle lies within a distance 'a' from each other */
-//                RedrawPositionImportanceSampling(rOld, i);
-//                distance = Hamiltonian::ParticleDistance(rOld.row(i), rOld.row(j));
-//            }
-//        }
-//    }
-//}
-
-
 double VariationalMonteCarlo::UniformRandomNumber( void )
 {
     static std::random_device rd;  /* Initialize the seed for the random number engine */
@@ -260,8 +235,8 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     std::ofstream outputDistance;
     if (cycleStepToFile != 0 && world_rank == 0)
     {
-        outputEnergy.open("../Project_2/energies.txt");
-        outputDistance.open("../Project_2/distances.txt");
+        outputEnergy.open("../Project_2/results/energies.txt");
+        outputDistance.open("../Project_2/results/distances.txt");
     }
 
     /* Loop over Monte Carlo cycles */
@@ -315,9 +290,6 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
 
         acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-        //std::cout << "wOld = " << waveFunctionOld << std::endl;
-        //std::cout << "wNew = " <<waveFunctionNew << std::endl;
-        //std::cout << "acceptW = " <<acceptanceWeight << std::endl;
 
         UpdateEnergies(i);
     }
@@ -361,10 +333,10 @@ double VariationalMonteCarlo::GreensRatio(const arma::mat &rNew, const arma::mat
                                           const arma::mat &QForceOld, const double &diffusionCoefficient,
                                           const double &timeStep, const int &i)
 {
-    double fraction = 1.0/(4.0*diffusionCoefficient*timeStep);
-    arma::rowvec yx = rNew.row(i) - rOld.row(i) - diffusionCoefficient*timeStep*QForceOld.row(i);
+    double fraction  = 1.0/(4.0*diffusionCoefficient*timeStep);
+    arma::rowvec yx  = rNew.row(i) - rOld.row(i) - diffusionCoefficient*timeStep*QForceOld.row(i);
     double yxSquared = arma::dot(yx, yx);
-    arma::rowvec xy = rOld.row(i) - rNew.row(i) - diffusionCoefficient*timeStep*QForceNew.row(i);
+    arma::rowvec xy  = rOld.row(i) - rNew.row(i) - diffusionCoefficient*timeStep*QForceNew.row(i);
     double xySquared = arma::dot(xy, xy);
     return exp((-xySquared + yxSquared) * fraction) + (nParticles - 1.0);
 }
@@ -375,51 +347,54 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     /* Test is performed by moving one particle at the time. Accept or reject this move. */
     if (UniformRandomNumber() <= acceptanceWeight)
     {
-        rOld.row(i) = rNew.row(i);
-        QForceOld.row(i) = QForceNew.row(i);
-        waveFunctionOld = waveFunctionNew;
+        rOld.row(i)        = rNew.row(i);
+        QForceOld.row(i)   = QForceNew.row(i);
+        waveFunctionOld    = waveFunctionNew;
         acceptanceCounter += 1;
     } else
     {
-        rNew.row(i) = rOld.row(i);
+        rNew.row(i)      = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
-        //waveFunctionNew = waveFunctionOld;  /* Probably unnecessary since the wavefunction didn't change. */
+        //waveFunctionNew  = waveFunctionOld;  /* Probably unnecessary since the wavefunction didn't change. */
     }
 
     /* Update energies */
     if (!UseAnalyticalExpressions)
     {
         /* using numerical expressions */
-        deltaEnergy = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega, spinParameter,
-                                                        UseJastrowFactor, UseNumericalPotentialEnergy);
+        numericalEnergyVector = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega,
+                                                                  spinParameter, UseJastrowFactor, UseFermionInteraction,
+                                                                  UseNumericalPotentialEnergy);
+        deltaEnergy         = numericalEnergyVector.at(0);
+        kineticEnergySum   += numericalEnergyVector.at(1);
+        potentialEnergySum += numericalEnergyVector.at(2);
     } else
     {
         /* using analytical expressions */
         deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor,
                                                UseFermionInteraction);
     }
-    energySum         += deltaEnergy;
-    energySquaredSum  += (deltaEnergy*deltaEnergy);
+    energySum        += deltaEnergy;
+    energySquaredSum += (deltaEnergy*deltaEnergy);
 
     if (cycleType == "SteepestDescent")
     {
-        dPsiOfAlpha        = Wavefunction::DerivativePsiOfAlpha(rNew, omega);
-        dPsiOfBeta         = Wavefunction::DerivativePsiOfBeta(rNew, beta, spinParameter);
-        psiSumAlpha       += dPsiOfAlpha;
-        psiSumBeta        += dPsiOfBeta;
-        psiOfAlphaTimesEnergySum  += dPsiOfAlpha*deltaEnergy;
-        psiOfBetaTimesEnergySum   += dPsiOfBeta*deltaEnergy;
+        dPsiOfAlpha  = Wavefunction::DerivativePsiOfAlpha(rNew, omega);
+        dPsiOfBeta   = Wavefunction::DerivativePsiOfBeta(rNew, beta, spinParameter);
+        psiSumAlpha += dPsiOfAlpha;
+        psiSumBeta  += dPsiOfBeta;
+        psiOfAlphaTimesEnergySum += dPsiOfAlpha*deltaEnergy;
+        psiOfBetaTimesEnergySum  += dPsiOfBeta*deltaEnergy;
     }
 
-    /*
     if (cycleType == "OneBodyDensity")
     {
         OneBodyDensity();
-    }*/
+    }
 }
 
 
-double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
+void VariationalMonteCarlo::SteepestDescent(const int &nParticles)
 {
     std::cout << "Running steepest descent..." << std::endl;
     double eta                   = 0.001;
@@ -433,7 +408,7 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
     double averagePsiOfAlphaTimesEnergy = 0.0;
     double averagePsiOfBetaTimesEnergy  = 0.0;
 
-    std::cout << "New alpha:    New beta:" << std::endl;
+    std::cout << "Iteration " << " New_alpha " << " New_beta " << "   Energy " << std::endl;
     /* Loop over number of alphas */
     for (int i = 0; i < nAlpha; i++)
     {
@@ -446,18 +421,16 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
         acceptanceWeight  = 0.0;
         psiSumAlpha       = 0.0;
         psiSumBeta        = 0.0;
-        deltaPsi          = 0.0;
         psiOfAlphaTimesEnergySum = 0.0;
         psiOfBetaTimesEnergySum  = 0.0;
-
 
         /* Run Monte Carlo cycles */
         MonteCarloCycles();
 
         /* Update energies */
-        averagePsiAlpha    = psiSumAlpha*scalingFactor;
-        averagePsiBeta     = psiSumBeta*scalingFactor;
-        averageEnergy      = energySum*scalingFactor;
+        averagePsiAlpha = psiSumAlpha*scalingFactor;
+        averagePsiBeta  = psiSumBeta*scalingFactor;
+        averageEnergy   = energySum*scalingFactor;
         averagePsiOfAlphaTimesEnergy = psiOfAlphaTimesEnergySum*scalingFactor;
         averagePsiOfBetaTimesEnergy  = psiOfBetaTimesEnergySum*scalingFactor;
         alphaEnergyDerivative = 2.0*(averagePsiOfAlphaTimesEnergy - averagePsiAlpha*averageEnergy);
@@ -469,12 +442,50 @@ double VariationalMonteCarlo::SteepestDescent(const int &nParticles)
             i=nAlpha-1;
         }
 
-        //std::cout << averagePsiOfAlphaTimesEnergy << std::endl;
         /* Calculate alpha and beta */
         alpha -= eta * alphaEnergyDerivative;
         beta  -= eta * betaEnergyDerivative;
-        std::cout << alpha << "     " << beta  << std::endl;
-        std::cout << "Energy: " << averageEnergy << std::endl;
+
+        std::cout << std::setw(9) << i << std::setw(11) << alpha << std::setw(10) << beta
+                  << std::setw(10) << averageEnergy << std::endl;
     }
-    return alpha;
+}
+
+
+void VariationalMonteCarlo::SetOneBody( void )
+{
+    int max_r = 2;
+    nBins = 400;
+    r_step = (double) max_r/nBins;
+    hist = arma::zeros<arma::rowvec>(nBins);
+    volume = arma::zeros<arma::rowvec>(nBins);
+
+    volume(0) = r_step*r_step;
+    for (int i = 1; i < nBins; i++)
+    {
+        volume(i) = pow(r_step*(i+1), 2);
+    }
+}
+
+
+void VariationalMonteCarlo::OneBodyDensity( void )
+{
+    if (!isOneBodySetup)
+    {
+        SetOneBody();
+        isOneBodySetup = true;
+    }
+
+    for (int i = 0; i < nParticles; i++)
+    {
+        double rNorm = arma::norm(rNew.row(i));
+        for (int j = 1; j < nBins; j++)
+        {
+            if ( (rNorm < j*r_step) && (rNorm >= (r_step*(j-1))) )
+            {
+                hist(j-1) += 1;
+            }
+        }
+    }
+
 }

@@ -24,23 +24,26 @@ int main(int argumentCount, char *argumentVector[])
 
 
     /* Who am I? */
-    std::string Iam = "Line";
+    std::string Iam = "Trond";
 
     /* The whole project path is needed to read json file */
     std::string projectFolder;
 
     /* Check the number of command line arguments */
     if (argumentCount == 1) {
-        if (Iam == "Trond") {
+        if (Iam == "Trond")
+        {
             std::cout << "Hi, Trond!" << std::endl;
             projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";         // Mac
             //projectFolder = "/home/twj/Documents/GitHub/FYS4411/Project_2/";  // Linux
             inputFile.open(projectFolder+"parameters.json", std::ios::in);
-        } else if (Iam == "Line") {
+        } else if (Iam == "Line")
+        {
             std::cout << "Hi, Line!" << std::endl;
             projectFolder = "/home/line/github/FYS4411/Project_2/";
             inputFile.open(projectFolder+"parameters.json", std::ios::in);
-        } else {
+        } else
+        {
             std::cerr << "You have to give the parameter file as command line argument." << std::endl;
             std::cerr << "Compile: g++ -std=c++11 -O3 -L '/armadillo/lib/' -I '/armadillo/include/' -I 'project folder' -o main.out main.cpp src/*.cpp -larmadillo" << std::endl;
             std::cerr << "Remember to include the paths of armadillo library and headers as stated above, and in addition the project folder." << std::endl;
@@ -127,15 +130,21 @@ int main(int argumentCount, char *argumentVector[])
         }
 
         /* Used for running several trials */
-        arma::rowvec columnSum;
-        columnSum = arma::sum(runMatrix, 0);
+        arma::rowvec columnSum = arma::sum(runMatrix, 0);
 
         /* Finding averages of trials */
-        double runTime = columnSum(0)/trials;
-        double energy = columnSum(1)/trials;
-        double energySquared = columnSum(2)/trials;
-        double variance = columnSum(3)/trials;
+        double runTime         = columnSum(0)/trials;
+        double energy          = columnSum(1)/trials;
+        double energySquared   = columnSum(2)/trials;
+        double variance        = columnSum(3)/trials;
         double acceptanceRatio = columnSum(4)/trials;
+        double kineticEnergy;
+        double potentialEnergy;
+        if (!UseAnalyticalExpressions)
+        {
+            kineticEnergy   = columnSum(5)/trials;
+            potentialEnergy = columnSum(6)/trials;
+        }
 
         /* Setup for printing to terminal */
         int nDimensions = 2;
@@ -200,6 +209,14 @@ int main(int argumentCount, char *argumentVector[])
                   << std::setw(16) << std::setprecision(6) << energySquared
                   << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
+
+        if (!UseAnalyticalExpressions)
+        {
+            std::cout << "Kinetic_energy "  << " Potential_energy " << std::endl;
+
+            std::cout << std::setw(14) << std::setprecision(6) << kineticEnergy
+                      << std::setw(18) << std::setprecision(6) << potentialEnergy << std::endl;
+        }
 
         return 0;
     }

@@ -13,8 +13,8 @@ public:
                         const double beta,  const double omega, const double spinParameter,
                         const double stepLength, const double timeStep, const bool UseJastrowFactor,
                         const bool UseImportanceSampling, const bool UseFermionInteraction,
-                        const bool UseAnalyticalExpressions, bool UseNumericalPotentialEnergy, std::string cycleType,
-                        const int cycleStepToFile, bool UseMPI);
+                        const bool UseAnalyticalExpressions, const bool UseNumericalPotentialEnergy,
+                        const std::string cycleType, const int cycleStepToFile, const bool UseMPI);
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void MonteCarloCycles( void );
     double UniformRandomNumber( void );
@@ -29,15 +29,21 @@ public:
     double GreensRatio(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
                        const arma::mat &QForceOld, const double &diffusionCoefficient,
                        const double &timeStep, const int &i);
-    double SteepestDescent(const int &nParticles);
+    void SteepestDescent(const int &nParticles);
+    void SetOneBody( void );
+    void OneBodyDensity( void );
     double waveFunctionOld;            /* old wave function */
     double waveFunctionNew;            /* new wave function */
     double energySum;                  /* sum of particle energies for all Monte Carlo cycles */
     double energySquaredSum;           /* squared sum of particle energies for all Monte Carlo cycles */
     double deltaEnergy;                /* energy of particle we look at */
+    arma::rowvec numericalEnergyVector;
+    double kineticEnergySum;
+    double potentialEnergySum;
+    double kineticEnergy;
+    double potentialEnergy;
     double psiSum;
     double psiTimesEnergySum;
-    double deltaPsi;
     const int nDimensions;             /* number of dimensions */
     double dPsiOfAlpha;
     double dPsiOfBeta;
@@ -70,12 +76,11 @@ private:
     int cycleStepToFile;               /* fraction of Monte Carlo cycles written to file */
     double acceptanceWeight;           /* weight used for accepting or rejecting a move */
     int acceptanceCounter;             /* number of accepted moves */
-    //arma::rowvec hist;
-    //arma::rowvec volume;
-    //double r_step;
-    //int nBins;
-    //bool isOneBodySetup;
-
+    arma::rowvec hist;
+    arma::rowvec volume;
+    double r_step;
+    int nBins;
+    bool isOneBodySetup;
 };
 
 #endif /* VARIATIONALMONTECARLO_H */

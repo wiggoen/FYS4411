@@ -17,7 +17,7 @@ TEST_CASE("Local energy two electrons", "[Hamiltonian]")
     double stepLength = 1.5;
     double timeStep = 0;
     bool UseJastrowFactor = false;
-    bool UseImportanceSampling = false;
+    bool UseImportanceSampling;
     bool UseFermionInteraction = false;
     bool UseAverageTiming = false;
     bool UseAnalyticalExpressions = true;
@@ -28,12 +28,25 @@ TEST_CASE("Local energy two electrons", "[Hamiltonian]")
 
 
     arma::rowvec runVector;
+    double energy;
+    double variance;
+
+    UseImportanceSampling = false;
     runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
                             UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
-    double energy = runVector(1);
+    energy = runVector(1);
     REQUIRE(energy == 2);
-    double variance = runVector(3);
+    variance = runVector(3);
+    REQUIRE(variance == 0);
+
+    UseImportanceSampling = true;
+    runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
+                            UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
+                            UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
+    energy = runVector(1);
+    REQUIRE(energy == 2);
+    variance = runVector(3);
     REQUIRE(variance == 0);
 }
 

@@ -17,12 +17,13 @@ public:
     static double DerivativePsiOfBeta(const arma::mat &r, const double &beta, const double &spinParameter);
     static void NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                       const int &nDimensions, const double &alpha, const double &beta,
-                                      const double &omega, const double &spinParameter, const bool UseJastrowFactor);
-    static double TrialWaveFunctionManyParticles(const arma::mat &r, const double nParticles, const double &beta, const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
-    static arma::mat Positions(const int nParticles);
-    static double SlaterDeterminant(const int nParticles, const arma::mat &r, const double &omega);
-    static double findPossibleNxNy(unsigned int i, const arma::vec &p);
-    static double phi(const int &j, const arma::mat &r, const double &omega, const int &nx, const int &ny);
+                                      const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
+    static double TrialWaveFunctionManyParticles(const arma::mat &r, const double &nParticles, const double &beta,
+                                                 const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
+    static arma::mat Positions(const int &nParticles);
+    static double SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &omega);
+    static double findPossibleNxNy(const arma::vec &p, unsigned int i);
+    static double phi(const arma::mat &r, const double &omega, const int &nx, const int &ny, const int &j);
 };
 
 
