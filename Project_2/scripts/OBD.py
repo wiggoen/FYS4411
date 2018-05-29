@@ -4,28 +4,28 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-Int_J_path = "../results/histogram-Int-J-2p.txt"
-Int_noJ_path = "../results/histogram-Int-noJ-2p.txt"
-noInt_J_path = "../results/histogram-noInt-J-2p.txt"
-noInt_noJ_path = "../results/histogram-noInt-noJ-2p.txt"
+Int_J_path = "../results/histogram-Int-J-2p-2up27.txt"
+Int_noJ_path = "../results/histogram-Int-noJ-2p-2up27.txt"
+noInt_J_path = "../results/histogram-noInt-J-2p-2up27.txt"
+noInt_noJ_path = "../results/histogram-noInt-noJ-2p-2up27.txt"
 
-int_J = np.loadtxt(int_J_path)
-int_noJ = np.loadtxt(int_noJ_path)
+Int_J = np.loadtxt(Int_J_path)
+Int_noJ = np.loadtxt(Int_noJ_path)
 noInt_J = np.loadtxt(noInt_J_path)
 noInt_noJ = np.loadtxt(noInt_noJ_path)
 
-distance = np.linspace(0, 4, len(int_J)+1)
+distance = np.linspace(0, 4, len(Int_J)+1)
 norm = distance[1:]**2/(2*np.pi*distance[1:]*distance[1] - np.pi*distance[1]*distance[1])
 
-int_J = int_J*norm
-int_noJ = int_noJ*norm
+Int_J = Int_J*norm
+Int_noJ = Int_noJ*norm
 noInt_J = noInt_J*norm
 noInt_noJ = noInt_noJ*norm
 
 fig = plt.figure()
-plt.plot(distance[1:], int_J/sum(int_J), linestyle='None', marker='o',
+plt.plot(distance[1:], Int_J/sum(Int_J), linestyle='None', marker='o',
          markersize=0.6, label="Interaction on, Jastrow on")
-plt.plot(distance[1:], int_noJ/sum(int_noJ), linestyle='None', marker='o',
+plt.plot(distance[1:], Int_noJ/sum(Int_noJ), linestyle='None', marker='o',
          markersize=0.6, label="Interaction on, Jastrow off")
 plt.plot(distance[1:], noInt_J/sum(noInt_J), linestyle='None', marker='o',
          markersize=0.6, label="Interaction off, Jastrow on")
