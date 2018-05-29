@@ -26,10 +26,6 @@ HEADERS += \
     inc/hermite.h
 
 
-    # MPI-flag for compiling
-    #QMAKE_CXXFLAGS += -DMPI_ON         # NOT IMPLEMENTED YET
-
-
     # MPI Settings
 MPI_ON {
     QMAKE_CXX = mpicxx
