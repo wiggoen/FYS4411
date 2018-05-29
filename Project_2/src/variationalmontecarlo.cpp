@@ -454,8 +454,8 @@ void VariationalMonteCarlo::SteepestDescent(const int &nParticles)
 
 void VariationalMonteCarlo::SetOneBody( void )
 {
-    int max_r = 2;
-    nBins = 400;
+    int max_r = 4;
+    nBins = 800;
     r_step = (double) max_r/nBins;
     hist = arma::zeros<arma::rowvec>(nBins);
     volume = arma::zeros<arma::rowvec>(nBins);
