@@ -139,6 +139,25 @@ double Wavefunction::phi(const arma::mat &r, const double alpha, const double &o
     return hermiteNx*hermiteNy*exp(-omega*(xPosition*xPosition + yPosition*yPosition)/2.0);
 }
 
+double Wavefunction::phiLaplace(const double &alpha, const double &omega, const double &x, const double &y,
+                                const int &nx, const double &ny)
+/* Based on Alocias' calculation */
+{
+    double alphaOmega = alpha*omega;
+    double sqrtAlphaOmega = sqrt(alphaOmega);
+    double exponent1 = -alphaOmega*(x*x+y*y)/2.0;
+    double exponent2 = -alphaOmega*y*y/2.0;
+    double exponent3 = -alphaOmega*x*x/2.0;
+    double hermitey1 = H(sqrtAlphaOmega*y,ny);
+    double hermitex1 = H(sqrtAlphaOmega*x,nx);
+    double derHermite1 = Hamiltonian::doubleDerivativeHermite(alpha, omega, sqrtAlphaOmega*x,nx);
+    double derHermite2 = Hamiltonian::doubleDerivativeHermite(alpha, omega, sqrtAlphaOmega*y,ny);
+
+    double term1 = hermitey1*exp(exponent1)*derHermite1*exp(exponent2);
+    double term2 = hermitex1*exp(exponent1)*derHermite2*exp(exponent3);
+    return term1+term2;
+}
+
 
 
 

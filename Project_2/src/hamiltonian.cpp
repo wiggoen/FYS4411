@@ -147,7 +147,7 @@ double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, cons
             slaterEnergy += DerivativeSlater(alpha, omega, xPosition, yPosition, nx, ny);
         }
     }
-    arma::mat D = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
+    //arma::mat D = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
     return slaterEnergy;
 }
 
@@ -173,6 +173,17 @@ double Hamiltonian::DerivativeHermite(const int &n, const double &alpha, const d
     else if (n==3) { return 24*AlphaOmega*sqrtAlphaOmega*x*x - 12*sqrtAlphaOmega; }
     else if (n==4) { return 64*AlphaOmega*AlphaOmega*x*x*x - 96*AlphaOmega*x; }
     else {std::cerr << "Something went wrong in the DerivateHermite function" << std::endl; exit(1);}
+}
+
+double Hamiltonian::doubleDerivativeHermite(const double &alpha, const double &omega, const double &x, const int &n)
+{
+    double alphaOmega = alpha*omega;
+    double sqrtAlphaOmega = sqrt(alphaOmega);
+    if (n<2) {return 0;}
+    else if (n==2) {return 8*alphaOmega;}
+    else if (n==3) {return 48*alphaOmega*x;}
+    else if (n==4) {return 192*alphaOmega*alphaOmega*x*x - 96*alphaOmega;}
+    else {std::cerr << "Something went wrong in the doubleDerivateHermite function" << std::endl; exit(1);}
 }
 
 arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,

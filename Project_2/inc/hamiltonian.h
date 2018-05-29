@@ -24,6 +24,7 @@ public:
     static double LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &beta, const double &omega,
                                            const double &spinParameter, const bool &UseFermionInteraction);
     static double DerivativeHermite(const int &n, const double &alpha, const double &omega, const double &x);
+    static double doubleDerivativeHermite(const double &alpha, const double &omega, const double &x, const int &n);
     static double DerivativeSlater(const double &alpha, const double &omega, const double &xPosition, const double &yPosition, const int &nx, const int &ny);
     static double SlaterEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega, arma::mat &positions);
 private:
