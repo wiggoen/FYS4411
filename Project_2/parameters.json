@@ -10,7 +10,7 @@
     "timeStep": 0.001,
     "Use Jastrow factor": true,
     "Use Importance sampling": true,
-    "Use Fermion interaction": true,
+    "Use Fermion interaction": false,
     "Use Average timing": false,
     "Use analytical expressions": true,
     "Use numerical potential energy": false,

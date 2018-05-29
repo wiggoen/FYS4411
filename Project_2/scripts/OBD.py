@@ -4,17 +4,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-Int_J_path = "../results/histogram-Int-J-2p-2up27.txt"
-Int_noJ_path = "../results/histogram-Int-noJ-2p-2up27.txt"
-noInt_J_path = "../results/histogram-noInt-J-2p-2up27.txt"
-noInt_noJ_path = "../results/histogram-noInt-noJ-2p-2up27.txt"
+Int_J_path = "../results/histogram-Int-J-2p-2up27-w01.txt"
+Int_noJ_path = "../results/histogram-Int-noJ-2p-2up27-w01.txt"
+noInt_J_path = "../results/histogram-noInt-J-2p-2up27-w01.txt"
+noInt_noJ_path = "../results/histogram-noInt-noJ-2p-2up27-w01.txt"
 
 Int_J = np.loadtxt(Int_J_path)
 Int_noJ = np.loadtxt(Int_noJ_path)
 noInt_J = np.loadtxt(noInt_J_path)
 noInt_noJ = np.loadtxt(noInt_noJ_path)
 
-distance = np.linspace(0, 4, len(Int_J)+1)
+distance = np.linspace(0, 10, len(Int_J)+1)
 norm = distance[1:]**2/(2*np.pi*distance[1:]*distance[1] - np.pi*distance[1]*distance[1])
 
 Int_J = Int_J*norm
