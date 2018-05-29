@@ -22,7 +22,8 @@ HEADERS += \
     inc/catch.hpp \
     inc/hamiltonian.h \
     inc/variationalmontecarlo.h \
-    inc/wavefunction.h
+    inc/wavefunction.h \
+    inc/hermite.h
 
 
     # MPI-flag for compiling

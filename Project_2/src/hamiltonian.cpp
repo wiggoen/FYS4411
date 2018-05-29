@@ -1,5 +1,6 @@
 #include "inc/hamiltonian.h"
 #include "inc/wavefunction.h"
+#include "inc/hermite.h"
 #include <armadillo>
 
 
@@ -35,11 +36,11 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
     double AlphaOmega = alpha*omega;
     double omegaSquaredHalf = 0.5*omega*omega;
 
-    double r_1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
-    double r_2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
+    double r1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
+    double r2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
     double alphaSquared = alpha*alpha;
 
-    double energyWithoutJastrow = 2*AlphaOmega + omegaSquaredHalf*(1 - alphaSquared)*(r_1Squared + r_2Squared);
+    double energyWithoutJastrow = 2*AlphaOmega + omegaSquaredHalf*(1 - alphaSquared)*(r1Squared + r2Squared);
 
     if (!UseJastrowFactor)
     {
@@ -84,52 +85,99 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
         return LocalEnergyTwoElectrons(r, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
     } else
     {
-        /* Husk å legg til med / uten Jastrow for flere partikler */
-        //if (!UseJastrowFactor) {}
-
-
-        //double localEnergy = 0;
-        //double AlphaOmega = alpha*omega;
-        //double omegaSquaredHalf = 0.5*omega*omega;
-        //
-        //double betaR_ij =  beta*arma::norm(r.row(0) - r.row(1));
-        ////std::cout << "norm = " << betaR_ij << std::endl;
-        //
-        //for (int i = 0; i < nParticles; i++)
-        //{
-        //    double numerator = spinParameter*(1 + betaR_ij) - spinParameter*betaR_ij;
-        //    double denominator = (1 + betaR_ij)*(1 + betaR_ij);
-        //    double firstFraction = numerator/denominator;
-        //    //double firstTerm = -0.5*(-AlphaOmega*arma::norm(r.row(i)) + firstFraction);
-        //    double firstTerm = -AlphaOmega*arma::norm(r.row(i)) + firstFraction;
-        //
-        //    //double secondTerm = 1 - AlphaOmega*arma::dot(r.row(i), r.row(i)) + firstFraction*arma::norm(r.row(i));
-        //
-        //    double secondTerm = firstFraction * (2*beta*arma::norm(r.row(i)) + 2*beta*beta*arma::norm(r.row(i)))/denominator - AlphaOmega;
-        //
-        //    //double thirdTerm = arma::norm(r.row(i))*(-AlphaOmega + (((1 + beta - a*beta)*(1 + betaR_ij) - numerator)*2*beta)/(denominator*(1 + betaR_ij)));
-        //
-        //    double thirdTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-        //
-        //    //double fourthTerm = omegaSquaredHalf*arma::dot(r.row(i), r.row(i));
-        //
-        //    localEnergy += -0.5*firstTerm*firstTerm * (-0.5)*secondTerm * thirdTerm;
-        //}
-        //return localEnergy;
-        return 0;
-    }
+        double LocalEnergy = LocalEnergyMoreParticles(r,nParticles,beta,omega,spinParameter,UseFermionInteraction);
+        if (UseJastrowFactor) {
+            arma::mat positions = Wavefunction::Positions(nParticles);
+            double slater = SlaterEnergy(r,nParticles,omega,positions);
+            LocalEnergy *= slater;
+            }
+        return LocalEnergy;
+        }
 }
 
+
+double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &beta,
+                                             const double omega, const double &spinParameter, const bool UseFermionInteraction)
+{
+    double energy = 0;
+    double halfOmegaSquared = 0.5*omega*omega;
+    for (int j=0; j<nParticles; j++)
+    {
+        for (int i=0; i<j; i++)
+        {
+            double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
+            double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
+
+            double top = -0.5*2*spinParameter*beta;
+            double bot = (1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj));
+            energy += top/bot + halfOmegaSquared*Ri*Ri;
+        }
+    }
+    double interactionTerm = 0;
+    if (!UseFermionInteraction)
+    /* Without interaction */
+    {
+        return energy;
+    } else {
+        for (int j=0; j<nParticles; j++)
+        {
+            for (int i=0; i<nParticles; i++)
+            {
+                double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
+                double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
+                interactionTerm += 1.0/abs(Ri-Rj);
+            }
+        }
+    }
+    return energy + interactionTerm;
+}
+
+double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, const double &omega, arma::mat &positions)
+{
+    double slaterEnergy = 0;
+    for (int iParticle = 0; iParticle < nParticles; iParticle++)
+    {
+        for (int jPosition=0; jPosition < nParticles; jPosition++)
+        {
+            double nx = positions(jPosition,0);
+            double ny = positions(jPosition,1);
+            double xPosition = (r(iParticle,0));
+            double yPosition = (r(iParticle,1));
+            slaterEnergy += DerivativeSlater(omega, xPosition, yPosition, nx, ny);
+        }
+    }
+    //arma::mat D = Wavefunction::SlaterDeterminant(nParticles,r,omega);
+    return slaterEnergy;
+}
+
+double Hamiltonian::DerivativeSlater(const double &omega, const double &xPosition, const double &yPosition, const int &nx, const int &ny)
+{
+    double x = xPosition;
+    double y = yPosition;
+    double normFactor    = 1.0;
+    double omegaSquared  = omega*omega;
+    double derivativeExp = normFactor*omegaSquared*(0.5+x*x+y*y);
+    double firstHermit   = DerivativeHermite(nx,omega,x);
+    double secondHermit  = DerivativeHermite(ny,omega,y);
+    return firstHermit + secondHermit + derivativeExp;
+}
+
+double Hamiltonian::DerivativeHermite(const int &n, const double &omega, const double &x)
+{
+    if (n==0) {return 0;}
+    if (n==1) {return sqrt(omega);}
+    if (n==2) {return 2*omega*x;}
+}
 
 double Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                          const double &alpha, const double &beta, const double &omega,
                                          const double &spinParameter, const bool UseJastrowFactor,
                                          const bool UseNumericalPotentialEnergy)
 {
-    arma::mat rPlus = arma::zeros<arma::mat>(nParticles, nDimensions);
+    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
 
-    rPlus = r;
+    rPlus  = r;
     rMinus = r;
 
     double waveFunctionMinus = 0.0;

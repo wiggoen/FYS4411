@@ -18,9 +18,11 @@ public:
     static void NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                       const int &nDimensions, const double &alpha, const double &beta,
                                       const double &omega, const double &spinParameter, const bool UseJastrowFactor);
-    double TrialWaveFunctionManyParticles(const double nParticles, const arma::mat &r, const double &alpha, const double &beta, const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
-    double SlaterDeterminant(int nParticles);
+    static double TrialWaveFunctionManyParticles(const arma::mat &r, const double nParticles, const double &beta, const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
+    static arma::mat Positions(const int nParticles);
+    static double SlaterDeterminant(const int nParticles, const arma::mat &r, const double &omega);
     static double findPossibleNxNy(unsigned int i, const arma::vec &p);
+    static double phi(const int &j, const arma::mat &r, const double &omega, const int &nx, const int &ny);
 };
 
 
