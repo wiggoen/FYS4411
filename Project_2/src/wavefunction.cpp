@@ -81,7 +81,7 @@ int factorial(int n)
   return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
 }
 
-arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &omega)
+arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
 {
     /* Create NxN matrix */
     std::cout << "I am in Slater!" << std::endl;
@@ -97,24 +97,44 @@ arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nPartic
         {
             nx = positions(jPosition,0);
             ny = positions(jPosition,1);
-            slater(iParticle,jPosition) = phi(r, omega, nx, ny, iParticle);
+            slater(iParticle,jPosition) = phi(r, alpha, omega, nx, ny, iParticle);
         }
     }
     std::cout << "Slater:" << std::endl;
-    std::cout << slater << std::endl;
-    //std::cout << "Determinant: " << arma::det(slater) << std::endl;
-    return slater;
+    std::cout << slater << std::endl << std::endl;
+    std::cout << arma::inv(slater) << std::endl;
+    return arma::inv(slater);
 }
 
+/*
+arma::mat Wavefunction::inverseSlater()
+{
+    arma::mat inverseSlater = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+    for (int i=0; i<nParticles/2; i++)
+    {
+        for (int j=0; j<nParticles/2; j++)
+        {
+            if (i==j)
+            {
+                inverseSlater(i,j)= ... (side 56)
+            } else
+            {
+                inverseSlater(i,j)= ...
+            }
+        }
+    }
+}
+*/
 
-double Wavefunction::phi(const arma::mat &r, const double &omega, const int &nx, const int &ny, const int &j)
+
+double Wavefunction::phi(const arma::mat &r, const double alpha, const double &omega, const int &nx, const int &ny, const int &j)
 {
     /* Single particle states, given by Hermite polynomials */
-    double sqrtOmega = sqrt(omega);
+    double sqrtAlphaOmega = sqrt(alpha*omega);
     double xPosition = r(j,0);
     double yPosition = r(j,1);
-    double hermiteNx = H(sqrtOmega*xPosition, nx);
-    double hermiteNy = H(sqrtOmega*yPosition, ny);
+    double hermiteNx = H(sqrtAlphaOmega*xPosition, nx);
+    double hermiteNy = H(sqrtAlphaOmega*yPosition, ny);
     //std::cout << hermiteNx << std::endl;
     return hermiteNx*hermiteNy*exp(-omega*(xPosition*xPosition + yPosition*yPosition)/2.0);
 }
