@@ -144,22 +144,22 @@ double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, cons
             double ny = positions(jPosition,1);
             double xPosition = (r(iParticle,0));
             double yPosition = (r(iParticle,1));
-            slaterEnergy += DerivativeSlater(omega, xPosition, yPosition, nx, ny);
+            slaterEnergy += DerivativeSlater(alpha, omega, xPosition, yPosition, nx, ny);
         }
     }
     arma::mat D = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
     return slaterEnergy;
 }
 
-double Hamiltonian::DerivativeSlater(const double &omega, const double &xPosition, const double &yPosition, const int &nx, const int &ny)
+double Hamiltonian::DerivativeSlater(const double &alpha, const double &omega, const double &xPosition, const double &yPosition, const int &nx, const int &ny)
 {
     double x = xPosition;
     double y = yPosition;
     double normFactor    = 1.0;
     double omegaSquared  = omega*omega;
     double derivativeExp = normFactor*omegaSquared*(0.5+x*x+y*y);
-    double firstHermit   = DerivativeHermite(nx,omega,x);
-    double secondHermit  = DerivativeHermite(ny,omega,y);
+    double firstHermit   = DerivativeHermite(nx,alpha,omega,x);
+    double secondHermit  = DerivativeHermite(ny,alpha,omega,y);
     return firstHermit + secondHermit + derivativeExp;
 }
 
