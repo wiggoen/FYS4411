@@ -294,17 +294,24 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             rNew(i, j) = rOld(i, j) + (UniformRandomNumber() - 0.5) * stepLength;
         }
         /* Recalculate the value of the wave function */
-        if (nParticles==2){waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);}
-        else {waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew,nParticles,beta,spinParameter,UseJastrowFactor);}
-
-        if (nParticles==2){acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);}
+        if (nParticles==2)
+        {
+            waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
+            acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+        }
         else
         {
-            double DupNew    = arma::det(Wavefunction::SlaterDeterminant(rNew,nParticles,alpha,omega));
-            double DdownNew  = arma::det(Wavefunction::SlaterDeterminant(rNew,nParticles,alpha,omega));
-            double DupOld    = arma::det(Wavefunction::SlaterDeterminant(rOld,nParticles,alpha,omega));
-            double DdownOld  = arma::det(Wavefunction::SlaterDeterminant(rOld,nParticles,alpha,omega));
-            acceptanceWeight = DupNew*DdownNew / (DupOld*DdownOld);
+            waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew,nParticles,beta,spinParameter,UseJastrowFactor);
+
+            arma::mat DupNew    = Wavefunction::SlaterDeterminant(rNew.submat(0,0,nParticles/2-1,1),nParticles,alpha,omega);
+            arma::mat DdownNew  = Wavefunction::SlaterDeterminant(rNew.submat(nParticles/2,0,nParticles-1,1),nParticles,alpha,omega);
+            arma::mat DupOld    = Wavefunction::SlaterDeterminant(rOld.submat(0,0,nParticles/2-1,1),nParticles,alpha,omega);
+            arma::mat DdownOld  = Wavefunction::SlaterDeterminant(rOld.submat(nParticles/2,0,nParticles-1,1),nParticles,alpha,omega);
+
+            std::cout << DupNew << std::endl;
+
+            //double slaterRatio +=
+            //acceptanceWeight = DupNew*DdownNew / (DupOld*DdownOld);
         }
 
         UpdateEnergies(i);
