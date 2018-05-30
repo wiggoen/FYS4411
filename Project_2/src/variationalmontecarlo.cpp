@@ -243,7 +243,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
         /* Sampling */
-        if (nParticles>2)
+        if (nParticles > 2)
         {
             /* Only implemented brute-force Metropolis for many particles  */
             MetropolisBruteForce(rNew, rOld, waveFunctionNew, waveFunctionOld);
@@ -294,19 +294,19 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             rNew(i, j) = rOld(i, j) + (UniformRandomNumber() - 0.5) * stepLength;
         }
         /* Recalculate the value of the wave function */
-        if (nParticles==2)
+        if (nParticles == 2)
         {
             waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
             acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
         }
         else
         {
-            waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew,nParticles,beta,spinParameter,UseJastrowFactor);
+            waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew, nParticles, beta, spinParameter, UseJastrowFactor);
 
-            arma::mat DupNew    = Wavefunction::SlaterDeterminant(rNew.submat(0,0,nParticles/2-1,1),nParticles,alpha,omega);
-            arma::mat DdownNew  = Wavefunction::SlaterDeterminant(rNew.submat(nParticles/2,0,nParticles-1,1),nParticles,alpha,omega);
-            arma::mat DupOld    = Wavefunction::SlaterDeterminant(rOld.submat(0,0,nParticles/2-1,1),nParticles,alpha,omega);
-            arma::mat DdownOld  = Wavefunction::SlaterDeterminant(rOld.submat(nParticles/2,0,nParticles-1,1),nParticles,alpha,omega);
+            arma::mat DupNew   = Wavefunction::SlaterDeterminant(rNew.submat(0, 0, nParticles/2-1, 1), nParticles, alpha, omega);
+            arma::mat DdownNew = Wavefunction::SlaterDeterminant(rNew.submat(nParticles/2,0, nParticles-1 ,1), nParticles, alpha, omega);
+            arma::mat DupOld   = Wavefunction::SlaterDeterminant(rOld.submat(0, 0, nParticles/2-1, 1), nParticles, alpha, omega);
+            arma::mat DdownOld = Wavefunction::SlaterDeterminant(rOld.submat(nParticles/2, 0, nParticles-1, 1), nParticles, alpha, omega);
 
             std::cout << DupNew << std::endl;
 

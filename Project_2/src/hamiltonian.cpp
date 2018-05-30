@@ -134,23 +134,22 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
     return energy + interactionTerm;
 }
 
+
 double Hamiltonian::JastrowMoreParticles(arma::mat &r, const double &nParticles, const double &spinParameter, const double &beta)
 {
     double jastrow = 0;
-    for (int j = 0; j<nParticles; j++)
+    for (int j = 0; j < nParticles; j++)
     {
-        for (int i=0; i<j; i++)
+        for (int i = 0; i < j; i++)
         {
-            double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
-            double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
-            double Rij = abs(Ri-Rj);
+            double Ri = sqrt(r(i, 0)*r(i, 0)+r(i, 1)*r(i, 1));
+            double Rj = sqrt(r(j, 0)*r(j, 0)+r(j, 1)*r(j, 1));
+            double Rij = abs(Ri-Rj);                                // Hvorfor abs?
             jastrow += spinParameter*Rij/(1+beta*Rij);
         }
     }
     return exp(jastrow);
 }
-
-
 
 /*
 double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega, arma::mat &positions)
@@ -173,56 +172,55 @@ double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, cons
 }
 */
 
-arma::mat Hamiltonian::GradientSlater(const arma::mat r, const double nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
+arma::mat Hamiltonian::GradientSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
                                    const int &nx, const int &ny, const int &iParticle)
 {
     arma::mat gradient = 0;
     int i = iParticle;
-    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
-    for (int j=0; j<nParticles; j++)
+    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r, nParticles, alpha, omega);
+    for (int j = 0; j < nParticles; j++)
     {
-        arma::mat gradPhi    = Wavefunction::phiGradient(alpha,omega,xPosition,yPosition,nx,ny);
-        gradient += gradPhi*inverseDet(j,i);
+        arma::mat gradPhi = Wavefunction::phiGradient(nParticles, alpha, omega, xPosition, yPosition, nx, ny);
+        gradient += gradPhi*inverseDet(j, i);
     }
     return gradient;
 }
 
 
-double Hamiltonian::LaplaceSlater(const arma::mat r, const double nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
+double Hamiltonian::LaplaceSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
                                   const int &nx, const int &ny, const int &i)
 {
     double laplace =0;
-    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
-    for (int j=0; j<nParticles; j++)
+    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r, nParticles, alpha, omega);
+    for (int j = 0; j < nParticles; j++)
     {
-        double laplacePhi = Wavefunction::phiLaplace(alpha,omega,xPosition,yPosition,nx,ny);
-        laplace += laplacePhi*inverseDet(j,i);
+        double laplacePhi = Wavefunction::phiLaplace(alpha, omega, xPosition, yPosition, nx, ny);
+        laplace += laplacePhi*inverseDet(j, i);
     }
     return laplace;
 }
 
 
-double Hamiltonian::DerivativeHermite(const int &n, const double &alpha, const double &omega, const double &x)
+double Hamiltonian::DerivativeHermite(const int &n, const double &x)
 {
-    double AlphaOmega = alpha*omega;
-    double sqrtAlphaOmega = sqrt(AlphaOmega);
-    if      (n==0) { return 0; }
-    else if (n==1) { return 2*sqrtAlphaOmega; }
-    else if (n==2) { return 8*AlphaOmega*x; }
-    else if (n==3) { return 24*AlphaOmega*sqrtAlphaOmega*x*x - 12*sqrtAlphaOmega; }
-    else if (n==4) { return 64*AlphaOmega*AlphaOmega*x*x*x - 96*AlphaOmega*x; }
-    else {std::cerr << "Something went wrong in the DerivateHermite function" << std::endl; exit(1);}
+    if      (n == 0) { return 0; }
+    else if (n == 1) { return 2; }
+    else if (n == 2) { return 8*x; }
+    else if (n == 3) { return 24*x*x - 12; }
+    else if (n == 4) { return 64*x*x*x - 96*x; }
+    else { std::cerr << "Something went wrong in the DerivateHermite function" << std::endl; exit(1); }
 }
 
-double Hamiltonian::doubleDerivativeHermite(const double &alpha, const double &omega, const double &x, const int &n)
+
+double Hamiltonian::DoubleDerivativeHermite(const int &n, const double &x)
 {
-    double alphaOmega = alpha*omega;
-    if (n<2) {return 0;}
-    else if (n==2) {return 8*alphaOmega;}
-    else if (n==3) {return 48*alphaOmega*x;}
-    else if (n==4) {return 192*alphaOmega*alphaOmega*x*x - 96*alphaOmega;}
-    else {std::cerr << "Something went wrong in the doubleDerivateHermite function" << std::endl; exit(1);}
+    if      (n < 2)  { return 0; }
+    else if (n == 2) { return 8; }
+    else if (n == 3) { return 48*x; }
+    else if (n == 4) { return 192*x*x - 96; }
+    else { std::cerr << "Something went wrong in the doubleDerivateHermite function" << std::endl; exit(1); }
 }
+
 
 arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                                const double &alpha, const double &beta, const double &omega,

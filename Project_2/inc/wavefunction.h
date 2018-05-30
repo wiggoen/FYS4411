@@ -23,7 +23,7 @@ public:
     static arma::mat Positions(const int &nParticles);
     static arma::mat SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega);
     static double phiLaplace(const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const double &ny);
-    static arma::mat phiGradient(const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const double &ny);
+    static arma::mat phiGradient(const double &nParticles, const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const double &ny);
     static double findPossibleNxNy(const arma::vec &p, unsigned int i);
     static double phi(const arma::mat &r, const double alpha, const double &omega, const int &nx, const int &ny, const int &j);
 };
