@@ -76,7 +76,7 @@ def hermiteDerivative(x,n,m=1):
 
 def usage():
     """ print usage """
-    print "USAGE: python hermite.py 'order' 'filename'\n"
+    print("USAGE: python hermite.py 'order' 'filename'\n")
 # end function usage
 
 def turnToCPP(n,H,funcName):
