@@ -84,11 +84,10 @@ int factorial(int n)
 arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
 {
     /* Create NxN matrix */
-    //std::cout << "I am in Slater!" << std::endl;
     arma::mat positions = Positions(nParticles);
     arma::mat slater = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
     int nx=0; int ny=0;
-    double normFactor = 1.0/sqrt(factorial(nParticles));
+    double normFactor = 1.0/sqrt(factorial(nParticles/2));
     /*   Fill Jastrow matrix   */
     /* Particle i at position j */
     for (int iParticle = 0; iParticle < nParticles/2; iParticle++)
@@ -100,31 +99,8 @@ arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nPartic
             slater(iParticle,jPosition) = phi(r, alpha, omega, nx, ny, iParticle);
         }
     }
-    //std::cout << "Slater:" << std::endl;
-    //std::cout << slater << std::endl << std::endl;
-    //std::cout << arma::inv(slater) << std::endl;
-    return arma::inv(slater);
+    return arma::inv(slater)*normFactor;
 }
-
-/*
-arma::mat Wavefunction::inverseSlater()
-{
-    arma::mat inverseSlater = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
-    for (int i=0; i<nParticles/2; i++)
-    {
-        for (int j=0; j<nParticles/2; j++)
-        {
-            if (i==j)
-            {
-                inverseSlater(i,j)= ... (side 56)
-            } else
-            {
-                inverseSlater(i,j)= ...
-            }
-        }
-    }
-}
-*/
 
 
 double Wavefunction::phi(const arma::mat &r, const double alpha, const double &omega, const int &nx, const int &ny, const int &j)

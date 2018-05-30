@@ -85,7 +85,7 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
         return LocalEnergyTwoElectrons(r, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
     } else
     {
-        double LocalEnergy = LocalEnergyMoreParticles(r, nParticles, beta, omega, spinParameter, UseFermionInteraction);
+        double LocalEnergy = LocalEnergyMoreParticles(r, nParticles, alpha, beta, omega, spinParameter, UseFermionInteraction);
         arma::mat positions = Wavefunction::Positions(nParticles);
         //double slater = SlaterEnergy(r, nParticles, alpha, omega, positions);
         //LocalEnergy *= slater;
@@ -94,23 +94,27 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
 }
 
 
-double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &beta,
+double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &alpha, const double &beta,
                                              const double &omega, const double &spinParameter, const bool &UseFermionInteraction)
 {
+    arma::mat slaterDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
     double energy = 0;
-    double halfOmegaSquared = 0.5*omega*omega;
-    for (int j=0; j<nParticles; j++)
+    for (int i=0; i<nParticles; i++)
     {
-        for (int i=0; i<j; i++)
+        for (int j=0; j<nParticles; j++)
         {
             double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
             double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
+            double Rij = abs(Ri-Rj);
+            double aOverNumerator = spinParameter/((1+beta*Rij)*(1+beta*Rij));
+            double alphaOmegaR = alpha*omega*Rij;
+            double fancyTerm = 1-beta*Rij/(Rij*(1+beta*Rij));
+            energy += -aOverNumerator*(-alphaOmegaR + aOverNumerator + fancyTerm);
 
-            double top = -0.5*2*spinParameter*beta;
-            double bot = (1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj))*(1+beta*abs(Ri-Rj));
-            energy += top/bot + halfOmegaSquared*Ri*Ri;
+
         }
     }
+
     double interactionTerm = 0;
     if (!UseFermionInteraction)
     /* Without interaction */
@@ -129,6 +133,24 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
     }
     return energy + interactionTerm;
 }
+
+double Hamiltonian::JastrowMoreParticles(arma::mat &r, const double &nParticles, const double &spinParameter, const double &beta)
+{
+    double jastrow = 0;
+    for (int j = 0; j<nParticles; j++)
+    {
+        for (int i=0; i<j; i++)
+        {
+            double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
+            double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
+            double Rij = abs(Ri-Rj);
+            jastrow += spinParameter*Rij/(1+beta*Rij);
+        }
+    }
+    return exp(jastrow);
+}
+
+
 
 /*
 double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega, arma::mat &positions)
