@@ -295,7 +295,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
         /* Recalculate the value of the wave function */
         if (nParticles==2){waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);}
-        else {waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew,nParticles,beta,omega,spinParameter,UseJastrowFactor);}
+        else {waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew,nParticles,beta,spinParameter,UseJastrowFactor);}
 
         if (nParticles==2){acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);}
         else

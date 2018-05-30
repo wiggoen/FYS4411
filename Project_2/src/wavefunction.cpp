@@ -33,7 +33,7 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
     }
 }
 
-double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const double &nParticles, const double &beta, const double &omega,
+double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const double &nParticles, const double &beta,
                                                     const double &spinParameter, const bool &UseJastrowFactor)
 {
     double wavefuncProd = 1;

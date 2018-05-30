@@ -19,7 +19,7 @@ public:
                                       const int &nDimensions, const double &alpha, const double &beta,
                                       const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
     static double TrialWaveFunctionManyParticles(const arma::mat &r, const double &nParticles, const double &beta,
-                                                 const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
+                                                 const double &spinParameter, const bool &UseJastrowFactor);
     static arma::mat Positions(const int &nParticles);
     static arma::mat SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega);
     static double phiLaplace(const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const double &ny);

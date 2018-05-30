@@ -217,7 +217,6 @@ double Hamiltonian::DerivativeHermite(const int &n, const double &alpha, const d
 double Hamiltonian::doubleDerivativeHermite(const double &alpha, const double &omega, const double &x, const int &n)
 {
     double alphaOmega = alpha*omega;
-    double sqrtAlphaOmega = sqrt(alphaOmega);
     if (n<2) {return 0;}
     else if (n==2) {return 8*alphaOmega;}
     else if (n==3) {return 48*alphaOmega*x;}
