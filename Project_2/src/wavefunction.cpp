@@ -71,8 +71,8 @@ arma::mat Wavefunction::Positions(const int &nParticles)
         positions(i,0) = possibleQuantumNumbers(nx);
         positions(i,1) = possibleQuantumNumbers(ny);
     }
-    std::cout << "Position vector: " << std::endl;
-    std::cout << positions << std::endl << std::endl;
+    //std::cout << "Position vector: " << std::endl;
+    //std::cout << positions << std::endl << std::endl;
     return positions;
 }
 
@@ -84,7 +84,7 @@ int factorial(int n)
 arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
 {
     /* Create NxN matrix */
-    std::cout << "I am in Slater!" << std::endl;
+    //std::cout << "I am in Slater!" << std::endl;
     arma::mat positions = Positions(nParticles);
     arma::mat slater = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
     int nx=0; int ny=0;
@@ -100,9 +100,9 @@ arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nPartic
             slater(iParticle,jPosition) = phi(r, alpha, omega, nx, ny, iParticle);
         }
     }
-    std::cout << "Slater:" << std::endl;
-    std::cout << slater << std::endl << std::endl;
-    std::cout << arma::inv(slater) << std::endl;
+    //std::cout << "Slater:" << std::endl;
+    //std::cout << slater << std::endl << std::endl;
+    //std::cout << arma::inv(slater) << std::endl;
     return arma::inv(slater);
 }
 
@@ -137,6 +137,24 @@ double Wavefunction::phi(const arma::mat &r, const double alpha, const double &o
     double hermiteNy = H(sqrtAlphaOmega*yPosition, ny);
     //std::cout << hermiteNx << std::endl;
     return hermiteNx*hermiteNy*exp(-omega*(xPosition*xPosition + yPosition*yPosition)/2.0);
+}
+
+arma::mat Wavefunction::phiGradient(const double &alpha, const double &omega, const double &x, const double &y,
+                                    const int &nx, const double &ny)
+{
+    arma::mat gradient = arma::mat(0,1);
+    double alphaOmega = alpha*omega;
+    double sqrtAlphaOmega = sqrt(alphaOmega);
+    double exponent = -alphaOmega*(x*x+y*y)/2.0;
+    double hermitey1 = H(sqrtAlphaOmega*y,ny);
+    double hermitex1 = H(sqrtAlphaOmega*x,nx);
+    double derHermite1 = Hamiltonian::DerivativeHermite(nx,alpha,omega,sqrtAlphaOmega*x);
+    double derHermite2 = Hamiltonian::DerivativeHermite(ny,alpha,omega,sqrtAlphaOmega*y);
+    double hermitex2 = H(sqrtAlphaOmega*x,nx)*alphaOmega*x;
+    double hermitey2 = H(sqrtAlphaOmega*y,ny)*alphaOmega*y;
+    gradient(0,0) = exp(exponent)*hermitey1*(derHermite1-hermitex2);
+    gradient(0,1) = exp(exponent)*hermitex1*(derHermite2-hermitey2);
+    return gradient;
 }
 
 double Wavefunction::phiLaplace(const double &alpha, const double &omega, const double &x, const double &y,

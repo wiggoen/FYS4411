@@ -243,14 +243,21 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
         /* Sampling */
-        if (!UseImportanceSampling)
+        if (nParticles>2)
         {
-            /* Brute force sampling */
+            /* Only implemented brute-force Metropolis for many particles  */
             MetropolisBruteForce(rNew, rOld, waveFunctionNew, waveFunctionOld);
         } else
         {
-            /* Importance sampling */
-            ImportanceSampling(rNew, rOld, QForceNew, QForceOld, waveFunctionNew, waveFunctionOld);
+            if (!UseImportanceSampling)
+            {
+                /* Brute force sampling */
+                MetropolisBruteForce(rNew, rOld, waveFunctionNew, waveFunctionOld);
+            } else
+            {
+                /* Importance sampling */
+                ImportanceSampling(rNew, rOld, QForceNew, QForceOld, waveFunctionNew, waveFunctionOld);
+            }
         }
 
         /* Write to file */
@@ -287,9 +294,18 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             rNew(i, j) = rOld(i, j) + (UniformRandomNumber() - 0.5) * stepLength;
         }
         /* Recalculate the value of the wave function */
-        waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
+        if (nParticles==2){waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);}
+        else {waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew,nParticles,beta,omega,spinParameter,UseJastrowFactor);}
 
-        acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+        if (nParticles==2){acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);}
+        else
+        {
+            double DupNew    = arma::det(Wavefunction::SlaterDeterminant(rNew,nParticles,alpha,omega));
+            double DdownNew  = arma::det(Wavefunction::SlaterDeterminant(rNew,nParticles,alpha,omega));
+            double DupOld    = arma::det(Wavefunction::SlaterDeterminant(rOld,nParticles,alpha,omega));
+            double DdownOld  = arma::det(Wavefunction::SlaterDeterminant(rOld,nParticles,alpha,omega));
+            acceptanceWeight = DupNew*DdownNew / (DupOld*DdownOld);
+        }
 
         UpdateEnergies(i);
     }

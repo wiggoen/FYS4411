@@ -86,11 +86,9 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
     } else
     {
         double LocalEnergy = LocalEnergyMoreParticles(r, nParticles, beta, omega, spinParameter, UseFermionInteraction);
-        if (UseJastrowFactor) {
-            arma::mat positions = Wavefunction::Positions(nParticles);
-            double slater = SlaterEnergy(r, nParticles, alpha, omega, positions);
-            LocalEnergy *= slater;
-            }
+        arma::mat positions = Wavefunction::Positions(nParticles);
+        //double slater = SlaterEnergy(r, nParticles, alpha, omega, positions);
+        //LocalEnergy *= slater;
         return LocalEnergy;
         }
 }
@@ -132,9 +130,10 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
     return energy + interactionTerm;
 }
 
+/*
 double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega, arma::mat &positions)
 {
-    std::cout << "Calculating Slater Energy" << std::endl;
+    //std::cout << "Calculating Slater Energy" << std::endl;
     double slaterEnergy = 0;
     for (int iParticle = 0; iParticle < nParticles/2; iParticle++)
     {
@@ -150,18 +149,36 @@ double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, cons
     //arma::mat D = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
     return slaterEnergy;
 }
+*/
 
-double Hamiltonian::DerivativeSlater(const double &alpha, const double &omega, const double &xPosition, const double &yPosition, const int &nx, const int &ny)
+arma::mat Hamiltonian::GradientSlater(const arma::mat r, const double nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
+                                   const int &nx, const int &ny, const int &iParticle)
 {
-    double x = xPosition;
-    double y = yPosition;
-    double normFactor    = 1.0;
-    double omegaSquared  = omega*omega;
-    double derivativeExp = normFactor*omegaSquared*(0.5+x*x+y*y);
-    double firstHermit   = DerivativeHermite(nx,alpha,omega,x);
-    double secondHermit  = DerivativeHermite(ny,alpha,omega,y);
-    return firstHermit + secondHermit + derivativeExp;
+    arma::mat gradient = 0;
+    int i = iParticle;
+    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
+    for (int j=0; j<nParticles; j++)
+    {
+        arma::mat gradPhi    = Wavefunction::phiGradient(alpha,omega,xPosition,yPosition,nx,ny);
+        gradient += gradPhi*inverseDet(j,i);
+    }
+    return gradient;
 }
+
+
+double Hamiltonian::LaplaceSlater(const arma::mat r, const double nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
+                                  const int &nx, const int &ny, const int &i)
+{
+    double laplace =0;
+    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
+    for (int j=0; j<nParticles; j++)
+    {
+        double laplacePhi = Wavefunction::phiLaplace(alpha,omega,xPosition,yPosition,nx,ny);
+        laplace += laplacePhi*inverseDet(j,i);
+    }
+    return laplace;
+}
+
 
 double Hamiltonian::DerivativeHermite(const int &n, const double &alpha, const double &omega, const double &x)
 {
