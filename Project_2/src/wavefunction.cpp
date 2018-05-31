@@ -57,13 +57,32 @@ double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const do
 }
 
 
-arma::mat Wavefunction::Positions(const int &nParticles)
+arma::mat Wavefunction::QuantumNumbers()
+{
+    /* Quantum numbers for up to 20 electrons */
+    arma::mat QNumbers = { {0, 0},
+                           {1, 0},
+                           {0, 1},
+                           {2, 0},
+                           {1, 1},
+                           {0, 2},
+                           {3, 0},
+                           {2, 1},
+                           {1, 2},
+                           {0, 3} };
+
+    // Do something more
+}
+
+
+arma::mat Wavefunction::Positions(const int &nParticles)    // Muligens overflødig pga QuantumNumbers-matrisen?
 {
     arma::mat positions = arma::mat(nParticles/2, 2);
     arma::mat possibleQuantumNumbers = arma::mat(nParticles/3, 1);
     for (int i = 0; i < nParticles/3; i++)                              // Hvorfor /3 ?
     {
         possibleQuantumNumbers(i) = i;
+        //std::cout << i << std::endl;
     }
     int nx = 0; int ny = 0;
     for (int i = 0; i < nParticles/2; i++)
@@ -74,6 +93,8 @@ arma::mat Wavefunction::Positions(const int &nParticles)
         positions(i, 0) = possibleQuantumNumbers(nx);
         positions(i, 1) = possibleQuantumNumbers(ny);
     }
+
+
     //std::cout << "Position vector: " << std::endl;
     //std::cout << positions << std::endl << std::endl;
     return positions;
@@ -101,21 +122,21 @@ arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nPartic
         {
             nx = positions(jPosition,0);
             ny = positions(jPosition,1);
-            slater(iParticle,jPosition) = phi(r, alpha, omega, nx, ny, iParticle);
+            slater(iParticle, jPosition) = phi(r, alpha, omega, nx, ny, iParticle);
         }
     }
     return arma::inv(slater)*normFactor;
 }
 
 
-double Wavefunction::phi(const arma::mat &r, const double alpha, const double &omega, const int &nx, const int &ny, const int &j)
+double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny, const int &j)
 {
     /* Single particle states, given by Hermite polynomials */
     double sqrtAlphaOmega = sqrt(alpha*omega);
     double xPosition = r(j, 0);
     double yPosition = r(j, 1);
-    double hermiteNx = H(sqrtAlphaOmega*xPosition, nx);
-    double hermiteNy = H(sqrtAlphaOmega*yPosition, ny);
+    double hermiteNx = Hermite::H(nx, sqrtAlphaOmega*xPosition);
+    double hermiteNy = Hermite::H(ny, sqrtAlphaOmega*yPosition);
     //std::cout << hermiteNx << std::endl;
     return hermiteNx*hermiteNy*exp(-0.5*omega*(xPosition*xPosition + yPosition*yPosition));
 }
@@ -131,11 +152,11 @@ arma::mat Wavefunction::phiGradient(const double &nParticles, const double &alph
 
     double exponential = exp(-0.5*alphaOmega*(x*x + y*y));
 
-    double H_nx = H(sqrtAlphaOmega*x, nx);
-    double H_ny = H(sqrtAlphaOmega*y, ny);
+    double H_nx = Hermite::H(nx, sqrtAlphaOmega*x);
+    double H_ny = Hermite::H(ny, sqrtAlphaOmega*y);
 
-    double derivativeH_nx = Hamiltonian::DerivativeHermite(nx, sqrtAlphaOmega*x);
-    double derivativeH_ny = Hamiltonian::DerivativeHermite(ny, sqrtAlphaOmega*y);
+    double derivativeH_nx = Hermite::DerivativeHermite(nx, sqrtAlphaOmega*x);
+    double derivativeH_ny = Hermite::DerivativeHermite(ny, sqrtAlphaOmega*y);
 
     double derivativePsi_x = H_ny*exponential*(derivativeH_nx - H_nx*alphaOmega*x);
     double derivativePsi_y = H_nx*exponential*(derivativeH_ny - H_ny*alphaOmega*y);
@@ -153,14 +174,14 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
     double sqrtAlphaOmega = sqrt(alphaOmega);
     double exponential = exp(-0.5*alphaOmega*(x*x + y*y));
 
-    double H_nx = H(sqrtAlphaOmega*x, nx);
-    double H_ny = H(sqrtAlphaOmega*y, ny);
+    double H_nx = Hermite::H(nx, sqrtAlphaOmega*x);
+    double H_ny = Hermite::H(ny, sqrtAlphaOmega*y);
 
-    double derivativeH_nx = Hamiltonian::DerivativeHermite(nx, sqrtAlphaOmega*x);
-    double derivativeH_ny = Hamiltonian::DerivativeHermite(ny, sqrtAlphaOmega*y);
+    double derivativeH_nx = Hermite::DerivativeHermite(nx, sqrtAlphaOmega*x);
+    double derivativeH_ny = Hermite::DerivativeHermite(ny, sqrtAlphaOmega*y);
 
-    double doubleDerivativeH_nx = Hamiltonian::DoubleDerivativeHermite(nx, sqrtAlphaOmega*x);
-    double doubleDerivativeH_ny = Hamiltonian::DoubleDerivativeHermite(ny, sqrtAlphaOmega*y);
+    double doubleDerivativeH_nx = Hermite::DoubleDerivativeHermite(nx, sqrtAlphaOmega*x);
+    double doubleDerivativeH_ny = Hermite::DoubleDerivativeHermite(ny, sqrtAlphaOmega*y);
 
     double term1 = H_ny*doubleDerivativeH_nx + H_nx*doubleDerivativeH_ny;
     double term2 = -2.0*alphaOmega*(H_ny*derivativeH_nx*x + H_nx*derivativeH_ny*y);

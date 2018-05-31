@@ -201,27 +201,6 @@ double Hamiltonian::LaplaceSlater(const arma::mat &r, const double &nParticles, 
 }
 
 
-double Hamiltonian::DerivativeHermite(const int &n, const double &x)
-{
-    if      (n == 0) { return 0; }
-    else if (n == 1) { return 2; }
-    else if (n == 2) { return 8*x; }
-    else if (n == 3) { return 24*x*x - 12; }
-    else if (n == 4) { return 64*x*x*x - 96*x; }
-    else { std::cerr << "Something went wrong in the DerivateHermite function" << std::endl; exit(1); }
-}
-
-
-double Hamiltonian::DoubleDerivativeHermite(const int &n, const double &x)
-{
-    if      (n < 2)  { return 0; }
-    else if (n == 2) { return 8; }
-    else if (n == 3) { return 48*x; }
-    else if (n == 4) { return 192*x*x - 96; }
-    else { std::cerr << "Something went wrong in the doubleDerivateHermite function" << std::endl; exit(1); }
-}
-
-
 arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                                const double &alpha, const double &beta, const double &omega,
                                                const double &spinParameter, const bool &UseJastrowFactor,

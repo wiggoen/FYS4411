@@ -24,7 +24,7 @@ int main(int argumentCount, char *argumentVector[])
 
 
     /* Who am I? */
-    std::string Iam = "Line";
+    std::string Iam = "Trond";
 
     /* The whole project path is needed to read json file */
     std::string projectFolder;

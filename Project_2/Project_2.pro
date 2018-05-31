@@ -15,7 +15,8 @@ SOURCES += \
     src/hamiltonian.cpp \
     src/tests.cpp \
     src/variationalmontecarlo.cpp \
-    src/wavefunction.cpp
+    src/wavefunction.cpp \
+    src/hermite.cpp
 
 HEADERS += \
     inc/json.hpp \

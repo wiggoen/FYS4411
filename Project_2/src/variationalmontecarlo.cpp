@@ -308,7 +308,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             arma::mat DupOld   = Wavefunction::SlaterDeterminant(rOld.submat(0, 0, nParticles/2-1, 1), nParticles, alpha, omega);
             arma::mat DdownOld = Wavefunction::SlaterDeterminant(rOld.submat(nParticles/2, 0, nParticles-1, 1), nParticles, alpha, omega);
 
-            std::cout << DupNew << std::endl;
+            //std::cout << DupNew << std::endl;
 
             //double slaterRatio +=
             //acceptanceWeight = DupNew*DdownNew / (DupOld*DdownOld);

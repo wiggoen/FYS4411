@@ -20,12 +20,13 @@ public:
                                       const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
     static double TrialWaveFunctionManyParticles(const arma::mat &r, const double &nParticles, const double &beta,
                                                  const double &spinParameter, const bool &UseJastrowFactor);
+    arma::mat QuantumNumbers();
     static arma::mat Positions(const int &nParticles);
     static arma::mat SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega);
     static double phiLaplace(const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const double &ny);
     static arma::mat phiGradient(const double &nParticles, const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const double &ny);
     static double findPossibleNxNy(const arma::vec &p, unsigned int i);
-    static double phi(const arma::mat &r, const double alpha, const double &omega, const int &nx, const int &ny, const int &j);
+    static double phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny, const int &j);
 };
 
 
