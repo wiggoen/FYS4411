@@ -86,7 +86,7 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
     } else
     {
         double LocalEnergy = LocalEnergyMoreParticles(r, nParticles, alpha, beta, omega, spinParameter, UseFermionInteraction);
-        arma::mat positions = Wavefunction::Positions(nParticles);
+        arma::mat positions = Wavefunction::QuantumNumbers();
         //double slater = SlaterEnergy(r, nParticles, alpha, omega, positions);
         //LocalEnergy *= slater;
         return LocalEnergy;
@@ -97,25 +97,32 @@ double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const
 double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &alpha, const double &beta,
                                              const double &omega, const double &spinParameter, const bool &UseFermionInteraction)
 {
-    arma::mat slaterDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
+    //arma::mat slaterDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
+    arma::mat QuantumNumber = Wavefunction::QuantumNumbers();
     double energy = 0;
+    double SlaterLaplace = 0;
     double r2 = 0;
     for (int i=0; i<nParticles; i++)
     {
+        for (int k=0; k<nParticles/2; k++)
+        {
+            SlaterLaplace += LaplaceSlater(r,nParticles,alpha,omega,r[i,0],r[i,1],QuantumNumber[k,0],QuantumNumber[k,1],i,k);
+        }
         for (int j=0; j<2; j++)
         {
-            r2 += r(i,j)*r(i,j);
+           r2 += r(i,j)*r(i,j);
         }
     }
 
-    energy = r2*omega*omega*0.5;
+    energy = -0.5*SlaterLaplace;//+r2*omega*omega*0.5;   //Remember to add this again later
 
 
     double interactionTerm = 0;
     if (!UseFermionInteraction)
     /* Without interaction */
     {
-        std::cout << energy  << "   "<< interactionTerm << std::endl;
+        //std::cout << r2*omega*omega*0.5  << "   " << -0.5*SlaterLaplace << std::endl;
+        std::cout << energy <<std::endl;
         return energy;
     } else {
         for (int j=0; j<nParticles; j++)
@@ -185,16 +192,20 @@ arma::mat Hamiltonian::GradientSlater(const arma::mat &r, const double &nParticl
 
 
 double Hamiltonian::LaplaceSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
-                                  const int &nx, const int &ny, const int &i)
+                                  const int &nx, const int &ny, const int &i, const int &k)
 {
     double laplace =0;
-    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r, nParticles, alpha, omega);
-    for (int j = 0; j < nParticles; j++)
-    {
-        double laplacePhi = Wavefunction::phiLaplace(alpha, omega, xPosition, yPosition, nx, ny);
-        laplace += laplacePhi*inverseDet(j, i);
-    }
-    return laplace;
+    int tempi = i >= nParticles/2 ? i-nParticles/2 : i;
+    arma::mat inverseDet;
+    if(i==tempi)
+         inverseDet= arma::inv(Wavefunction::SlaterDeterminant(r, nParticles, alpha, omega));
+    else
+         inverseDet = arma::inv(Wavefunction::SlaterDeterminant(sub, nParticles, alpha, omega));
+    double laplacePhi = Wavefunction::phiLaplace(alpha, omega, xPosition, yPosition, nx, ny);
+    laplace += laplacePhi*Wavefunction::phi(r,alpha, omega, nx, ny,i)*inverseDet(tempi, k);
+    //std::cout << "    " << laplace << std::endl;
+
+    return laplace;//(double(nParticles)/2)/(double(nParticles)/2);
 }
 
 

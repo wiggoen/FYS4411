@@ -242,6 +242,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     /* Loop over Monte Carlo cycles */
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
+        if(cycle%1000==0) std::cout << cycle << std::endl;
         /* Sampling */
         if (nParticles > 2)
         {
@@ -308,10 +309,13 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             arma::mat DupOld   = Wavefunction::SlaterDeterminant(rOld.submat(0, 0, nParticles/2-1, 1), nParticles, alpha, omega);
             arma::mat DdownOld = Wavefunction::SlaterDeterminant(rOld.submat(nParticles/2, 0, nParticles-1, 1), nParticles, alpha, omega);
 
+
             //std::cout << DupNew << std::endl;
 
             //double slaterRatio +=
             acceptanceWeight = arma::det(DupNew) *arma::det(DdownNew) / (arma::det(DupOld)*arma::det(DdownOld));
+            acceptanceWeight*=acceptanceWeight;
+            //std::cout << acceptanceWeight << " Dun " << arma::det(DupNew) <<" Duo " << arma::det(DupOld) <<" Ddn " << arma::det(DdownNew) <<" Ddo " << arma::det(DdownOld) <<std::endl;
         }
 
         UpdateEnergies(i);

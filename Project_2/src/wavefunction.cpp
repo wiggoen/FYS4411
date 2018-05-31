@@ -71,34 +71,9 @@ arma::mat Wavefunction::QuantumNumbers()
                            {1, 2},
                            {0, 3} };
 
-    // Do something more
+    return QNumbers;
 }
 
-
-arma::mat Wavefunction::Positions(const int &nParticles)    // Muligens overflødig pga QuantumNumbers-matrisen?
-{
-    arma::mat positions = arma::mat(nParticles/2, 2);
-    arma::mat possibleQuantumNumbers = arma::mat(nParticles/3, 1);
-    for (int i = 0; i < nParticles/3; i++)                              // Hvorfor /3 ?
-    {
-        possibleQuantumNumbers(i) = i;
-        //std::cout << i << std::endl;
-    }
-    int nx = 0; int ny = 0;
-    for (int i = 0; i < nParticles/2; i++)
-    {
-        if (i == 1) { nx += 1; } if (i == 2){ nx -= 1; ny += 1; }
-        if (i == 3) { nx += 1; } if (i == 4){ nx += 1; ny -= 1; } // CAN THIS BE OPTIMIZED?
-        if (i == 5) { nx -= 2; ny += 2; }
-        positions(i, 0) = possibleQuantumNumbers(nx);
-        positions(i, 1) = possibleQuantumNumbers(ny);
-    }
-
-
-    //std::cout << "Position vector: " << std::endl;
-    //std::cout << positions << std::endl << std::endl;
-    return positions;
-}
 
 
 int factorial(int n)
@@ -110,10 +85,10 @@ int factorial(int n)
 arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
 {
     /* Create NxN matrix */
-    arma::mat positions = Positions(nParticles);
+    arma::mat positions = QuantumNumbers();
     arma::mat slater = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
     int nx=0; int ny=0;
-    double normFactor = 1.0/sqrt(factorial(nParticles/2));
+    //double normFactor = 1.0/sqrt(factorial(nParticles/2));
     /*   Fill Jastrow matrix   */
     /* Particle i at position j */
     for (int iParticle = 0; iParticle < nParticles/2; iParticle++)
@@ -123,9 +98,10 @@ arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nPartic
             nx = positions(jPosition,0);
             ny = positions(jPosition,1);
             slater(iParticle, jPosition) = phi(r, alpha, omega, nx, ny, iParticle);
+            //slater(iParticle, jPosition) = phiLaplace(alpha,omega,x,y,nx,ny);
         }
     }
-    return arma::inv(slater)*normFactor;
+    return slater;//arma::inv(slater)*normFactor;
 }
 
 
@@ -138,7 +114,7 @@ double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &
     double hermiteNx = Hermite::H(nx, sqrtAlphaOmega*xPosition);
     double hermiteNy = Hermite::H(ny, sqrtAlphaOmega*yPosition);
     //std::cout << hermiteNx << std::endl;
-    return hermiteNx*hermiteNy*exp(-0.5*omega*(xPosition*xPosition + yPosition*yPosition));
+    return hermiteNx*hermiteNy*exp(-0.5*alpha*omega*(xPosition*xPosition + yPosition*yPosition));
 }
 
 
@@ -172,10 +148,9 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
 {
     double alphaOmega = alpha*omega;
     double sqrtAlphaOmega = sqrt(alphaOmega);
-    double exponential = exp(-0.5*alphaOmega*(x*x + y*y));
 
-    double H_nx = Hermite::H(nx, sqrtAlphaOmega*x);
-    double H_ny = Hermite::H(ny, sqrtAlphaOmega*y);
+    double inverseH_nx = 1.0/Hermite::H(nx, sqrtAlphaOmega*x);
+    double inverseH_ny = 1.0/Hermite::H(ny, sqrtAlphaOmega*y);
 
     double derivativeH_nx = Hermite::DerivativeHermite(nx, sqrtAlphaOmega*x);
     double derivativeH_ny = Hermite::DerivativeHermite(ny, sqrtAlphaOmega*y);
@@ -183,11 +158,11 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
     double doubleDerivativeH_nx = Hermite::DoubleDerivativeHermite(nx, sqrtAlphaOmega*x);
     double doubleDerivativeH_ny = Hermite::DoubleDerivativeHermite(ny, sqrtAlphaOmega*y);
 
-    double term1 = H_ny*doubleDerivativeH_nx + H_nx*doubleDerivativeH_ny;
-    double term2 = -2.0*alphaOmega*(H_ny*derivativeH_nx*x + H_nx*derivativeH_ny*y);
-    double term3 = H_nx*H_ny*alphaOmega*(alphaOmega*(x*x + y*y) - 2.0);
+    double term1 = inverseH_nx*doubleDerivativeH_nx + inverseH_ny*doubleDerivativeH_ny;
+    double term2 = -2.0*alphaOmega*(inverseH_nx*derivativeH_nx*x + inverseH_ny*derivativeH_ny*y);
+    double term3 = alphaOmega*(alphaOmega*(x*x + y*y)*0 - 2.0); // remember to remove *0
 
-    double laplacian = exponential*(term1 + term2 + term3);
+    double laplacian = term1+term2+term3;
     return laplacian;
 }
 
