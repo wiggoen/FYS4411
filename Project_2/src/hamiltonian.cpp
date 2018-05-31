@@ -2,7 +2,7 @@
 #include "inc/wavefunction.h"
 #include "inc/hermite.h"
 #include <armadillo>
-
+#include <iostream>
 
 Hamiltonian::Hamiltonian( void )
 {
@@ -99,26 +99,23 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
 {
     arma::mat slaterDet = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
     double energy = 0;
+    double r2 = 0;
     for (int i=0; i<nParticles; i++)
     {
-        for (int j=0; j<nParticles; j++)
+        for (int j=0; j<2; j++)
         {
-            double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
-            double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
-            double Rij = abs(Ri-Rj);
-            double aOverNumerator = spinParameter/((1+beta*Rij)*(1+beta*Rij));
-            double alphaOmegaR = alpha*omega*Rij;
-            double fancyTerm = 1-beta*Rij/(Rij*(1+beta*Rij));
-            energy += -aOverNumerator*(-alphaOmegaR + aOverNumerator + fancyTerm);
-
-
+            r2 += r(i,j)*r(i,j);
         }
     }
+
+    energy = r2*omega*omega*0.5;
+
 
     double interactionTerm = 0;
     if (!UseFermionInteraction)
     /* Without interaction */
     {
+        std::cout << energy  << "   "<< interactionTerm << std::endl;
         return energy;
     } else {
         for (int j=0; j<nParticles; j++)

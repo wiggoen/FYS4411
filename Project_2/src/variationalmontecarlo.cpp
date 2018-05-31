@@ -311,7 +311,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
             //std::cout << DupNew << std::endl;
 
             //double slaterRatio +=
-            //acceptanceWeight = DupNew*DdownNew / (DupOld*DdownOld);
+            acceptanceWeight = arma::det(DupNew) *arma::det(DdownNew) / (arma::det(DupOld)*arma::det(DdownOld));
         }
 
         UpdateEnergies(i);
