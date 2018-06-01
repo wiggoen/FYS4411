@@ -84,7 +84,15 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
 {
     /* Kinetic energy */
     double slaterLaplacian = SlaterLaplacian(r, nParticles, alpha, omega, InverseSlaterUp, InverseSlaterDown);
-    double kineticEnergy = -0.5 * slaterLaplacian;
+    double jastrowLaplacian = 0;//JastrowLaplacian(r, nParticles, beta, spinMatrix);
+    //std::cout << "here?" << std::endl;
+    arma::rowvec slaterGradient = {0, 0};//SlaterGradient(r, nParticles, nDimensions, alpha, omega, InverseSlaterUp, InverseSlaterDown);
+    //std::cout << "or here?" << std::endl;
+    arma::rowvec jastrowGradient = {0, 0};//JastrowGradient(r, nParticles, nDimensions, beta, spinMatrix);
+    //std::cout << "or maybe here?" << std::endl;
+    double gradients = 0;//arma::dot(slaterGradient, jastrowGradient);
+
+    double kineticEnergy = -0.5*(slaterLaplacian + jastrowLaplacian + 2*gradients);
 
 
     /* External potential */
@@ -118,36 +126,45 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
 }
 
 
-//double Hamiltonian::JastrowMoreParticles(arma::mat &r, const double &nParticles, const double &spinParameter, const double &beta)
-//{
-//    double jastrow = 0;
-//    for (int j = 0; j < nParticles; j++)
-//    {
-//        for (int i = 0; i < j; i++)
-//        {
-//            double Ri = sqrt(r(i, 0)*r(i, 0)+r(i, 1)*r(i, 1));
-//            double Rj = sqrt(r(j, 0)*r(j, 0)+r(j, 1)*r(j, 1));
-//            double Rij = abs(Ri-Rj);                                // Hvorfor abs?
-//            jastrow += spinParameter*Rij/(1+beta*Rij);
-//        }
-//    }
-//    return exp(jastrow);
-//}
+arma::rowvec Hamiltonian::SlaterGradient(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                         const double &alpha, const double &omega,
+                                         const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown)
+{
+    arma::rowvec slaterGradient = arma::zeros<arma::mat>(nDimensions);
 
+    arma::mat QuantumNumber = Hermite::QuantumNumbers();
 
-//arma::mat Hamiltonian::GradientSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
-//                                   const int &nx, const int &ny, const int &iParticle)
-//{
-//    arma::mat gradient = 0;
-//    int i = iParticle;
-//    arma::mat inverseDet = Wavefunction::SlaterDeterminant(r, nParticles, alpha, omega);
-//    for (int j = 0; j < nParticles; j++)
-//    {
-//        arma::mat gradPhi = Wavefunction::phiGradient(nParticles, alpha, omega, xPosition, yPosition, nx, ny);
-//        gradient += gradPhi*inverseDet(j, i);
-//    }
-//    return gradient;
-//}
+    // try i as row and j as qNumber, this should be correct..?
+
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            double x = r(i, 0);
+            double y = r(i, 1);
+            arma::rowvec phiGradient = Wavefunction::phiGradient(nParticles, alpha, omega, x, y, nx, ny);
+            double phi = Wavefunction::phi(r, alpha, omega, nx, ny, i);
+            slaterGradient.row(i) += phiGradient.row(i)*phi*InverseSlaterUp(j, i);
+        }
+    }
+
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            double x = r(i + nParticles/2, 0);
+            double y = r(i + nParticles/2, 1);
+            arma::rowvec phiGradient = Wavefunction::phiGradient(nParticles, alpha, omega, x, y, nx, ny);
+            double phi = Wavefunction::phi(r, alpha, omega, nx, ny, i + nParticles/2);
+            slaterGradient.row(i) += phiGradient.row(i)*phi*InverseSlaterDown(j, i);
+        }
+    }
+    return slaterGradient;
+}
 
 
 double Hamiltonian::SlaterLaplacian(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega,
@@ -166,7 +183,9 @@ double Hamiltonian::SlaterLaplacian(const arma::mat &r, const int &nParticles, c
             int ny = QuantumNumber(j, 1);
             double x = r(i, 0);
             double y = r(i, 1);
-            laplacianUp += Wavefunction::phiLaplace(alpha, omega, x, y, nx, ny)*Wavefunction::phi(r,alpha, omega, nx, ny, i)*InverseSlaterUp(j, i); // check if (i,j)
+            double phiLaplace = Wavefunction::phiLaplace(alpha, omega, x, y, nx, ny);
+            double phi = Wavefunction::phi(r,alpha, omega, nx, ny, i);
+            laplacianUp += phiLaplace*phi*InverseSlaterUp(j, i);
         }
     }
     /* Laplacian down */
@@ -178,7 +197,9 @@ double Hamiltonian::SlaterLaplacian(const arma::mat &r, const int &nParticles, c
             int ny = QuantumNumber(j, 1);
             double x = r(i + nParticles/2, 0);
             double y = r(i + nParticles/2, 1);
-            laplacianDown += Wavefunction::phiLaplace(alpha, omega, x, y, nx, ny)*Wavefunction::phi(r,alpha, omega, nx, ny, i + nParticles/2)*InverseSlaterDown(j, i);
+            double phiLaplace = Wavefunction::phiLaplace(alpha, omega, x, y, nx, ny);
+            double phi = Wavefunction::phi(r,alpha, omega, nx, ny, i + nParticles/2);
+            laplacianDown += phiLaplace*phi*InverseSlaterDown(j, i);
         }
     }
     return laplacianUp + laplacianDown;
@@ -206,9 +227,10 @@ arma::rowvec Hamiltonian::JastrowGradient(const arma::mat &r, const int &nPartic
 }
 
 
-double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, const arma::mat &spinMatrix)
+double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta, const arma::mat &spinMatrix)
 {
-    double jastrowLaplacian = 0.0;
+    double doubleSum = 0.0;
+    double singleSum = 0.0;
 
     for (int k = 0; k < nParticles; k++)
     {
@@ -216,27 +238,26 @@ double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, 
         {
             if (j != k)
             {
-                arma::rowvec Rkj             = r.row(k) - r.row(j);
-                double distanceRkj  = arma::norm(Rkj);
+                arma::rowvec Rkj   = r.row(k) - r.row(j);
+                double distanceRkj = arma::norm(Rkj);
+                double fraction_kj = spinMatrix(k, j)/((1 + beta*distanceRkj)*(1 + beta*distanceRkj));
+                singleSum += 2*(fraction_kj/distanceRkj - beta/(fraction_kj*(1 + beta*distanceRkj)));
 
-                //double distanceSquared_kj     = arma::norm(distance_j)*arma::norm(distance_j);
-                //double distanceSubtraction_kj = arma::norm(distance_j) - a;
                 for (int i = 0; i < nParticles; i++)
                 {
                     if (i != k)
                     {
-                        arma::rowvec distance_i      = r.row(k) - r.row(i);
-                        double distanceSquared_i     = arma::norm(distance_i)*arma::norm(distance_i);
-                        //double distanceSubtraction_i = arma::norm(distance_i) - a;
-                        //double denominator = distanceSquared_i * distanceSubtraction_i * distanceSquared_j * distanceSubtraction_j;
-                        //doubleSum += ( arma::dot(distance_i, distance_j) / denominator );
+                        arma::rowvec Rki   = r.row(k) - r.row(i);
+                        double distanceRki = arma::norm(Rki);
+                        double fraction_ki = spinMatrix(k, i)/((1 + beta*distanceRki)*(1 + beta*distanceRki));
+                        doubleSum += ( (arma::dot(Rki, Rkj) / (distanceRki*distanceRkj)) * fraction_ki * fraction_kj );
                     }
                 }
             }
 
         }
     }
-    return jastrowLaplacian;
+    return doubleSum + singleSum;
 }
 
 

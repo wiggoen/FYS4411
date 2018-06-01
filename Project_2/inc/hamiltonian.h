@@ -19,18 +19,18 @@ public:
                                            arma::mat &spinMatrix, const bool &UseFermionInteraction,
                                            const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown);
 
-    static arma::mat GradientSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega,
-                                    const double &xPosition, const double &yPosition, const int &nx, const int &ny, const int &iParticle);
-    //static double LaplaceSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega,
-    //                            const double &xPosition, const double &yPosition, const int &nx, const int &ny, const int &i, const int &k);
-    static double JastrowMoreParticles(arma::mat &r, const double &nParticles, const double &spinParameter, const double &beta);
+    static arma::rowvec SlaterGradient(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                       const double &alpha, const double &omega,
+                                       const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown);
+
+
     static double SlaterLaplacian(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega,
                                   const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown);
 
-    arma::rowvec JastrowGradient(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta,
+    static arma::rowvec JastrowGradient(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta,
                                  const arma::mat &spinMatrix);
 
-    double JastrowLaplacian(const arma::mat &r, const int &nParticles, const arma::mat &spinMatrix);
+    static double JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta, const arma::mat &spinMatrix);
 
     static arma::rowvec NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                              const double &alpha, const double &beta, const double &omega,

@@ -99,10 +99,10 @@ double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &
 }
 
 
-arma::mat Wavefunction::phiGradient(const int &nParticles, const double &alpha, const double &omega, const double &x, const double &y,
-                                    const int &nx, const int &ny)
+arma::rowvec Wavefunction::phiGradient(const int &nDimensions, const double &alpha, const double &omega, const double &x, const double &y,
+                                       const int &nx, const int &ny)
 {
-    arma::mat gradient = arma::mat(nParticles, 2);
+    arma::rowvec gradient = arma::zeros<arma::mat>(nDimensions);
 
     double alphaOmega = alpha*omega;
     double sqrtAlphaOmega = sqrt(alphaOmega);
@@ -118,8 +118,8 @@ arma::mat Wavefunction::phiGradient(const int &nParticles, const double &alpha, 
     double derivativePsi_x = H_ny*exponential*(derivativeH_nx - H_nx*alphaOmega*x);
     double derivativePsi_y = H_nx*exponential*(derivativeH_ny - H_ny*alphaOmega*y);
 
-    gradient(0, 0) = derivativePsi_x;
-    gradient(0, 1) = derivativePsi_y;
+    gradient.at(0) = derivativePsi_x;
+    gradient.at(1) = derivativePsi_y;
     return gradient;
 }
 

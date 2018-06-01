@@ -22,7 +22,7 @@ public:
                                                  const double &spinParameter, const bool &UseJastrowFactor);
     //static arma::mat SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega);
     static double phiLaplace(const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const int &ny);
-    static arma::mat phiGradient(const int &nParticles, const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const int &ny);
+    static arma::rowvec phiGradient(const int &nDimensions, const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const int &ny);
     static double findPossibleNxNy(const arma::vec &p, unsigned int i);
     static double phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny, const int &k);
     static double SlaterRatio(const arma::mat &rNew, const int &nParticles, const double &alpha, const double &omega,

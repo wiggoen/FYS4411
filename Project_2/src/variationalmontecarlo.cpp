@@ -347,6 +347,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 
             slaterRatio = Wavefunction::SlaterRatio(rNew, nParticles, alpha, omega, InverseSlaterUpOld, InverseSlaterDownOld, i);
             //double jastrowRatio = 1;
+            //std::cout << "husk jastrowRatio" << std::endl;
             acceptanceWeight = slaterRatio*slaterRatio;  // check if squared
 
         }
