@@ -1,6 +1,6 @@
 {
     "Run tests": false,
-    "nParticles": 12,
+    "nParticles": 6,
     "nCycles": 100000,
     "alpha": 1.0,
     "beta": 1.0,

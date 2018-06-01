@@ -82,7 +82,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     /* Initial slater determinants and quantum numbers */
     SlaterUpOld          = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
     SlaterDownOld        = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
-    aijMatrix            = arma::zeros<arma::mat>(nParticles, nParticles);
+    spinMatrix           = arma::zeros<arma::mat>(nParticles, nParticles);
     QuantumNumber        = Hermite::QuantumNumbers();
     SlaterInitialization();
     SlaterUpNew          = SlaterUpOld;
@@ -260,10 +260,10 @@ void VariationalMonteCarlo::SlaterInitialization( void )
     {
         for (int j = 0; j < nParticles; j++)
         {
-            if (i < nParticles/2) { if (j < nParticles/2) { aijMatrix(i, j) = 1.0/3.0; }
-                                    else                  { aijMatrix(i, j) = 1.0;     } }
-            else                  { if (j < nParticles/2) { aijMatrix(i, j) = 1.0;     }
-                                    else                  { aijMatrix(i, j) = 1.0/3.0; } }
+            if (i < nParticles/2) { if (j < nParticles/2) { spinMatrix(i, j) = 1.0/3.0; }
+                                    else                  { spinMatrix(i, j) = 1.0;     } }
+            else                  { if (j < nParticles/2) { spinMatrix(i, j) = 1.0;     }
+                                    else                  { spinMatrix(i, j) = 1.0/3.0; } }
         }
     }
 }
@@ -504,14 +504,14 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         /* using analytical expressions */
         if (nParticles == 2)
         {
-            deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor,
-                                                   UseFermionInteraction);
+            deltaEnergy = Hamiltonian::LocalEnergyTwoParticles(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor,
+                                                               UseFermionInteraction);
         }
         else
         {
-            deltaEnergy = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, alpha, beta, omega, spinParameter,
-                                                                UseFermionInteraction, InverseSlaterUpNew,
-                                                                InverseSlaterDownNew, i);
+            deltaEnergy = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, nDimensions, alpha, beta, omega,
+                                                                spinMatrix, UseFermionInteraction, InverseSlaterUpNew,
+                                                                InverseSlaterDownNew);
         }
 
     }

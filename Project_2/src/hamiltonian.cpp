@@ -29,7 +29,7 @@ double Hamiltonian::RepulsiveInteraction(const arma::rowvec &r_i, const arma::ro
 }
 
 
-double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &alpha, const double &beta,
+double Hamiltonian::LocalEnergyTwoParticles(const arma::mat &r, const double &alpha, const double &beta,
                                             const double &omega, const double &spinParameter, const bool &UseJastrowFactor,
                                             const bool &UseFermionInteraction)
 {
@@ -77,62 +77,44 @@ double Hamiltonian::LocalEnergyTwoElectrons(const arma::mat &r, const double &al
 }
 
 
-double Hamiltonian::LocalEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &beta,
-                                const double &omega, const double &spinParameter, bool &UseJastrowFactor,
-                                const bool &UseFermionInteraction)
+double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                             const double &alpha, const double &beta, const double &omega,
+                                             arma::mat &spinMatrix, const bool &UseFermionInteraction,
+                                             const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown)
 {
-    if (nParticles == 2) {
-        return LocalEnergyTwoElectrons(r, alpha, beta, omega, spinParameter, UseJastrowFactor, UseFermionInteraction);
-    }
-    //else
-    //{
-        //double LocalEnergy = LocalEnergyMoreParticles(r, nParticles, alpha, beta, omega, spinParameter, UseFermionInteraction);
-        //arma::mat positions = Wavefunction::QuantumNumbers();
-        //double slater = SlaterEnergy(r, nParticles, alpha, omega, positions);
-        //LocalEnergy *= slater;
-     //   return LocalEnergy;
-      //  }
-}
+    /* Kinetic energy */
+    double slaterLaplacian = SlaterLaplacian(r, nParticles, alpha, omega, InverseSlaterUp, InverseSlaterDown);
+    double kineticEnergy = -0.5 * slaterLaplacian;
 
 
-double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const double &alpha, const double &beta,
-                                             const double &omega, const double &spinParameter, const bool &UseFermionInteraction,
-                                             const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown, const int &k)
-{
-    double energy = 0;
-    double r2 = 0;
-
-    for (int i=0; i<nParticles; i++)
+    /* External potential */
+    double rSquared = 0.0;
+    for (int i = 0; i < nParticles; i++)
     {
-        for (int j=0; j<2; j++)
+        for (int j = 0; j < nDimensions; j++)
         {
-           r2 += r(i,j)*r(i,j);
+            rSquared += r(i, j) * r(i, j);
         }
     }
+    double externalPotential = 0.5 * omega*omega * rSquared;
 
 
-    double SL = Laplacian(r, nParticles, alpha, omega, InverseSlaterUp, InverseSlaterDown, k);
-
-    energy = -0.5*SL+r2*omega*omega*0.5;
-
-
-    double interactionTerm = 0;
-    if (!UseFermionInteraction)
-    /* Without interaction */
+    /* Repulsive potential (interaction) */
+    double repulsivePotential = 0.0;
+    if (UseFermionInteraction)
     {
-        return energy;
-    } else {
-        for (int j=0; j<nParticles; j++)
+        for (int i = 0; i < nParticles; i++)
         {
-            for (int i=0; i<nParticles; i++)
+            for (int j = 0; j < nParticles; j++)
             {
-                double Ri = sqrt(r(i,0)*r(i,0)+r(i,1)*r(i,1));
-                double Rj = sqrt(r(j,0)*r(j,0)+r(j,1)*r(j,1));
-                interactionTerm += 1.0/abs(Ri-Rj);
+                if (i < j)
+                {
+                    repulsivePotential += RepulsiveInteraction(r.row(i), r.row(j));
+                }
             }
         }
     }
-    return energy + interactionTerm;
+    return kineticEnergy + externalPotential + repulsivePotential;
 }
 
 
@@ -153,27 +135,6 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
 //}
 
 
-/*
-double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega, arma::mat &positions)
-{
-    //std::cout << "Calculating Slater Energy" << std::endl;
-    double slaterEnergy = 0;
-    for (int iParticle = 0; iParticle < nParticles/2; iParticle++)
-    {
-        for (int jPosition=0; jPosition < nParticles/2; jPosition++)
-        {
-            double nx = positions(jPosition,0);
-            double ny = positions(jPosition,1);
-            double xPosition = (r(iParticle,0));
-            double yPosition = (r(iParticle,1));
-            slaterEnergy += DerivativeSlater(alpha, omega, xPosition, yPosition, nx, ny);
-        }
-    }
-    //arma::mat D = Wavefunction::SlaterDeterminant(r,nParticles,alpha,omega);
-    return slaterEnergy;
-}
-*/
-
 //arma::mat Hamiltonian::GradientSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
 //                                   const int &nx, const int &ny, const int &iParticle)
 //{
@@ -188,8 +149,9 @@ double Hamiltonian::SlaterEnergy(const arma::mat &r, const int &nParticles, cons
 //    return gradient;
 //}
 
-double Hamiltonian::Laplacian(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega,
-                              const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown, const int &k)
+
+double Hamiltonian::SlaterLaplacian(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega,
+                                    const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown)
 {
     arma::mat QuantumNumber = Hermite::QuantumNumbers();
     double laplacianUp   = 0.0;
@@ -219,21 +181,63 @@ double Hamiltonian::Laplacian(const arma::mat &r, const int &nParticles, const d
             laplacianDown += Wavefunction::phiLaplace(alpha, omega, x, y, nx, ny)*Wavefunction::phi(r,alpha, omega, nx, ny, i + nParticles/2)*InverseSlaterDown(j, i);
         }
     }
-
     return laplacianUp + laplacianDown;
 }
 
 
+arma::rowvec Hamiltonian::JastrowGradient(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                          const double &beta, const arma::mat &spinMatrix)
+{
+    arma::rowvec jastrowGradient = arma::zeros<arma::rowvec>(nDimensions);
 
-//double Hamiltonian::LaplaceSlater(const arma::mat &r, const double &nParticles, const double &alpha, const double &omega, const double &xPosition, const double &yPosition,
-//                                  const int &nx, const int &ny, const int &i, const int &k)
-//{
-//    double laplace =0;
-//    double laplacePhi = Wavefunction::phiLaplace(alpha, omega, xPosition, yPosition, nx, ny);
-//    laplace += laplacePhi*Wavefunction::phi(r,alpha, omega, nx, ny,i);
-//
-//    return laplace;
-//}
+    for (int k = 0; k < nParticles; k++)
+    {
+        for (int j = 0; j < nParticles; j++)
+        {
+            if (j != k)
+            {
+                double distanceRkj = ParticleDistance(r.row(k), r.row(j));
+                double denominator = (1 + beta*distanceRkj);
+                jastrowGradient   += ( ((r.row(k) - r.row(j) ) * spinMatrix(k, j) * distanceRkj) / (denominator*denominator) );
+            }
+        }
+    }
+    return jastrowGradient;
+}
+
+
+double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, const arma::mat &spinMatrix)
+{
+    double jastrowLaplacian = 0.0;
+
+    for (int k = 0; k < nParticles; k++)
+    {
+        for (int j = 0; j < nParticles; j++)
+        {
+            if (j != k)
+            {
+                arma::rowvec Rkj             = r.row(k) - r.row(j);
+                double distanceRkj  = arma::norm(Rkj);
+
+                //double distanceSquared_kj     = arma::norm(distance_j)*arma::norm(distance_j);
+                //double distanceSubtraction_kj = arma::norm(distance_j) - a;
+                for (int i = 0; i < nParticles; i++)
+                {
+                    if (i != k)
+                    {
+                        arma::rowvec distance_i      = r.row(k) - r.row(i);
+                        double distanceSquared_i     = arma::norm(distance_i)*arma::norm(distance_i);
+                        //double distanceSubtraction_i = arma::norm(distance_i) - a;
+                        //double denominator = distanceSquared_i * distanceSubtraction_i * distanceSquared_j * distanceSubtraction_j;
+                        //doubleSum += ( arma::dot(distance_i, distance_j) / denominator );
+                    }
+                }
+            }
+
+        }
+    }
+    return jastrowLaplacian;
+}
 
 
 arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,

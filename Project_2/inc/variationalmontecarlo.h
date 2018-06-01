@@ -64,7 +64,7 @@ public:
     arma::mat InverseSlaterUpNew;
     arma::mat InverseSlaterDownOld;
     arma::mat InverseSlaterDownNew;
-    arma::mat aijMatrix;
+    arma::mat spinMatrix;
     arma::mat QuantumNumber;
 private:
     arma::mat rOld;                    /* matrix of old position */
