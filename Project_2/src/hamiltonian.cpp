@@ -136,6 +136,7 @@ arma::rowvec Hamiltonian::SlaterGradient(const arma::mat &r, const int &nParticl
 
     // try i as row and j as qNumber, this should be correct..?
 
+    /* Gradient up */
     for (int i = 0; i < nParticles/2; i++)
     {
         for (int j = 0; j < nParticles/2; j++)
@@ -149,7 +150,7 @@ arma::rowvec Hamiltonian::SlaterGradient(const arma::mat &r, const int &nParticl
             slaterGradient.row(i) += phiGradient.row(i)*phi*InverseSlaterUp(j, i);
         }
     }
-
+    /* Gradient down */
     for (int i = 0; i < nParticles/2; i++)
     {
         for (int j = 0; j < nParticles/2; j++)
