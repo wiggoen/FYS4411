@@ -35,17 +35,17 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
 }
 
 
-double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const double &nParticles, const double &beta,
+double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const int &nParticles, const double &beta,
                                                     const double &spinParameter, const bool &UseJastrowFactor)
 {
     double wavefuncProd = 1;
     double slater       = 1;
-    for (int i=0; i<nParticles; i++)
+    for (int i = 0; i < nParticles; i++)
     {
-        for (int j=0; j<nParticles; j++)
+        for (int j = 0; j < nParticles; j++)
         {
-            double Rij = arma::norm(r.row(i) - r.row(j));
-            double expontential = spinParameter*Rij/(1+beta*Rij);
+            double rij = arma::norm(r.row(i) - r.row(j));
+            double expontential = spinParameter*rij/(1 + beta*rij);
             wavefuncProd *= exp(expontential);
         }
     }
@@ -57,69 +57,50 @@ double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const do
 }
 
 
-arma::mat Wavefunction::QuantumNumbers()
+double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, const double &alpha, const double &omega,
+                                 const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown, const int &i)
 {
-    /* Quantum numbers for up to 20 electrons */
-    arma::mat QNumbers = { {0, 0},
-                           {1, 0},
-                           {0, 1},
-                           {2, 0},
-                           {1, 1},
-                           {0, 2},
-                           {3, 0},
-                           {2, 1},
-                           {1, 2},
-                           {0, 3} };
+    const arma::mat QuantumNumber = Hermite::QuantumNumbers();
+    double slaterRatio = 0.0;
 
-    return QNumbers;
-}
-
-
-
-int factorial(int n)
-{
-    return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
-}
-
-
-arma::mat Wavefunction::SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
-{
-    /* Create NxN matrix */
-    arma::mat positions = QuantumNumbers();
-    arma::mat slater = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
-    int nx=0; int ny=0;
-    //double normFactor = 1.0/sqrt(factorial(nParticles/2));
-    /*   Fill Jastrow matrix   */
-    /* Particle i at position j */
-    for (int iParticle = 0; iParticle < nParticles/2; iParticle++)
+    if (i < nParticles/2)
     {
-        for (int jPosition=0; jPosition < nParticles/2; jPosition++)
+        /* Electron with spin up moved */
+        for (int k = 0; k < nParticles/2; k++)
         {
-            nx = positions(jPosition,0);
-            ny = positions(jPosition,1);
-            slater(iParticle, jPosition) = phi(r, alpha, omega, nx, ny, iParticle);
-            //slater(iParticle, jPosition) = phiLaplace(alpha,omega,x,y,nx,ny);
+            int nx = QuantumNumber(k, 0);
+            int ny = QuantumNumber(k, 1);
+            slaterRatio += phi(rNew, alpha, omega, nx, ny, i)*InverseSlaterUp(k, i); // check if (i,k)
+        }
+
+    } else
+    {
+        /* Electron with spin down moved */
+        for (int k = 0; k < nParticles/2; k++)
+        {
+            int nx = QuantumNumber(k, 0);
+            int ny = QuantumNumber(k, 1);
+            slaterRatio += phi(rNew, alpha, omega, nx, ny, i)*InverseSlaterDown(k, i-nParticles/2);
         }
     }
-    return slater;//arma::inv(slater)*normFactor;
+    return slaterRatio;
 }
 
 
-double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny, const int &j)
+double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny, const int &k)
 {
     /* Single particle states, given by Hermite polynomials */
     double sqrtAlphaOmega = sqrt(alpha*omega);
-    double xPosition = r(j, 0);
-    double yPosition = r(j, 1);
+    double xPosition = r(k, 0);
+    double yPosition = r(k, 1);
     double hermiteNx = Hermite::H(nx, sqrtAlphaOmega*xPosition);
     double hermiteNy = Hermite::H(ny, sqrtAlphaOmega*yPosition);
-    //std::cout << hermiteNx << std::endl;
     return hermiteNx*hermiteNy*exp(-0.5*alpha*omega*(xPosition*xPosition + yPosition*yPosition));
 }
 
 
-arma::mat Wavefunction::phiGradient(const double &nParticles, const double &alpha, const double &omega, const double &x, const double &y,
-                                    const int &nx, const double &ny)
+arma::mat Wavefunction::phiGradient(const int &nParticles, const double &alpha, const double &omega, const double &x, const double &y,
+                                    const int &nx, const int &ny)
 {
     arma::mat gradient = arma::mat(nParticles, 2);
 
@@ -144,7 +125,7 @@ arma::mat Wavefunction::phiGradient(const double &nParticles, const double &alph
 
 
 double Wavefunction::phiLaplace(const double &alpha, const double &omega, const double &x, const double &y,
-                                const int &nx, const double &ny)
+                                const int &nx, const int &ny)
 {
     double alphaOmega = alpha*omega;
     double sqrtAlphaOmega = sqrt(alphaOmega);
@@ -158,11 +139,11 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
     double doubleDerivativeH_nx = Hermite::DoubleDerivativeHermite(nx, sqrtAlphaOmega*x);
     double doubleDerivativeH_ny = Hermite::DoubleDerivativeHermite(ny, sqrtAlphaOmega*y);
 
-    double term1 = inverseH_nx*doubleDerivativeH_nx + inverseH_ny*doubleDerivativeH_ny;
-    double term2 = -2.0*alphaOmega*(inverseH_nx*derivativeH_nx*x + inverseH_ny*derivativeH_ny*y);
-    double term3 = alphaOmega*(alphaOmega*(x*x + y*y)*0 - 2.0); // remember to remove *0
+    double doubleDerivatives = alphaOmega*(inverseH_nx*doubleDerivativeH_nx + inverseH_ny*doubleDerivativeH_ny);
+    double derivatives = -2.0*alphaOmega*sqrtAlphaOmega*(inverseH_nx*derivativeH_nx*x + inverseH_ny*derivativeH_ny*y);
+    double positions = alphaOmega*(alphaOmega*(x*x + y*y) - 2.0);
 
-    double laplacian = term1+term2+term3;
+    double laplacian = doubleDerivatives+derivatives+positions;
     return laplacian;
 }
 

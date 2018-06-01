@@ -54,3 +54,19 @@ double Hermite::DoubleDerivativeHermite(const int &n, const double &x)
     default: std::cerr << "Something went wrong in the DoubleDerivateHermite function" << std::endl; exit(1);
     }
 }
+
+
+arma::mat Hermite::QuantumNumbers( void ) {
+    /* Quantum numbers for up to 20 electrons */
+    const arma::mat QNumbers = { {0, 0},
+                                 {1, 0},
+                                 {0, 1},
+                                 {2, 0},
+                                 {1, 1},
+                                 {0, 2},
+                                 {3, 0},
+                                 {2, 1},
+                                 {1, 2},
+                                 {0, 3} };
+    return QNumbers;
+}

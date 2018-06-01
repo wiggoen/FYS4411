@@ -1,6 +1,7 @@
 #include "inc/variationalmontecarlo.h"
 #include "inc/wavefunction.h"
 #include "inc/hamiltonian.h"
+#include "inc/hermite.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -65,14 +66,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     deltaEnergy       = 0.0;
     acceptanceWeight  = 0.0;
     acceptanceCounter = 0.0;
-
-    arma::rowvec runDetails;
-    double runTime         = 0.0;
-    double energy          = 0.0;
-    double energySquared   = 0.0;
-    double variance        = 0.0;
-    double acceptanceRatio = 0.0;
-
+    slaterRatio       = 0.0;
     if (!UseAnalyticalExpressions)
     {
         numericalEnergyVector = arma::zeros<arma::rowvec>(nDimensions+1);
@@ -85,10 +79,28 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     else                        { InitialTrialPositionsImportanceSampling(rOld); }
     rNew = rOld;
 
+    /* Initial slater determinants and quantum numbers */
+    SlaterUpOld          = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+    SlaterDownOld        = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+    aijMatrix            = arma::zeros<arma::mat>(nParticles, nParticles);
+    QuantumNumber        = Hermite::QuantumNumbers();
+    SlaterInitialization();
+    SlaterUpNew          = SlaterUpOld;
+    SlaterDownNew        = SlaterDownOld;
+    InverseSlaterUpOld   = inv(SlaterUpOld);
+    InverseSlaterDownOld = inv(SlaterDownOld);
+    InverseSlaterUpNew   = InverseSlaterUpOld;
+    InverseSlaterDownNew = InverseSlaterDownOld;
+
+
     /* Store the current value of the wave function and quantum force */
-    waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
-    Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
-    QForceNew = QForceOld;
+    if (UseImportanceSampling)
+    {
+        waveFunctionOld = Wavefunction::TrialWaveFunction(rOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
+        Wavefunction::QuantumForce(rOld, QForceOld, alpha, beta, omega, spinParameter, UseJastrowFactor);
+        QForceNew = QForceOld;
+    }
+
 
     /* MPI */
 #ifdef MPI_ON
@@ -129,14 +141,14 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
 
     /* Timing finished */
     auto end_time = std::chrono::high_resolution_clock::now();
-    runTime = (std::chrono::duration<double> (end_time - start_time).count());
+    double runTime = (std::chrono::duration<double> (end_time - start_time).count());
 
     /* Normalizing */
     double normalizationFactor = 1.0/(nCycles * nParticles);
 
     /* Calculation of averages */
-    energy = energySum * normalizationFactor;
-    energySquared = energySquaredSum * normalizationFactor;
+    double energy = energySum * normalizationFactor;
+    double energySquared = energySquaredSum * normalizationFactor;
 
     if (!UseAnalyticalExpressions)
     {
@@ -144,8 +156,8 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         potentialEnergy = potentialEnergySum * normalizationFactor;
     }
 
-    variance = (energySquared - energy*energy);
-    acceptanceRatio = acceptanceCounter * normalizationFactor;
+    double variance = (energySquared - energy*energy);
+    double acceptanceRatio = acceptanceCounter * normalizationFactor;
 
 
     if (cycleType == "OneBodyDensity")
@@ -167,6 +179,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     }
 
     /* Vector containing the results of the run */
+    arma::rowvec runDetails;
     if (!UseAnalyticalExpressions)
     {
         runDetails << runTime << energy << energySquared << variance << acceptanceRatio << kineticEnergy << potentialEnergy;
@@ -225,6 +238,34 @@ double VariationalMonteCarlo::GaussianRandomNumber( void )
     /* Set up the normal distribution for x in [0, 1] */
     static std::normal_distribution<double> NormalDistribution(0.0,1.0);
     return NormalDistribution(gen);
+}
+
+
+void VariationalMonteCarlo::SlaterInitialization( void )
+{
+    /* initialize slater determinants */
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            SlaterUpOld(i, j)   = Wavefunction::phi(rOld, alpha, omega, nx, ny, i);
+            SlaterDownOld(i, j) = Wavefunction::phi(rOld, alpha, omega, nx, ny, i+nParticles/2);
+        }
+    }
+
+    /* set up spin parameter matrix */
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nParticles; j++)
+        {
+            if (i < nParticles/2) { if (j < nParticles/2) { aijMatrix(i, j) = 1.0/3.0; }
+                                    else                  { aijMatrix(i, j) = 1.0;     } }
+            else                  { if (j < nParticles/2) { aijMatrix(i, j) = 1.0;     }
+                                    else                  { aijMatrix(i, j) = 1.0/3.0; } }
+        }
+    }
 }
 
 
@@ -304,18 +345,10 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         {
             waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew, nParticles, beta, spinParameter, UseJastrowFactor);
 
-            arma::mat DupNew   = Wavefunction::SlaterDeterminant(rNew.submat(0, 0, nParticles/2-1, 1), nParticles, alpha, omega);
-            arma::mat DdownNew = Wavefunction::SlaterDeterminant(rNew.submat(nParticles/2,0, nParticles-1 ,1), nParticles, alpha, omega);
-            arma::mat DupOld   = Wavefunction::SlaterDeterminant(rOld.submat(0, 0, nParticles/2-1, 1), nParticles, alpha, omega);
-            arma::mat DdownOld = Wavefunction::SlaterDeterminant(rOld.submat(nParticles/2, 0, nParticles-1, 1), nParticles, alpha, omega);
+            slaterRatio = Wavefunction::SlaterRatio(rNew, nParticles, alpha, omega, InverseSlaterUpOld, InverseSlaterDownOld, i);
+            //double jastrowRatio = 1;
+            acceptanceWeight = slaterRatio*slaterRatio;  // check if squared
 
-
-            //std::cout << DupNew << std::endl;
-
-            //double slaterRatio +=
-            acceptanceWeight = arma::det(DupNew) *arma::det(DdownNew) / (arma::det(DupOld)*arma::det(DdownOld));
-            acceptanceWeight*=acceptanceWeight;
-            //std::cout << acceptanceWeight << " Dun " << arma::det(DupNew) <<" Duo " << arma::det(DupOld) <<" Ddn " << arma::det(DdownNew) <<" Ddo " << arma::det(DdownOld) <<std::endl;
         }
 
         UpdateEnergies(i);
@@ -369,6 +402,74 @@ double VariationalMonteCarlo::GreensRatio(const arma::mat &rNew, const arma::mat
 }
 
 
+void VariationalMonteCarlo::UpdateInverseSlater(const int &i)
+{
+    double factor = 1.0/slaterRatio;
+
+    if (i < nParticles/2)
+    {
+        /* Update InverseSlaterUp */
+        for (int k = 0; k < nParticles/2; k++)
+        {
+            /* i-th column */
+            InverseSlaterUpNew(k, i) = factor*InverseSlaterUpOld(k, i);
+        }
+
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            /* j-th column */
+            if (j != i)
+            {
+                double Sj = 0.0;
+
+                for (int l = 0; l < nParticles/2; l++)
+                {
+                    int nx = QuantumNumber(l, 0);
+                    int ny = QuantumNumber(l, 1);
+                    Sj += Wavefunction::phi(rNew, alpha, omega, nx, ny, i)*InverseSlaterUpOld(l, j);
+                }
+
+                for (int k = 0; k < nParticles/2; k++)
+                {
+                    InverseSlaterUpNew(k, j) = InverseSlaterUpOld(k, j) - (Sj/slaterRatio)*InverseSlaterUpOld(k, i);
+                }
+            }
+        }
+    } else
+    {
+        /* Update InverseSlaterDown */
+        for (int k = 0; k < nParticles/2; k++)
+        {
+            /* i-th column */
+            InverseSlaterDownNew(k, i-nParticles/2) = factor*InverseSlaterDownOld(k, i-nParticles/2);
+        }
+
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            /* j-th column */
+            if (j != (i-nParticles/2))
+            {
+                double Sj = 0.0;
+
+                for (int l = 0; l < nParticles/2; l++)
+                {
+                    int nx = QuantumNumber(l, 0);
+                    int ny = QuantumNumber(l, 1);
+                    Sj += Wavefunction::phi(rNew, alpha, omega, nx, ny, i)*InverseSlaterDownOld(l, j);
+                }
+
+                for (int k = 0; k < nParticles/2; k++)
+                {
+                    InverseSlaterDownNew(k, j) = InverseSlaterDownOld(k, j) - (Sj/slaterRatio)*InverseSlaterDownOld(k, i-nParticles/2);
+                }
+            }
+        }
+    }
+    InverseSlaterUpOld   = InverseSlaterUpNew;
+    InverseSlaterDownOld = InverseSlaterDownNew;
+}
+
+
 void VariationalMonteCarlo::UpdateEnergies(const int &i)
 {
     /* Test is performed by moving one particle at the time. Accept or reject this move. */
@@ -377,11 +478,14 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         rOld.row(i)        = rNew.row(i);
         QForceOld.row(i)   = QForceNew.row(i);
         waveFunctionOld    = waveFunctionNew;
+        UpdateInverseSlater(i);
         acceptanceCounter += 1;
     } else
     {
         rNew.row(i)      = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
+        if (i < nParticles/2) { SlaterUpNew.col(i)                = SlaterUpNew.col(i); }
+        else                  { SlaterDownNew.col(i-nParticles/2) = SlaterDownOld.col(i-nParticles/2); }
         //waveFunctionNew  = waveFunctionOld;  /* Probably unnecessary since the wavefunction didn't change. */
     }
 
@@ -398,8 +502,18 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     } else
     {
         /* using analytical expressions */
-        deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor,
-                                               UseFermionInteraction);
+        if (nParticles == 2)
+        {
+            deltaEnergy = Hamiltonian::LocalEnergy(rNew, nParticles, alpha, beta, omega, spinParameter, UseJastrowFactor,
+                                                   UseFermionInteraction);
+        }
+        else
+        {
+            deltaEnergy = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, alpha, beta, omega, spinParameter,
+                                                                UseFermionInteraction, InverseSlaterUpNew,
+                                                                InverseSlaterDownNew, i);
+        }
+
     }
     energySum        += deltaEnergy;
     energySquaredSum += (deltaEnergy*deltaEnergy);

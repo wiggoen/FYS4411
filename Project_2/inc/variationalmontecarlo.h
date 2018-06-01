@@ -18,11 +18,13 @@ public:
     void InitialTrialPositionsBruteForce(arma::mat &r);
     void MonteCarloCycles( void );
     double UniformRandomNumber( void );
+    void SlaterInitialization( void );
     void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew,
                                  const double &waveFunctionOld);
     void ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew,
                                  const arma::mat &QForceOld, double &waveFunctionNew,
                                  const double &waveFunctionOld);
+    void UpdateInverseSlater(const int &i);
     void UpdateEnergies(const int &i);
     void InitialTrialPositionsImportanceSampling(arma::mat &r);
     double GaussianRandomNumber( void );
@@ -54,6 +56,16 @@ public:
     double psiOfAlphaTimesEnergySum;
     double psiOfBetaTimesEnergySum;
     int world_rank;                    /* to use with MPI; holds the processor rank */
+    arma::mat SlaterUpOld;
+    arma::mat SlaterUpNew;
+    arma::mat SlaterDownOld;
+    arma::mat SlaterDownNew;
+    arma::mat InverseSlaterUpOld;
+    arma::mat InverseSlaterUpNew;
+    arma::mat InverseSlaterDownOld;
+    arma::mat InverseSlaterDownNew;
+    arma::mat aijMatrix;
+    arma::mat QuantumNumber;
 private:
     arma::mat rOld;                    /* matrix of old position */
     arma::mat rNew;                    /* matrix of new position */
@@ -76,6 +88,7 @@ private:
     int cycleStepToFile;               /* fraction of Monte Carlo cycles written to file */
     double acceptanceWeight;           /* weight used for accepting or rejecting a move */
     int acceptanceCounter;             /* number of accepted moves */
+    double slaterRatio;
     arma::rowvec hist;
     arma::rowvec volume;
     double r_step;
