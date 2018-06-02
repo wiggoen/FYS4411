@@ -204,6 +204,44 @@ double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &beta,
     return -(spinParameter*(r_12*r_12))/denominator;
 }
 
+double Wavefunction::DerivativePsiManyOfAlpha(const double &alpha, const double &omega, const int &nx, const int &ny,
+                                              const double &x, const double &y)
+{
+    // NEED TO GO THROUGH THIS!!
+    double sqrtAlphaOmega  = sqrt(alpha*omega);
+    double alphaOmegaX = sqrtAlphaOmega*x;
+    double alphaOmegaY = sqrtAlphaOmega*y;
+    double derHnx    = Hermite::AlphaDerivativeHermite(nx,x,alpha,omega);
+    double derHny    = Hermite::AlphaDerivativeHermite(ny,x,alpha,omega);
+    double hermiteNx = Hermite::H(nx,alphaOmegaX);
+    double hermiteNy = Hermite::H(ny,alphaOmegaY);
+    double frstFrac  = derHnx*x*hermiteNy;
+    double scndFrac  = derHny*y*hermiteNx;
+//    double exponent  = -0.5*alpha*omega*(x*x+y*y);
+    return ((0.5*omega/sqrtAlphaOmega)*(frstFrac+scndFrac) - 1);
+
+double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nParticles, const double &beta, const double &omega,
+                                             const arma::mat &spinMatrix)
+{
+    double sum = 0.0;
+
+    for (int k = 0; k < nParticles; k++)
+    {
+        for (int j = 0; j < nParticles; j++)
+        {
+            if (j != k)
+            {
+                arma::rowvec Rkj       = (r.row(k) - r.row(j));
+                double distanceRkj     = arma::norm(Rkj);
+                double denominator_kj  =  (1 + beta*distanceRkj);
+                double fraction_kj     = spinMatrix(k, j) * distanceRkj / (denominator_kj*denominator_kj);
+                sum -= fraction_kj;
+            }
+        }
+    }
+    return sum;
+}
+
 
 void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                          const int &nDimensions, const double &alpha, const double &beta,

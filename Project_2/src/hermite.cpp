@@ -55,6 +55,20 @@ double Hermite::DoubleDerivativeHermite(const int &n, const double &x)
     }
 }
 
+double Hermite::AlphaDerivativeHermite(const int &n, const double &x, const double &alpha, const double &omega)
+{
+    double sqrtAlphaOmega     = sqrt(alpha*omega);
+    switch(n)
+    {
+    case 0: return 0;
+    case 1: return omega*x/sqrtAlphaOmega;
+    case 2: return 4*omega*x*x;
+    case 3: return 12*sqrtAlphaOmega*omega*x*x*x;
+    case 4: return 32*alpha*omega*omega*x*x*x*x - 48*omega*x*x;
+    default: std::cerr << "Something went wrong in the AlphaDerivativeHermite function" << std::endl; exit(1);
+    }
+}
+
 
 arma::mat Hermite::QuantumNumbers( void ) {
     /* Quantum numbers for up to 20 electrons */

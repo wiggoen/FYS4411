@@ -13,6 +13,7 @@ public:
     static double DerivativeHermite(const int &n, const double &x);
     static double DoubleDerivativeHermite(const int &n, const double &x);
     static arma::mat QuantumNumbers( void );
+    static double AlphaDerivativeHermite(const int &n, const double &x, const double &alpha, const double &omega);
 };
 
 #endif // HERMITE_H
