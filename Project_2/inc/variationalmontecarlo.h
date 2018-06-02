@@ -89,6 +89,7 @@ private:
     double acceptanceWeight;           /* weight used for accepting or rejecting a move */
     int acceptanceCounter;             /* number of accepted moves */
     double slaterRatio;
+    double jastrowRatio;
     arma::rowvec hist;
     arma::rowvec volume;
     double r_step;

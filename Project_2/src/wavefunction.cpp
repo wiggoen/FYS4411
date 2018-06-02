@@ -35,26 +35,19 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
 }
 
 
-double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const int &nParticles, const double &beta,
-                                                    const double &spinParameter, const bool &UseJastrowFactor)
-{
-    double wavefuncProd = 1;
-    double slater       = 1;
-    for (int i = 0; i < nParticles; i++)
-    {
-        for (int j = 0; j < nParticles; j++)
-        {
-            double rij = arma::norm(r.row(i) - r.row(j));
-            double expontential = spinParameter*rij/(1 + beta*rij);
-            wavefuncProd *= exp(expontential);
-        }
-    }
-    if (UseJastrowFactor)
-    {
-        //slater = SlaterDeterminant(r, nParticles, omega);
-    }
-    return wavefuncProd*slater;
-}
+//double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const int &nParticles, const double &beta,
+//                                                    const arma::mat &spinMatrix, const bool &UseJastrowFactor,
+//                                                    const arma::mat &SlaterUp, const arma::mat &SlaterDown)
+//{
+//    double slaterWavefunction = SlaterUp*SlaterDown;
+//
+//    double jastrowWavefunction = 1.0;
+//    if (UseJastrowFactor)
+//    {
+//        jastrowWavefunction = JastrowWavefunction(r, nParticles, beta, spinMatrix);
+//    }
+//    return slaterWavefunction*jastrowWavefunction;
+//}
 
 
 double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, const double &alpha, const double &omega,
@@ -70,7 +63,7 @@ double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, c
         {
             int nx = QuantumNumber(k, 0);
             int ny = QuantumNumber(k, 1);
-            slaterRatio += phi(rNew, alpha, omega, nx, ny, i)*InverseSlaterUp(k, i); // check if (i,k)
+            slaterRatio += phi(rNew, alpha, omega, nx, ny, i)*InverseSlaterUp(k, i);
         }
 
     } else
@@ -84,6 +77,35 @@ double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, c
         }
     }
     return slaterRatio;
+}
+
+
+double Wavefunction::JastrowWavefunction(const arma::mat &r, const int &nParticles, const double &beta,
+                                         const arma::mat &spinMatrix)
+{
+    double exponential = 0.0;
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nParticles; j++)
+        {
+            if (i < j)
+            {
+                double rij = arma::norm(r.row(i) - r.row(j));
+                exponential += spinMatrix(i, j)*rij/(1 + beta*rij);
+            }
+        }
+    }
+    return exp(exponential);
+}
+
+
+double Wavefunction::JastrowRatio(const arma::mat &rNew, const arma::mat &rOld, const int &nParticles, const double &beta,
+                                  const arma::mat &spinMatrix)
+{
+    double jastrowNew = JastrowWavefunction(rNew, nParticles, beta, spinMatrix);
+    double jastrowOld = JastrowWavefunction(rOld, nParticles, beta, spinMatrix);
+
+    return jastrowNew/jastrowOld;
 }
 
 
@@ -102,24 +124,21 @@ double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &
 arma::rowvec Wavefunction::phiGradient(const int &nDimensions, const double &alpha, const double &omega, const double &x, const double &y,
                                        const int &nx, const int &ny)
 {
-    arma::rowvec gradient = arma::zeros<arma::mat>(nDimensions);
+    /* Returns phiGradient/phi */
+    arma::rowvec gradient = arma::zeros<arma::rowvec>(nDimensions);
 
     double alphaOmega = alpha*omega;
     double sqrtAlphaOmega = sqrt(alphaOmega);
 
-    double exponential = exp(-0.5*alphaOmega*(x*x + y*y));
-
-    double H_nx = Hermite::H(nx, sqrtAlphaOmega*x);
-    double H_ny = Hermite::H(ny, sqrtAlphaOmega*y);
+    double inverseH_nx = 1.0/Hermite::H(nx, sqrtAlphaOmega*x);
+    double inverseH_ny = 1.0/Hermite::H(ny, sqrtAlphaOmega*y);
 
     double derivativeH_nx = Hermite::DerivativeHermite(nx, sqrtAlphaOmega*x);
     double derivativeH_ny = Hermite::DerivativeHermite(ny, sqrtAlphaOmega*y);
 
-    double derivativePsi_x = H_ny*exponential*(derivativeH_nx - H_nx*alphaOmega*x);
-    double derivativePsi_y = H_nx*exponential*(derivativeH_ny - H_ny*alphaOmega*y);
+    gradient.at(0) = inverseH_nx*derivativeH_nx - alphaOmega*x;
+    gradient.at(1) = inverseH_ny*derivativeH_ny - alphaOmega*y;
 
-    gradient.at(0) = derivativePsi_x;
-    gradient.at(1) = derivativePsi_y;
     return gradient;
 }
 
@@ -127,6 +146,7 @@ arma::rowvec Wavefunction::phiGradient(const int &nDimensions, const double &alp
 double Wavefunction::phiLaplace(const double &alpha, const double &omega, const double &x, const double &y,
                                 const int &nx, const int &ny)
 {
+    /* Returns phiLaplace/phi */
     double alphaOmega = alpha*omega;
     double sqrtAlphaOmega = sqrt(alphaOmega);
 
@@ -139,8 +159,8 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
     double doubleDerivativeH_nx = Hermite::DoubleDerivativeHermite(nx, sqrtAlphaOmega*x);
     double doubleDerivativeH_ny = Hermite::DoubleDerivativeHermite(ny, sqrtAlphaOmega*y);
 
-    double doubleDerivatives = alphaOmega*(inverseH_nx*doubleDerivativeH_nx + inverseH_ny*doubleDerivativeH_ny);
-    double derivatives = -2.0*alphaOmega*sqrtAlphaOmega*(inverseH_nx*derivativeH_nx*x + inverseH_ny*derivativeH_ny*y);
+    double doubleDerivatives = inverseH_nx*doubleDerivativeH_nx + inverseH_ny*doubleDerivativeH_ny;
+    double derivatives = -2.0*alphaOmega*(inverseH_nx*derivativeH_nx*x + inverseH_ny*derivativeH_ny*y);
     double positions = alphaOmega*(alphaOmega*(x*x + y*y) - 2.0);
 
     double laplacian = doubleDerivatives+derivatives+positions;

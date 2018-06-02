@@ -260,10 +260,13 @@ void VariationalMonteCarlo::SlaterInitialization( void )
     {
         for (int j = 0; j < nParticles; j++)
         {
-            if (i < nParticles/2) { if (j < nParticles/2) { spinMatrix(i, j) = 1.0/3.0; }
-                                    else                  { spinMatrix(i, j) = 1.0;     } }
-            else                  { if (j < nParticles/2) { spinMatrix(i, j) = 1.0;     }
-                                    else                  { spinMatrix(i, j) = 1.0/3.0; } }
+            //if(i==j) spinMatrix(i, j)  = 0;
+            //else{
+                if (i < nParticles/2) { if (j < nParticles/2) { spinMatrix(i, j) = 1.0/3.0; }
+                                        else                  { spinMatrix(i, j) = 1.0;     } }
+                else                  { if (j < nParticles/2) { spinMatrix(i, j) = 1.0;     }
+                                        else                  { spinMatrix(i, j) = 1.0/3.0; } }
+            //}
         }
     }
 }
@@ -283,7 +286,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     /* Loop over Monte Carlo cycles */
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
-        if(cycle%1000==0) std::cout << cycle << std::endl;
+        //if(cycle%1000==0) std::cout << cycle << std::endl;
         /* Sampling */
         if (nParticles > 2)
         {
@@ -343,12 +346,17 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
         else
         {
-            waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew, nParticles, beta, spinParameter, UseJastrowFactor);
+//            waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew, nParticles, beta, spinMatrix,
+//                                                                           UseJastrowFactor, SlaterUpNew, SlaterDownNew);
 
             slaterRatio = Wavefunction::SlaterRatio(rNew, nParticles, alpha, omega, InverseSlaterUpOld, InverseSlaterDownOld, i);
-            //double jastrowRatio = 1;
+            jastrowRatio = Wavefunction::JastrowRatio(rNew, rOld, nParticles, beta, spinMatrix);
+
+
             //std::cout << "husk jastrowRatio" << std::endl;
-            acceptanceWeight = slaterRatio*slaterRatio;  // check if squared
+
+
+            acceptanceWeight = slaterRatio*slaterRatio * jastrowRatio*jastrowRatio;  // check if squared
 
         }
 
@@ -511,8 +519,8 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         else
         {
             deltaEnergy = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, nDimensions, alpha, beta, omega,
-                                                                spinMatrix, UseFermionInteraction, InverseSlaterUpNew,
-                                                                InverseSlaterDownNew);
+                                                                spinMatrix, UseJastrowFactor, UseFermionInteraction,
+                                                                InverseSlaterUpNew, InverseSlaterDownNew);
         }
 
     }

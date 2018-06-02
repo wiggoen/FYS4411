@@ -18,13 +18,21 @@ public:
     static void NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                       const int &nDimensions, const double &alpha, const double &beta,
                                       const double &omega, const double &spinParameter, const bool &UseJastrowFactor);
-    static double TrialWaveFunctionManyParticles(const arma::mat &r, const int &nParticles, const double &beta,
-                                                 const double &spinParameter, const bool &UseJastrowFactor);
-    //static arma::mat SlaterDeterminant(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega);
+    static double TrialWaveFunctionManyParticles(const arma::mat &r, const int &nParticles,
+                                                 const double &beta, const arma::mat &spinMatrix,
+                                                 const bool &UseJastrowFactor, const arma::mat &SlaterUp,
+                                                 const arma::mat &SlaterDown);
     static double phiLaplace(const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const int &ny);
     static arma::rowvec phiGradient(const int &nDimensions, const double &alpha, const double &omega, const double &x, const double &y, const int &nx, const int &ny);
-    static double findPossibleNxNy(const arma::vec &p, unsigned int i);
+
+    static double JastrowWavefunction(const arma::mat &r, const int &nParticles, const double &beta, const arma::mat &spinMatrix);
+
+    static double JastrowRatio(const arma::mat &rNew, const arma::mat &rOld, const int &nParticles, const double &beta,
+                               const arma::mat &spinMatrix);
+
+
     static double phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny, const int &k);
+
     static double SlaterRatio(const arma::mat &rNew, const int &nParticles, const double &alpha, const double &omega,
                               const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown, const int &i);
 };
