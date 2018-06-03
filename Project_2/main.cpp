@@ -84,18 +84,32 @@ int main(int argumentCount, char *argumentVector[])
         return RunCatchTests();
     } else
     {
+        bool UseAverageTiming = parameter["Use Average timing"];
         int nParticles = parameter["nParticles"];
+        if (nParticles != 2 && nParticles != 6 && nParticles != 12 && nParticles != 20)
+        {
+            std::cout << std::endl;
+            std::cerr << "The system is built to calculate the number of electrons in the quantity {2, 6, 12, 20}." << std::endl;
+            std::cout << "Choose either of these particle numbers." << std::endl;
+            std::cout << std::endl;
+            exit(1);
+        }
+        if (nParticles == 6 || nParticles == 12 || nParticles == 20)
+        {
+            std::cout << std::endl;
+            std::cout << "Warning: Only brute force Metropolis is supported for system of {6, 12, 20} electrons." << std::endl;
+            std::cout << std::endl;
+        }
         int nCycles = parameter["nCycles"];
         double alpha = parameter["alpha"];
         double beta = parameter["beta"];
         double omega = parameter["omega"];
-        double spinParameter = parameter["spin parameter"];
+        double spinParameter = parameter["two electron spin parameter"];
         double stepLength = parameter["stepLength"];
+        bool UseImportanceSampling = parameter["Use Importance sampling"];
         double timeStep = parameter["timeStep"];
         bool UseJastrowFactor = parameter["Use Jastrow factor"];
-        bool UseImportanceSampling = parameter["Use Importance sampling"];
         bool UseFermionInteraction = parameter["Use Fermion interaction"];
-        bool UseAverageTiming = parameter["Use Average timing"];
         bool UseAnalyticalExpressions = parameter["Use analytical expressions"];
         bool UseNumericalPotentialEnergy = parameter["Use numerical potential energy"];
         std::string cycleType = parameter["Cycle type"];

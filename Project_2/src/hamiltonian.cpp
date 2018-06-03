@@ -79,9 +79,9 @@ double Hamiltonian::LocalEnergyTwoParticles(const arma::mat &r, const double &al
 
 double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                              const double &alpha, const double &beta, const double &omega,
-                                             arma::mat &spinMatrix, const bool UseJastrowFactor,
-                                             const bool &UseFermionInteraction, const arma::mat InverseSlaterUp,
-                                             const arma::mat InverseSlaterDown)
+                                             arma::mat &spinMatrix, const bool &UseJastrowFactor,
+                                             const bool &UseFermionInteraction, const arma::mat &InverseSlaterUp,
+                                             const arma::mat &InverseSlaterDown)
 {
     /* Kinetic energy */
     double slaterLaplacian = SlaterLaplacian(r, nParticles, alpha, omega, InverseSlaterUp, InverseSlaterDown);
@@ -139,7 +139,7 @@ double Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nPar
 
 arma::mat Hamiltonian::SlaterGradient(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                       const double &alpha, const double &omega,
-                                      const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown)
+                                      const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown)
 {
     arma::mat slaterGradient = arma::zeros<arma::mat>(nParticles, nDimensions);
 
@@ -178,7 +178,7 @@ arma::mat Hamiltonian::SlaterGradient(const arma::mat &r, const int &nParticles,
 
 
 double Hamiltonian::SlaterLaplacian(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega,
-                                    const arma::mat InverseSlaterUp, const arma::mat InverseSlaterDown)
+                                    const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown)
 {
     arma::mat QuantumNumber = Hermite::QuantumNumbers();
     double laplacianUp   = 0.0;
