@@ -240,7 +240,8 @@ arma::mat Hamiltonian::JastrowGradient(const arma::mat &r, const int &nParticles
 }
 
 
-double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta, const arma::mat &spinMatrix)
+double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta,
+                                     const arma::mat &spinMatrix)
 {
     double singleSum = 0.0;
     double doubleSum = 0.0;
