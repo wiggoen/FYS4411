@@ -35,21 +35,6 @@ double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, 
 }
 
 
-//double Wavefunction::TrialWaveFunctionManyParticles(const arma::mat &r, const int &nParticles, const double &beta,
-//                                                    const arma::mat &spinMatrix, const bool &UseJastrowFactor,
-//                                                    const arma::mat &SlaterUp, const arma::mat &SlaterDown)
-//{
-//    double slaterWavefunction = SlaterUp*SlaterDown;
-//
-//    double jastrowWavefunction = 1.0;
-//    if (UseJastrowFactor)
-//    {
-//        jastrowWavefunction = JastrowWavefunction(r, nParticles, beta, spinMatrix);
-//    }
-//    return slaterWavefunction*jastrowWavefunction;
-//}
-
-
 double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, const double &alpha, const double &omega,
                                  const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown, const int &i)
 {
@@ -206,6 +191,7 @@ double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &beta,
 
 
 double Wavefunction::DerivativePsiManyOfAlpha(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
+/* Returns 1/Psi * dPsi/dAlpha */
 {
     double sum = 0.0;
 
@@ -252,6 +238,7 @@ double Wavefunction::DerivativePsiManyOfAlpha(const arma::mat &r, const int &nPa
 
 double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nParticles, const double &beta,
                                              const arma::mat &spinMatrix)
+/* Returns 1/Psi * dPsi/dBeta */
 {
     double sum = 0.0;
 

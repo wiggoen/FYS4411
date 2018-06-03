@@ -9,31 +9,43 @@ class VariationalMonteCarlo
 public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo( void );
-    arma::rowvec RunVMC(const int nParticles, const int nCycles, const double alpha,
-                        const double beta,  const double omega, const double spinParameter,
-                        const double stepLength, const double timeStep, const bool UseJastrowFactor,
-                        const bool UseImportanceSampling, const bool UseFermionInteraction,
+    arma::rowvec RunVMC(const int nParticles, const int nCycles, const double alpha, const double beta, const double omega,
+                        const double spinParameter, const double stepLength, const double timeStep,
+                        const bool UseJastrowFactor, const bool UseImportanceSampling, const bool UseFermionInteraction,
                         const bool UseAnalyticalExpressions, const bool UseNumericalPotentialEnergy,
                         const std::string cycleType, const int cycleStepToFile, const bool UseMPI);
+
     void InitialTrialPositionsBruteForce(arma::mat &r);
-    void MonteCarloCycles( void );
-    double UniformRandomNumber( void );
-    void SlaterInitialization( void );
-    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew,
-                                 const double &waveFunctionOld);
-    void ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew,
-                                 const arma::mat &QForceOld, double &waveFunctionNew,
-                                 const double &waveFunctionOld);
-    void UpdateInverseSlater(const int &i);
-    void UpdateEnergies(const int &i);
+
     void InitialTrialPositionsImportanceSampling(arma::mat &r);
+
+    void SlaterInitialization( void );
+
+    double UniformRandomNumber( void );
+
     double GaussianRandomNumber( void );
-    double GreensRatio(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew,
-                       const arma::mat &QForceOld, const double &diffusionCoefficient,
-                       const double &timeStep, const int &i);
+
+    void MonteCarloCycles( void );
+
+
+    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew, const double &waveFunctionOld);
+
+    void ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew, const arma::mat &QForceOld,
+                            double &waveFunctionNew, const double &waveFunctionOld);
+
+    double GreensRatio(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew, const arma::mat &QForceOld,
+                       const double &diffusionCoefficient, const double &timeStep, const int &i);
+
+    void UpdateInverseSlater(const int &i);
+
+    void UpdateEnergies(const int &i);
+
     void SteepestDescent(const int &nParticles);
+
     void SetOneBody( void );
+
     void OneBodyDensity( void );
+
     double waveFunctionOld;            /* old wave function */
     double waveFunctionNew;            /* new wave function */
     double energySum;                  /* sum of particle energies for all Monte Carlo cycles */
@@ -66,6 +78,7 @@ public:
     arma::mat InverseSlaterDownNew;
     arma::mat spinMatrix;
     arma::mat QuantumNumber;
+
 private:
     arma::mat rOld;                    /* matrix of old position */
     arma::mat rNew;                    /* matrix of new position */

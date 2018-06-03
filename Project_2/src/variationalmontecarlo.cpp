@@ -67,6 +67,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     acceptanceWeight  = 0.0;
     acceptanceCounter = 0.0;
     slaterRatio       = 0.0;
+    jastrowRatio      = 0.0;
     if (!UseAnalyticalExpressions)
     {
         numericalEnergyVector = arma::zeros<arma::rowvec>(nDimensions+1);
@@ -80,18 +81,20 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     rNew = rOld;
 
     /* Initial slater determinants and quantum numbers */
-    SlaterUpOld          = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
-    SlaterDownOld        = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
-    spinMatrix           = arma::zeros<arma::mat>(nParticles, nParticles);
-    QuantumNumber        = Hermite::QuantumNumbers();
-    SlaterInitialization();
-    SlaterUpNew          = SlaterUpOld;
-    SlaterDownNew        = SlaterDownOld;
-    InverseSlaterUpOld   = inv(SlaterUpOld);
-    InverseSlaterDownOld = inv(SlaterDownOld);
-    InverseSlaterUpNew   = InverseSlaterUpOld;
-    InverseSlaterDownNew = InverseSlaterDownOld;
-
+    if (nParticles > 2)
+    {
+        SlaterUpOld          = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+        SlaterDownOld        = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+        spinMatrix           = arma::zeros<arma::mat>(nParticles, nParticles);
+        QuantumNumber        = Hermite::QuantumNumbers();
+        SlaterInitialization();
+        SlaterUpNew          = SlaterUpOld;
+        SlaterDownNew        = SlaterDownOld;
+        InverseSlaterUpOld   = inv(SlaterUpOld);
+        InverseSlaterDownOld = inv(SlaterDownOld);
+        InverseSlaterUpNew   = InverseSlaterUpOld;
+        InverseSlaterDownNew = InverseSlaterDownOld;
+    }
 
     /* Store the current value of the wave function and quantum force */
     if (UseImportanceSampling)
@@ -221,6 +224,35 @@ void VariationalMonteCarlo::InitialTrialPositionsImportanceSampling(arma::mat &r
 }
 
 
+void VariationalMonteCarlo::SlaterInitialization( void )
+{
+    /* initialize slater determinants */
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            SlaterUpOld(i, j)   = Wavefunction::phi(rOld, alpha, omega, nx, ny, i);
+            SlaterDownOld(i, j) = Wavefunction::phi(rOld, alpha, omega, nx, ny, i+nParticles/2);
+        }
+    }
+
+    /* set up spin parameter matrix */
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nParticles; j++)
+        {
+
+            if (i < nParticles/2) { if (j < nParticles/2) { spinMatrix(i, j) = 1.0/3.0; }
+                                    else                  { spinMatrix(i, j) = 1.0;     } }
+            else                  { if (j < nParticles/2) { spinMatrix(i, j) = 1.0;     }
+                                    else                  { spinMatrix(i, j) = 1.0/3.0; } }
+        }
+    }
+}
+
+
 double VariationalMonteCarlo::UniformRandomNumber( void )
 {
     static std::random_device rd;  /* Initialize the seed for the random number engine */
@@ -241,37 +273,6 @@ double VariationalMonteCarlo::GaussianRandomNumber( void )
 }
 
 
-void VariationalMonteCarlo::SlaterInitialization( void )
-{
-    /* initialize slater determinants */
-    for (int i = 0; i < nParticles/2; i++)
-    {
-        for (int j = 0; j < nParticles/2; j++)
-        {
-            int nx = QuantumNumber(j, 0);
-            int ny = QuantumNumber(j, 1);
-            SlaterUpOld(i, j)   = Wavefunction::phi(rOld, alpha, omega, nx, ny, i);
-            SlaterDownOld(i, j) = Wavefunction::phi(rOld, alpha, omega, nx, ny, i+nParticles/2);
-        }
-    }
-
-    /* set up spin parameter matrix */
-    for (int i = 0; i < nParticles; i++)
-    {
-        for (int j = 0; j < nParticles; j++)
-        {
-            //if(i==j) spinMatrix(i, j)  = 0;
-            //else{
-                if (i < nParticles/2) { if (j < nParticles/2) { spinMatrix(i, j) = 1.0/3.0; }
-                                        else                  { spinMatrix(i, j) = 1.0;     } }
-                else                  { if (j < nParticles/2) { spinMatrix(i, j) = 1.0;     }
-                                        else                  { spinMatrix(i, j) = 1.0/3.0; } }
-            //}
-        }
-    }
-}
-
-
 void VariationalMonteCarlo::MonteCarloCycles( void )
 {
     /* Open outputfiles to write */
@@ -286,7 +287,6 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     /* Loop over Monte Carlo cycles */
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
-        //if(cycle%1000==0) std::cout << cycle << std::endl;
         /* Sampling */
         if (nParticles > 2)
         {
@@ -346,18 +346,11 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         }
         else
         {
-//            waveFunctionNew = Wavefunction::TrialWaveFunctionManyParticles(rNew, nParticles, beta, spinMatrix,
-//                                                                           UseJastrowFactor, SlaterUpNew, SlaterDownNew);
-
+            /* the ratios acts on behalf of the wave function */
             slaterRatio = Wavefunction::SlaterRatio(rNew, nParticles, alpha, omega, InverseSlaterUpOld, InverseSlaterDownOld, i);
             jastrowRatio = Wavefunction::JastrowRatio(rNew, rOld, nParticles, beta, spinMatrix);
 
-
-            //std::cout << "husk jastrowRatio" << std::endl;
-
-
-            acceptanceWeight = slaterRatio*slaterRatio * jastrowRatio*jastrowRatio;  // check if squared
-
+            acceptanceWeight = slaterRatio*slaterRatio * jastrowRatio*jastrowRatio;
         }
 
         UpdateEnergies(i);
