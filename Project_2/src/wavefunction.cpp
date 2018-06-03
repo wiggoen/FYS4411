@@ -50,7 +50,6 @@ double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, c
             int ny = QuantumNumber(k, 1);
             slaterRatio += phi(rNew, alpha, omega, nx, ny, i)*InverseSlaterUp(k, i);
         }
-
     } else
     {
         /* Electron with spin down moved */
@@ -76,7 +75,8 @@ double Wavefunction::JastrowWavefunction(const arma::mat &r, const int &nParticl
             if (i < j)
             {
                 double rij = arma::norm(r.row(i) - r.row(j));
-                exponential += spinMatrix(i, j)*rij/(1 + beta*rij);
+                double spinParameter = Hamiltonian::getSpinParameter(nParticles, i, j);
+                exponential += spinParameter*rij/(1 + beta*rij);
             }
         }
     }
@@ -125,7 +125,7 @@ arma::rowvec Wavefunction::phiGradient(const int &nDimensions, const double &alp
     double derivativeH_ny = Hermite::DerivativeHermite(ny, sqrtAlphaOmega*y);
 
     gradient.at(0) = H_ny*exponential*(derivativeH_nx - H_nx*alphaOmega*x);
-    gradient.at(1) = H_ny*exponential*(derivativeH_ny - H_ny*alphaOmega*y);
+    gradient.at(1) = H_nx*exponential*(derivativeH_ny - H_ny*alphaOmega*y);
 
     return gradient;
 }
@@ -134,12 +134,14 @@ arma::rowvec Wavefunction::phiGradient(const int &nDimensions, const double &alp
 double Wavefunction::phiLaplace(const double &alpha, const double &omega, const double &x, const double &y,
                                 const int &nx, const int &ny)
 {
-    /* Returns phiLaplace/phi */
+    /* Returns phiLaplace */
     double alphaOmega = alpha*omega;
     double sqrtAlphaOmega = sqrt(alphaOmega);
 
-    double inverseH_nx = 1.0/Hermite::H(nx, sqrtAlphaOmega*x);
-    double inverseH_ny = 1.0/Hermite::H(ny, sqrtAlphaOmega*y);
+    double exponential = exp(-0.5*alphaOmega*(x*x + y*y));
+
+    double H_nx = Hermite::H(nx, sqrtAlphaOmega*x);
+    double H_ny = Hermite::H(ny, sqrtAlphaOmega*y);
 
     double derivativeH_nx = Hermite::DerivativeHermite(nx, sqrtAlphaOmega*x);
     double derivativeH_ny = Hermite::DerivativeHermite(ny, sqrtAlphaOmega*y);
@@ -147,12 +149,11 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
     double doubleDerivativeH_nx = Hermite::DoubleDerivativeHermite(nx, sqrtAlphaOmega*x);
     double doubleDerivativeH_ny = Hermite::DoubleDerivativeHermite(ny, sqrtAlphaOmega*y);
 
-    double doubleDerivatives = inverseH_nx*doubleDerivativeH_nx + inverseH_ny*doubleDerivativeH_ny;
-    double derivatives = -2.0*alphaOmega*(inverseH_nx*derivativeH_nx*x + inverseH_ny*derivativeH_ny*y);
-    double positions = alphaOmega*(alphaOmega*(x*x + y*y) - 2.0);
+    double doubleDerivatives = H_ny*doubleDerivativeH_nx + H_nx*doubleDerivativeH_ny;
+    double derivatives = -2.0*alphaOmega*(H_ny*derivativeH_nx*x + H_nx*derivativeH_ny*y);
+    double positions = H_nx*H_ny*alphaOmega*(alphaOmega*(x*x + y*y) - 2.0);
 
-    double laplacian = doubleDerivatives+derivatives+positions;
-    return laplacian;
+    return exponential*(doubleDerivatives + derivatives + positions);
 }
 
 
@@ -254,7 +255,8 @@ double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nPar
             {
                 double distanceRkj    = arma::norm(r.row(k) - r.row(j));
                 double denominator_kj =  (1 + beta*distanceRkj);
-                double fraction_kj    = spinMatrix(k, j) * (distanceRkj*distanceRkj) / (denominator_kj*denominator_kj);
+                double spinParameter  = Hamiltonian::getSpinParameter(nParticles, k, j);
+                double fraction_kj    = spinParameter * (distanceRkj*distanceRkj) / (denominator_kj*denominator_kj);
                 sum -= fraction_kj;
             }
         }

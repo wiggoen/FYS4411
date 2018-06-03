@@ -14,6 +14,8 @@ public:
 
     static double RepulsiveInteraction(const arma::rowvec &r_i, const arma::rowvec &r_j);
 
+    static double getSpinParameter(const int &nParticles, const int &i, const int &j);
+
     static double LocalEnergyTwoParticles(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
                                           const double &spinParameter, const bool &UseJastrowFactor,
                                           const bool &UseFermionInteraction);

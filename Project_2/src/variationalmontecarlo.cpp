@@ -160,7 +160,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         potentialEnergy = potentialEnergySum * normalizationFactor;
     }
 
-    double variance = (energySquared - energy*energy);
+    double variance = (energySquared - energy*energy) * normalizationFactor;
     double acceptanceRatio = acceptanceCounter * normalizationFactor;
 
 
@@ -343,12 +343,16 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
         {
             waveFunctionNew = Wavefunction::TrialWaveFunction(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor);
             acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-        }
-        else
+        } else
         {
             /* the ratios acts on behalf of the wave function */
             slaterRatio = Wavefunction::SlaterRatio(rNew, nParticles, alpha, omega, InverseSlaterUpOld, InverseSlaterDownOld, i);
-            jastrowRatio = Wavefunction::JastrowRatio(rNew, rOld, nParticles, beta, spinMatrix);
+
+            jastrowRatio = 1.0;
+            if (UseJastrowFactor)
+            {
+                jastrowRatio = Wavefunction::JastrowRatio(rNew, rOld, nParticles, beta, spinMatrix);
+            }
 
             acceptanceWeight = slaterRatio*slaterRatio * jastrowRatio*jastrowRatio;
         }
@@ -508,8 +512,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         {
             deltaEnergy = Hamiltonian::LocalEnergyTwoParticles(rNew, alpha, beta, omega, spinParameter, UseJastrowFactor,
                                                                UseFermionInteraction);
-        }
-        else
+        } else
         {
             energyVector = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, nDimensions, alpha, beta, omega,
                                                                 spinMatrix, UseJastrowFactor, UseFermionInteraction,
