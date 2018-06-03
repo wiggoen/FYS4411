@@ -52,6 +52,7 @@ public:
     double energySquaredSum;           /* squared sum of particle energies for all Monte Carlo cycles */
     double deltaEnergy;                /* energy of particle we look at */
     arma::rowvec numericalEnergyVector;
+    arma::rowvec energyVector;
     double kineticEnergySum;
     double potentialEnergySum;
     double kineticEnergy;

@@ -154,7 +154,7 @@ int main(int argumentCount, char *argumentVector[])
         double acceptanceRatio = columnSum(4)/trials;
         double kineticEnergy;
         double potentialEnergy;
-        if (!UseAnalyticalExpressions)
+        if (nParticles > 2 || !UseAnalyticalExpressions)
         {
             kineticEnergy   = columnSum(5)/trials;
             potentialEnergy = columnSum(6)/trials;
@@ -224,7 +224,7 @@ int main(int argumentCount, char *argumentVector[])
                   << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
 
-        if (!UseAnalyticalExpressions)
+        if (nParticles > 2 || !UseAnalyticalExpressions)
         {
             std::cout << "Kinetic_energy "  << " Potential_energy " << std::endl;
 

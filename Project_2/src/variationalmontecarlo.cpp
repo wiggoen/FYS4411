@@ -68,8 +68,9 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     acceptanceCounter = 0.0;
     slaterRatio       = 0.0;
     jastrowRatio      = 0.0;
-    if (!UseAnalyticalExpressions)
+    if (nParticles > 2 || !UseAnalyticalExpressions)
     {
+        energyVector          = arma::zeros<arma::rowvec>(nDimensions+1);
         numericalEnergyVector = arma::zeros<arma::rowvec>(nDimensions+1);
         kineticEnergySum   = 0.0;
         potentialEnergySum = 0.0;
@@ -153,7 +154,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     double energy = energySum * normalizationFactor;
     double energySquared = energySquaredSum * normalizationFactor;
 
-    if (!UseAnalyticalExpressions)
+    if (nParticles > 2 || !UseAnalyticalExpressions)
     {
         kineticEnergy   = kineticEnergySum * normalizationFactor;
         potentialEnergy = potentialEnergySum * normalizationFactor;
@@ -183,7 +184,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
 
     /* Vector containing the results of the run */
     arma::rowvec runDetails;
-    if (!UseAnalyticalExpressions)
+    if (nParticles > 2 || !UseAnalyticalExpressions)
     {
         runDetails << runTime << energy << energySquared << variance << acceptanceRatio << kineticEnergy << potentialEnergy;
     } else
@@ -243,7 +244,6 @@ void VariationalMonteCarlo::SlaterInitialization( void )
     {
         for (int j = 0; j < nParticles; j++)
         {
-
             if (i < nParticles/2) { if (j < nParticles/2) { spinMatrix(i, j) = 1.0/3.0; }
                                     else                  { spinMatrix(i, j) = 1.0;     } }
             else                  { if (j < nParticles/2) { spinMatrix(i, j) = 1.0;     }
@@ -486,8 +486,8 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     {
         rNew.row(i)      = rOld.row(i);
         QForceNew.row(i) = QForceOld.row(i);
-        if (i < nParticles/2) { SlaterUpNew.col(i)                = SlaterUpNew.col(i); }
-        else                  { SlaterDownNew.col(i-nParticles/2) = SlaterDownOld.col(i-nParticles/2); }
+        if (i < nParticles/2) { InverseSlaterUpNew.col(i)                = InverseSlaterUpOld.col(i); }
+        else                  { InverseSlaterDownNew.col(i-nParticles/2) = InverseSlaterDownOld.col(i-nParticles/2); }
         //waveFunctionNew  = waveFunctionOld;  /* Probably unnecessary since the wavefunction didn't change. */
     }
 
@@ -511,9 +511,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         }
         else
         {
-            deltaEnergy = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, nDimensions, alpha, beta, omega,
+            energyVector = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, nDimensions, alpha, beta, omega,
                                                                 spinMatrix, UseJastrowFactor, UseFermionInteraction,
                                                                 InverseSlaterUpNew, InverseSlaterDownNew);
+            deltaEnergy         = energyVector.at(0);
+            kineticEnergySum   += energyVector.at(1);
+            potentialEnergySum += energyVector.at(2);
         }
 
     }

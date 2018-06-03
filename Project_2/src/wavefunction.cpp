@@ -94,7 +94,8 @@ double Wavefunction::JastrowRatio(const arma::mat &rNew, const arma::mat &rOld, 
 }
 
 
-double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny, const int &k)
+double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &omega, const int &nx, const int &ny,
+                         const int &k)
 {
     /* Single particle states, given by Hermite polynomials */
     double sqrtAlphaOmega = sqrt(alpha*omega);
@@ -106,23 +107,25 @@ double Wavefunction::phi(const arma::mat &r, const double &alpha, const double &
 }
 
 
-arma::rowvec Wavefunction::phiGradient(const int &nDimensions, const double &alpha, const double &omega, const double &x, const double &y,
-                                       const int &nx, const int &ny)
+arma::rowvec Wavefunction::phiGradient(const int &nDimensions, const double &alpha, const double &omega, const double &x,
+                                       const double &y, const int &nx, const int &ny)
 {
-    /* Returns phiGradient/phi */
+    /* Returns phiGradient */
     arma::rowvec gradient = arma::zeros<arma::rowvec>(nDimensions);
 
     double alphaOmega = alpha*omega;
     double sqrtAlphaOmega = sqrt(alphaOmega);
 
-    double inverseH_nx = 1.0/Hermite::H(nx, sqrtAlphaOmega*x);
-    double inverseH_ny = 1.0/Hermite::H(ny, sqrtAlphaOmega*y);
+    double exponential = exp(-0.5*alphaOmega*(x*x + y*y));
+
+    double H_nx = Hermite::H(nx, sqrtAlphaOmega*x);
+    double H_ny = Hermite::H(ny, sqrtAlphaOmega*y);
 
     double derivativeH_nx = Hermite::DerivativeHermite(nx, sqrtAlphaOmega*x);
     double derivativeH_ny = Hermite::DerivativeHermite(ny, sqrtAlphaOmega*y);
 
-    gradient.at(0) = inverseH_nx*derivativeH_nx - alphaOmega*x;
-    gradient.at(1) = inverseH_ny*derivativeH_ny - alphaOmega*y;
+    gradient.at(0) = H_ny*exponential*(derivativeH_nx - H_nx*alphaOmega*x);
+    gradient.at(1) = H_ny*exponential*(derivativeH_ny - H_ny*alphaOmega*y);
 
     return gradient;
 }
@@ -190,7 +193,8 @@ double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &beta,
 }
 
 
-double Wavefunction::DerivativePsiManyOfAlpha(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
+double Wavefunction::DerivativePsiManyOfAlpha(const arma::mat &r, const int &nParticles, const double &alpha,
+                                              const double &omega)
 /* Returns 1/Psi * dPsi/dAlpha */
 {
     double sum = 0.0;
