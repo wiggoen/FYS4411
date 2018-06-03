@@ -529,8 +529,16 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 
     if (cycleType == "SteepestDescent")
     {
-        dPsiOfAlpha  = Wavefunction::DerivativePsiOfAlpha(rNew, omega);
-        dPsiOfBeta   = Wavefunction::DerivativePsiOfBeta(rNew, beta, spinParameter);
+        if (nParticles == 2)
+        {
+            dPsiOfAlpha  = Wavefunction::DerivativePsiOfAlpha(rNew, omega);
+            dPsiOfBeta   = Wavefunction::DerivativePsiOfBeta(rNew, beta, spinParameter);
+        } else
+        {
+            dPsiOfAlpha  = Wavefunction::DerivativePsiManyOfAlpha(rNew, nParticles, alpha, omega);
+            dPsiOfBeta   = Wavefunction::DerivativePsiManyOfBeta(rNew, nParticles, beta, spinMatrix);
+        }
+
         psiSumAlpha += dPsiOfAlpha;
         psiSumBeta  += dPsiOfBeta;
         psiOfAlphaTimesEnergySum += dPsiOfAlpha*deltaEnergy;

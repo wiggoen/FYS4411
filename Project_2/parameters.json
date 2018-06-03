@@ -1,7 +1,7 @@
 {
     "Run tests": false,
     "nParticles": 6,
-    "nCycles": 1000000,
+    "nCycles": 10000,
     "alpha": 0.93,
     "beta": 0.56,
     "omega": 1.0,
@@ -14,7 +14,7 @@
     "Use Average timing": false,
     "Use analytical expressions": true,
     "Use numerical potential energy": false,
-    "Cycle type": "MonteCarlo",
+    "Cycle type": "SteepestDescent",
     "Cycle step to file": 0,
     "Use MPI": false
 }

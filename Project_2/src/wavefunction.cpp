@@ -204,23 +204,53 @@ double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &beta,
     return -(spinParameter*(r_12*r_12))/denominator;
 }
 
-double Wavefunction::DerivativePsiManyOfAlpha(const double &alpha, const double &omega, const int &nx, const int &ny,
-                                              const double &x, const double &y)
-{
-    // NEED TO GO THROUGH THIS!!
-    double sqrtAlphaOmega  = sqrt(alpha*omega);
-    double alphaOmegaX = sqrtAlphaOmega*x;
-    double alphaOmegaY = sqrtAlphaOmega*y;
-    double derHnx    = Hermite::AlphaDerivativeHermite(nx,x,alpha,omega);
-    double derHny    = Hermite::AlphaDerivativeHermite(ny,x,alpha,omega);
-    double hermiteNx = Hermite::H(nx,alphaOmegaX);
-    double hermiteNy = Hermite::H(ny,alphaOmegaY);
-    double frstFrac  = derHnx*x*hermiteNy;
-    double scndFrac  = derHny*y*hermiteNx;
-//    double exponent  = -0.5*alpha*omega*(x*x+y*y);
-    return ((0.5*omega/sqrtAlphaOmega)*(frstFrac+scndFrac) - 1);
 
-double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nParticles, const double &beta, const double &omega,
+double Wavefunction::DerivativePsiManyOfAlpha(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega)
+{
+    double sum = 0.0;
+
+    const arma::mat QuantumNumber = Hermite::QuantumNumbers();
+
+    double factor = 0.5*sqrt(omega/alpha);
+    double sqrtAlphaOmega = sqrt(alpha*omega);
+
+    /* Electron with spin up moved */
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            double x = r(i, 0);
+            double y = r(i, 1);
+            double inverseH_nx = 1.0/Hermite::H(nx, sqrtAlphaOmega*x);
+            double inverseH_ny = 1.0/Hermite::H(ny, sqrtAlphaOmega*y);
+            double alphaDerivativeH_nx = Hermite::AlphaDerivativeHermite(nx, x, alpha, omega);
+            double alphaDerivativeH_ny = Hermite::AlphaDerivativeHermite(ny, y, alpha, omega);
+            sum += factor*x*inverseH_nx*alphaDerivativeH_nx + factor*y*inverseH_ny*alphaDerivativeH_ny;
+        }
+    }
+    /* Electron with spin down moved */
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            double x = r(i + nParticles/2, 0);
+            double y = r(i + nParticles/2, 1);
+            double inverseH_nx = 1.0/Hermite::H(nx, sqrtAlphaOmega*x);
+            double inverseH_ny = 1.0/Hermite::H(ny, sqrtAlphaOmega*y);
+            double alphaDerivativeH_nx = Hermite::AlphaDerivativeHermite(nx, x, alpha, omega);
+            double alphaDerivativeH_ny = Hermite::AlphaDerivativeHermite(ny, y, alpha, omega);
+            sum += factor*x*inverseH_nx*alphaDerivativeH_nx + factor*y*inverseH_ny*alphaDerivativeH_ny;
+        }
+    }
+    return  sum - nParticles;
+}
+
+
+double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nParticles, const double &beta,
                                              const arma::mat &spinMatrix)
 {
     double sum = 0.0;
@@ -231,10 +261,9 @@ double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nPar
         {
             if (j != k)
             {
-                arma::rowvec Rkj       = (r.row(k) - r.row(j));
-                double distanceRkj     = arma::norm(Rkj);
-                double denominator_kj  =  (1 + beta*distanceRkj);
-                double fraction_kj     = spinMatrix(k, j) * distanceRkj / (denominator_kj*denominator_kj);
+                double distanceRkj    = arma::norm(r.row(k) - r.row(j));
+                double denominator_kj =  (1 + beta*distanceRkj);
+                double fraction_kj    = spinMatrix(k, j) * (distanceRkj*distanceRkj) / (denominator_kj*denominator_kj);
                 sum -= fraction_kj;
             }
         }
