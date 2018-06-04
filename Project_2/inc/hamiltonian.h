@@ -16,13 +16,10 @@ public:
 
     static double getSpinParameter(const int &nParticles, const int &i, const int &j);
 
-    static double LocalEnergyTwoParticles(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
-                                          const bool &UseJastrowFactor, const bool &UseFermionInteraction);
-
-    static arma::rowvec LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const int &nDimensions,
-                                                 const double &alpha, const double &beta, const double &omega,
-                                                 const bool &UseJastrowFactor, const bool &UseFermionInteraction,
-                                                 const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown);
+    static arma::rowvec LocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                    const double &alpha, const double &beta, const double &omega,
+                                    const bool &UseJastrowFactor, const bool &UseFermionInteraction,
+                                    const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown);
 
     static arma::mat SlaterGradient(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha,
                                     const double &omega, const arma::mat &InverseSlaterUp,

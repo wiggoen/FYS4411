@@ -13,7 +13,7 @@ public:
                         const double stepLength, const double timeStep, const bool UseJastrowFactor,
                         const bool UseImportanceSampling, const bool UseFermionInteraction,
                         const bool UseAnalyticalExpressions, const bool UseNumericalPotentialEnergy,
-                        const std::string cycleType, const int cycleStepToFile, const bool UseMPI);
+                        const std::string cycleType, const int cycleStepToFile, const bool UseMPI, int terminalizationFactor);
 
     void InitialTrialPositionsBruteForce(arma::mat &r);
 
@@ -29,10 +29,9 @@ public:
 
     int PickRandomParticle( void );
 
-    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew, const double &waveFunctionOld);
+    void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld);
 
-    void ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew, const arma::mat &QForceOld,
-                            double &waveFunctionNew, const double &waveFunctionOld);
+    void ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew, const arma::mat &QForceOld);
 
     double GreensRatio(const arma::mat &rNew, const arma::mat &rOld, const arma::mat &QForceNew, const arma::mat &QForceOld,
                        const double &diffusionCoefficient, const double &timeStep, const int &i);
@@ -101,7 +100,7 @@ private:
     double acceptanceWeight;           /* weight used for accepting or rejecting a move */
     int acceptanceCounter;             /* number of accepted moves */
     int cycleNumber;
-    int terminalizationFactor;
+    int terminalizationFactor;         /* throws away the first (int) energies */
     double slaterRatio;
     double jastrowRatio;
     arma::rowvec hist;

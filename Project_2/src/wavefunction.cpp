@@ -15,28 +15,6 @@ Wavefunction::~Wavefunction( void )
 }
 
 
-double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
-                                       const bool &UseJastrowFactor)
-{
-    double spinParameter = 1.0;
-
-    /* Two electrons */
-    double r_1Squared  = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
-    double r_2Squared  = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
-    double unperturbed = -0.5*alpha*omega*(r_1Squared + r_2Squared);
-
-    if (!UseJastrowFactor) {
-        /* Without Jastrow factor */
-        return exp(unperturbed);
-    } else {
-        /* With Jastrow factor */
-        double r_12 = arma::norm(r.row(0) - r.row(1));
-        double jastrow = (spinParameter*r_12)/(1 + beta*r_12);
-        return exp(unperturbed + jastrow);
-    }
-}
-
-
 double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, const double &alpha, const double &omega,
                                  const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown, const int &i)
 {
@@ -157,22 +135,20 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
 }
 
 
-void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &beta,
-                                const double &omega, const bool &UseJastrowFactor)
+void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles, const int &nDimensions,
+                                const double &alpha, const double &beta, const double &omega, const bool &UseJastrowFactor,
+                                const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown, const int &k)
 {
-    double spinParameter = 1.0;
+    arma::mat slaterGradient = Hamiltonian::SlaterGradient(r, nParticles, nDimensions, alpha, omega, InverseSlaterUp,
+                                                           InverseSlaterDown);
 
-    if (!UseJastrowFactor) {
-        /* Without Jastrow factor */
-        QForce = -2*alpha*omega*r;
+    arma::mat jastrowGradient = arma::zeros<arma::mat>(nParticles, nDimensions);
+    if (UseJastrowFactor)
+    {
+        jastrowGradient = Hamiltonian::JastrowGradient(r, nParticles, nDimensions, beta);
     }
-    else {
-        /* With Jastrow factor for two electrons */
-        double r_12 = arma::norm(r.row(0) - r.row(1));
-        arma::rowvec JastrowDependence = (spinParameter*(r.row(0) - r.row(1)))/(r_12 * ((1 + beta*r_12)*(1 + beta*r_12)));
-        QForce.row(0) = 2*(-alpha*omega*r.row(0) + JastrowDependence);
-        QForce.row(1) = 2*(-alpha*omega*r.row(1) - JastrowDependence);
-    }
+
+    QForce.row(k) = 2*(slaterGradient.row(k) + jastrowGradient.row(k));
 }
 
 
@@ -268,34 +244,56 @@ double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nPar
 }
 
 
-void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
-                                         const int &nDimensions, const double &alpha, const double &beta,
-                                         const double &omega, const bool &UseJastrowFactor)
-{
-    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
-    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
+//double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
+//                                       const bool &UseJastrowFactor)
+//{
+//    double spinParameter = 1.0;
+//
+//    /* Two electrons */
+//    double r_1Squared  = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
+//    double r_2Squared  = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
+//    double unperturbed = -0.5*alpha*omega*(r_1Squared + r_2Squared);
+//
+//    if (!UseJastrowFactor) {
+//        /* Without Jastrow factor */
+//        return exp(unperturbed);
+//    } else {
+//        /* With Jastrow factor */
+//        double r_12 = arma::norm(r.row(0) - r.row(1));
+//        double jastrow = (spinParameter*r_12)/(1 + beta*r_12);
+//        return exp(unperturbed + jastrow);
+//    }
+//}
 
-    rPlus  = r;
-    rMinus = r;
 
-    double waveFunctionMinus   = 0.0;
-    double waveFunctionPlus    = 0.0;
-    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, UseJastrowFactor);
-
-    double h = 1e-4;
-
-    for (int i = 0; i < nParticles; i++)
-    {
-        for (int j = 0; j < nDimensions; j++)
-        {
-            rPlus(i, j)  += h;
-            rMinus(i, j) -= h;
-            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, UseJastrowFactor);
-            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, UseJastrowFactor);
-            QForce(i, j) = (waveFunctionPlus - waveFunctionMinus);
-            rPlus(i, j)  = r(i, j);
-            rMinus(i, j) = r(i, j);
-        }
-    }
-    QForce = QForce / (waveFunctionCurrent * h);
-}
+//void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
+//                                         const int &nDimensions, const double &alpha, const double &beta,
+//                                         const double &omega, const bool &UseJastrowFactor)
+//{
+//    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
+//    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
+//
+//    rPlus  = r;
+//    rMinus = r;
+//
+//    double waveFunctionMinus   = 0.0;
+//    double waveFunctionPlus    = 0.0;
+//    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, UseJastrowFactor);
+//
+//    double h = 1e-4;
+//
+//    for (int i = 0; i < nParticles; i++)
+//    {
+//        for (int j = 0; j < nDimensions; j++)
+//        {
+//            rPlus(i, j)  += h;
+//            rMinus(i, j) -= h;
+//            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, UseJastrowFactor);
+//            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, UseJastrowFactor);
+//            QForce(i, j) = (waveFunctionPlus - waveFunctionMinus);
+//            rPlus(i, j)  = r(i, j);
+//            rMinus(i, j) = r(i, j);
+//        }
+//    }
+//    QForce = QForce / (waveFunctionCurrent * h);
+//}

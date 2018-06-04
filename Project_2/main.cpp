@@ -64,7 +64,7 @@ int main(int argumentCount, char *argumentVector[])
         {
             projectFolder = "/Users/trondwj/GitHub/FYS4411/Project_2/";         // Mac
             //projectFolder = "/home/twj/Documents/GitHub/FYS4411/Project_2/";  // Linux
-            inputFile.open(projectFolder+argumentVector[5], std::ios::in);
+            inputFile.open(projectFolder+argumentVector[1], std::ios::in);
         } else if (Iam == "Line")
         {
             projectFolder = "/home/line/github/FYS4411/Project_2/";
@@ -95,13 +95,6 @@ int main(int argumentCount, char *argumentVector[])
             std::cout << std::endl;
             exit(1);
         }
-        if (nParticles == 6 || nParticles == 12 || nParticles == 20)
-        {
-            std::cout << std::endl;
-            std::cout << "Warning: Only brute force Metropolis is supported for system of {6, 12, 20} electrons. "
-                      << "Importance sampling will not run for these systems." << std::endl;
-            std::cout << std::endl;
-        }
         int nCycles = parameter["nCycles"];
         double alpha = parameter["alpha"];
         double beta = parameter["beta"];
@@ -116,6 +109,7 @@ int main(int argumentCount, char *argumentVector[])
         std::string cycleType = parameter["Cycle type"];
         int cycleStepToFile = parameter["Cycle step to file"];
         bool UseMPI = parameter["Use MPI"];
+        int terminalizationFactor = parameter["Terminalization factor"];
 
 
         /* Initialize VMC */
@@ -140,7 +134,7 @@ int main(int argumentCount, char *argumentVector[])
         {
             runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
                                     UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
-                                    UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
+                                    UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
             runMatrix.insert_rows(i, runVector);
         }
 
@@ -155,11 +149,8 @@ int main(int argumentCount, char *argumentVector[])
         double acceptanceRatio = columnSum(4)/trials;
         double kineticEnergy;
         double potentialEnergy;
-        if (nParticles > 2 || !UseAnalyticalExpressions)
-        {
-            kineticEnergy   = columnSum(5)/trials;
-            potentialEnergy = columnSum(6)/trials;
-        }
+        kineticEnergy   = columnSum(5)/trials;
+        potentialEnergy = columnSum(6)/trials;
 
         /* Setup for printing to terminal */
         std::string Jastrow;
@@ -167,7 +158,6 @@ int main(int argumentCount, char *argumentVector[])
 
         std::string Importance;
         UseImportanceSampling ? Importance = "On" : Importance = "Off";
-        if (nParticles == 6 || nParticles == 12 || nParticles == 20) { Importance = "Off"; }
 
         std::string Interaction;
         UseFermionInteraction ? Interaction = "On" : Interaction = "Off";
@@ -223,13 +213,11 @@ int main(int argumentCount, char *argumentVector[])
                   << std::setw(10) << std::setprecision(3) << variance
                   << std::setw(18) << std::setprecision(6) << acceptanceRatio << std::endl;
 
-        if (nParticles > 2 || !UseAnalyticalExpressions)
-        {
-            std::cout << "Kinetic_energy "  << " Potential_energy " << std::endl;
 
-            std::cout << std::setw(14) << std::setprecision(6) << kineticEnergy
+        std::cout << "Kinetic_energy "  << " Potential_energy " << std::endl;
+
+        std::cout << std::setw(14) << std::setprecision(6) << kineticEnergy
                       << std::setw(18) << std::setprecision(6) << potentialEnergy << std::endl;
-        }
 
         return 0;
     }
