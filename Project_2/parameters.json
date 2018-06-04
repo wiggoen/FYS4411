@@ -2,8 +2,8 @@
     "Run tests": false,
     "Use Average timing": false,
     "nParticles": 6,
-    "nCycles": 1048576,
-    "alpha": 0.8,
+    "nCycles": 1058577,
+    "alpha": 0.99,
     "beta": 0.47,
     "omega": 1.0,
     "two electron spin parameter": 1.0,
@@ -15,6 +15,6 @@
     "Use analytical expressions": true,
     "Use numerical potential energy": false,
     "Cycle type": "MonteCarlo",
-    "Cycle step to file": 0,
+    "Cycle step to file": 1,
     "Use MPI": false
 }

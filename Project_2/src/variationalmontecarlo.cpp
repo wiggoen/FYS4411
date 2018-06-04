@@ -287,6 +287,8 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
     /* Loop over Monte Carlo cycles */
     for (int cycle = 0; cycle < nCycles; cycle++)
     {
+        cycleNumber = cycle;
+
         /* Sampling */
         if (nParticles > 2)
         {
@@ -308,7 +310,7 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         /* Write to file */
         if (cycleStepToFile != 0 && world_rank == 0 && cycle % cycleStepToFile == 0)
         {
-            if (cycle > 0)
+            if (cycle > 10000)
             {
                 outputEnergy << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles)
                              << std::endl;
@@ -517,9 +519,12 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
             energyVector = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, nDimensions, alpha, beta, omega,
                                                                 spinMatrix, UseJastrowFactor, UseFermionInteraction,
                                                                 InverseSlaterUpNew, InverseSlaterDownNew);
-            deltaEnergy         = energyVector.at(0);
-            kineticEnergySum   += energyVector.at(1);
-            potentialEnergySum += energyVector.at(2);
+            if (cycleNumber > 10000)
+            {
+                deltaEnergy         = energyVector.at(0);
+                kineticEnergySum   += energyVector.at(1);
+                potentialEnergySum += energyVector.at(2);
+            }
         }
 
     }

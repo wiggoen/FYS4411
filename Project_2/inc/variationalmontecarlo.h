@@ -102,6 +102,7 @@ private:
     int cycleStepToFile;               /* fraction of Monte Carlo cycles written to file */
     double acceptanceWeight;           /* weight used for accepting or rejecting a move */
     int acceptanceCounter;             /* number of accepted moves */
+    int cycleNumber;
     double slaterRatio;
     double jastrowRatio;
     arma::rowvec hist;

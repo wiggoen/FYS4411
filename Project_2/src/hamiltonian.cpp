@@ -269,7 +269,7 @@ double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, 
                         arma::rowvec Rki      = (r.row(k) - r.row(i));
                         double distanceRki    = arma::norm(Rki);
                         double denominator_ki =  (1 + beta*distanceRki);
-                        spinParameter         = getSpinParameter(nParticles, k, j);
+                        spinParameter         = getSpinParameter(nParticles, k, i);
                         double fraction_ki    = spinParameter / (denominator_ki*denominator_ki);
                         doubleSum += ( (arma::dot(Rki, Rkj) / (distanceRki*distanceRkj) ) * fraction_ki * fraction_kj );
                     }
