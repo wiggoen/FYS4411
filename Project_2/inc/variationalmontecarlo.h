@@ -40,7 +40,7 @@ public:
 
     void UpdateEnergies(const int &i);
 
-    void SteepestDescent(const int &nParticles);
+    void SteepestDescent( void );
 
     void SetOneBody( void );
 

@@ -13,7 +13,7 @@
     "Use Fermion interaction": true,
     "Use analytical expressions": true,
     "Use numerical potential energy": false,
-    "Cycle type": "MonteCarlo",
+    "Cycle type": "SteepestDescent",
     "Cycle step to file": 0,
     "Use MPI": false,
     "Terminalization factor": 10000

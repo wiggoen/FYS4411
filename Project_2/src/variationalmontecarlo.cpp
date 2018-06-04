@@ -142,7 +142,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         std::cout << "Running MC Cycles.." << std::endl;
         MonteCarloCycles();
     } else if (cycleType == "SteepestDescent") {
-        SteepestDescent(nParticles);
+        SteepestDescent();
     }
 
     /* Timing finished */
@@ -521,7 +521,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     energySum        += deltaEnergy;
     energySquaredSum += (deltaEnergy*deltaEnergy);
 
-    if (cycleType == "SteepestDescent")
+    if (cycleType == "SteepestDescent" && cycleNumber >= terminalizationFactor)
     {
         if (nParticles == 2)
         {
@@ -546,7 +546,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
 }
 
 
-void VariationalMonteCarlo::SteepestDescent(const int &nParticles)
+void VariationalMonteCarlo::SteepestDescent( void )
 {
     std::cout << "Running steepest descent..." << std::endl;
     double eta                   = 0.001;
@@ -556,7 +556,7 @@ void VariationalMonteCarlo::SteepestDescent(const int &nParticles)
     double averageEnergy         = 0.0;
     double alphaEnergyDerivative = 0.0;
     double betaEnergyDerivative  = 0.0;
-    double scalingFactor         = 1.0/(nCycles*nParticles);
+    double scalingFactor         = 1.0/(nCycles - terminalizationFactor);
     double averagePsiOfAlphaTimesEnergy = 0.0;
     double averagePsiOfBetaTimesEnergy  = 0.0;
 
