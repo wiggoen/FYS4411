@@ -17,14 +17,12 @@ public:
     static double getSpinParameter(const int &nParticles, const int &i, const int &j);
 
     static double LocalEnergyTwoParticles(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
-                                          const double &spinParameter, const bool &UseJastrowFactor,
-                                          const bool &UseFermionInteraction);
+                                          const bool &UseJastrowFactor, const bool &UseFermionInteraction);
 
     static arma::rowvec LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                                  const double &alpha, const double &beta, const double &omega,
-                                                 arma::mat &spinMatrix, const bool &UseJastrowFactor,
-                                                 const bool &UseFermionInteraction, const arma::mat &InverseSlaterUp,
-                                                 const arma::mat &InverseSlaterDown);
+                                                 const bool &UseJastrowFactor, const bool &UseFermionInteraction,
+                                                 const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown);
 
     static arma::mat SlaterGradient(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &alpha,
                                     const double &omega, const arma::mat &InverseSlaterUp,
@@ -33,16 +31,14 @@ public:
     static double SlaterLaplacian(const arma::mat &r, const int &nParticles, const double &alpha, const double &omega,
                                   const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown);
 
-    static arma::mat JastrowGradient(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta,
-                                     const arma::mat &spinMatrix);
+    static arma::mat JastrowGradient(const arma::mat &r, const int &nParticles, const int &nDimensions, const double &beta);
 
-    static double JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta,
-                                   const arma::mat &spinMatrix);
+    static double JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta);
 
     static arma::rowvec NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                              const double &alpha, const double &beta, const double &omega,
-                                             const double &spinParameter, const bool &UseJastrowFactor,
-                                             const bool &UseFermionInteraction, const bool &UseNumericalPotentialEnergy);
+                                             const bool &UseJastrowFactor, const bool &UseFermionInteraction,
+                                             const bool &UseNumericalPotentialEnergy);
 
 private:
 };

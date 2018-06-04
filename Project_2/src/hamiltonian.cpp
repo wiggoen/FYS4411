@@ -38,11 +38,12 @@ double Hamiltonian::getSpinParameter(const int &nParticles, const int &i, const 
 
 
 double Hamiltonian::LocalEnergyTwoParticles(const arma::mat &r, const double &alpha, const double &beta,
-                                            const double &omega, const double &spinParameter, const bool &UseJastrowFactor,
+                                            const double &omega, const bool &UseJastrowFactor,
                                             const bool &UseFermionInteraction)
 {
     double AlphaOmega = alpha*omega;
     double omegaSquaredHalf = 0.5*omega*omega;
+    double spinParameter = 1.0;
 
     double r1Squared = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
     double r2Squared = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
@@ -87,9 +88,8 @@ double Hamiltonian::LocalEnergyTwoParticles(const arma::mat &r, const double &al
 
 arma::rowvec Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                                    const double &alpha, const double &beta, const double &omega,
-                                                   arma::mat &spinMatrix, const bool &UseJastrowFactor,
-                                                   const bool &UseFermionInteraction, const arma::mat &InverseSlaterUp,
-                                                   const arma::mat &InverseSlaterDown)
+                                                   const bool &UseJastrowFactor, const bool &UseFermionInteraction,
+                                                   const arma::mat &InverseSlaterUp, const arma::mat &InverseSlaterDown)
 {
     arma::rowvec energyVector = arma::zeros<arma::rowvec>(nDimensions+1);
 
@@ -100,9 +100,9 @@ arma::rowvec Hamiltonian::LocalEnergyMoreParticles(const arma::mat &r, const int
     double gradients = 0.0;
     if (UseJastrowFactor)
     {
-        jastrowLaplacian = JastrowLaplacian(r, nParticles, beta, spinMatrix);
+        jastrowLaplacian = JastrowLaplacian(r, nParticles, beta);
         arma::mat slaterGradient = SlaterGradient(r, nParticles, nDimensions, alpha, omega, InverseSlaterUp, InverseSlaterDown);
-        arma::mat jastrowGradient = JastrowGradient(r, nParticles, nDimensions, beta, spinMatrix);
+        arma::mat jastrowGradient = JastrowGradient(r, nParticles, nDimensions, beta);
         for (int i = 0; i < nParticles; i++)
         {
             gradients += arma::dot(slaterGradient.row(i), jastrowGradient.row(i));
@@ -220,7 +220,7 @@ double Hamiltonian::SlaterLaplacian(const arma::mat &r, const int &nParticles, c
 
 
 arma::mat Hamiltonian::JastrowGradient(const arma::mat &r, const int &nParticles, const int &nDimensions,
-                                       const double &beta, const arma::mat &spinMatrix)
+                                       const double &beta)
 {
     arma::mat jastrowGradient = arma::zeros<arma::mat>(nParticles, nDimensions);
 
@@ -242,8 +242,7 @@ arma::mat Hamiltonian::JastrowGradient(const arma::mat &r, const int &nParticles
 }
 
 
-double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta,
-                                     const arma::mat &spinMatrix)
+double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, const double &beta)
 {
     double singleSum     = 0.0;
     double doubleSum     = 0.0;
@@ -283,8 +282,8 @@ double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, 
 
 arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
                                                const double &alpha, const double &beta, const double &omega,
-                                               const double &spinParameter, const bool &UseJastrowFactor,
-                                               const bool &UseFermionInteraction, const bool &UseNumericalPotentialEnergy)
+                                               const bool &UseJastrowFactor, const bool &UseFermionInteraction,
+                                               const bool &UseNumericalPotentialEnergy)
 {
     arma::rowvec energyVector = arma::zeros<arma::rowvec>(nDimensions+1);
 
@@ -296,7 +295,7 @@ arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nP
 
     double waveFunctionMinus   = 0.0;
     double waveFunctionPlus    = 0.0;
-    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
+    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, UseJastrowFactor);
 
     double h = 1e-4;
     double hSquared = h*h;
@@ -309,8 +308,8 @@ arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nP
         {
             rPlus(i, j)  += h;
             rMinus(i, j) -= h;
-            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, spinParameter, UseJastrowFactor);
-            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, spinParameter, UseJastrowFactor);
+            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, UseJastrowFactor);
+            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, UseJastrowFactor);
             kineticEnergy -= (waveFunctionPlus + waveFunctionMinus - 2.0 * waveFunctionCurrent);
             rPlus(i, j)  = r(i, j);
             rMinus(i, j) = r(i, j);

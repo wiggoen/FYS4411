@@ -16,8 +16,10 @@ Wavefunction::~Wavefunction( void )
 
 
 double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
-                                       const double &spinParameter, const bool &UseJastrowFactor)
+                                       const bool &UseJastrowFactor)
 {
+    double spinParameter = 1.0;
+
     /* Two electrons */
     double r_1Squared  = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
     double r_2Squared  = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
@@ -64,8 +66,7 @@ double Wavefunction::SlaterRatio(const arma::mat &rNew, const int &nParticles, c
 }
 
 
-double Wavefunction::JastrowWavefunction(const arma::mat &r, const int &nParticles, const double &beta,
-                                         const arma::mat &spinMatrix)
+double Wavefunction::JastrowWavefunction(const arma::mat &r, const int &nParticles, const double &beta)
 {
     double exponential = 0.0;
     for (int i = 0; i < nParticles; i++)
@@ -84,11 +85,10 @@ double Wavefunction::JastrowWavefunction(const arma::mat &r, const int &nParticl
 }
 
 
-double Wavefunction::JastrowRatio(const arma::mat &rNew, const arma::mat &rOld, const int &nParticles, const double &beta,
-                                  const arma::mat &spinMatrix)
+double Wavefunction::JastrowRatio(const arma::mat &rNew, const arma::mat &rOld, const int &nParticles, const double &beta)
 {
-    double jastrowNew = JastrowWavefunction(rNew, nParticles, beta, spinMatrix);
-    double jastrowOld = JastrowWavefunction(rOld, nParticles, beta, spinMatrix);
+    double jastrowNew = JastrowWavefunction(rNew, nParticles, beta);
+    double jastrowOld = JastrowWavefunction(rOld, nParticles, beta);
 
     return jastrowNew/jastrowOld;
 }
@@ -158,8 +158,10 @@ double Wavefunction::phiLaplace(const double &alpha, const double &omega, const 
 
 
 void Wavefunction::QuantumForce(const arma::mat &r, arma::mat &QForce, const double &alpha, const double &beta,
-                                const double &omega, const double &spinParameter, const bool &UseJastrowFactor)
+                                const double &omega, const bool &UseJastrowFactor)
 {
+    double spinParameter = 1.0;
+
     if (!UseJastrowFactor) {
         /* Without Jastrow factor */
         QForce = -2*alpha*omega*r;
@@ -184,9 +186,11 @@ double Wavefunction::DerivativePsiOfAlpha(const arma::mat &r, const double &omeg
 }
 
 
-double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &beta, const double &spinParameter)
+double Wavefunction::DerivativePsiOfBeta(const arma::mat &r, const double &beta)
 /* Returns 1/Psi * dPsi/dBeta */
 {
+    double spinParameter = 1.0;
+
     /* With Jastrow factor for two electrons */
     double r_12 = arma::norm(r.row(0) - r.row(1));
     double denominator = (1 + beta*r_12)*(1 + beta*r_12);
@@ -241,8 +245,7 @@ double Wavefunction::DerivativePsiManyOfAlpha(const arma::mat &r, const int &nPa
 }
 
 
-double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nParticles, const double &beta,
-                                             const arma::mat &spinMatrix)
+double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nParticles, const double &beta)
 /* Returns 1/Psi * dPsi/dBeta */
 {
     double sum = 0.0;
@@ -267,7 +270,7 @@ double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nPar
 
 void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                          const int &nDimensions, const double &alpha, const double &beta,
-                                         const double &omega, const double &spinParameter, const bool &UseJastrowFactor)
+                                         const double &omega, const bool &UseJastrowFactor)
 {
     arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
     arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
@@ -277,7 +280,7 @@ void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, 
 
     double waveFunctionMinus   = 0.0;
     double waveFunctionPlus    = 0.0;
-    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, spinParameter, UseJastrowFactor);
+    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, UseJastrowFactor);
 
     double h = 1e-4;
 
@@ -287,8 +290,8 @@ void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, 
         {
             rPlus(i, j)  += h;
             rMinus(i, j) -= h;
-            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, spinParameter, UseJastrowFactor);
-            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, spinParameter, UseJastrowFactor);
+            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, UseJastrowFactor);
+            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, UseJastrowFactor);
             QForce(i, j) = (waveFunctionPlus - waveFunctionMinus);
             rPlus(i, j)  = r(i, j);
             rMinus(i, j) = r(i, j);

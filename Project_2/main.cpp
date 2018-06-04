@@ -24,7 +24,7 @@ int main(int argumentCount, char *argumentVector[])
 
 
     /* Who am I? */
-    std::string Iam = "Line";
+    std::string Iam = "Trond";
 
     /* The whole project path is needed to read json file */
     std::string projectFolder;
@@ -84,6 +84,7 @@ int main(int argumentCount, char *argumentVector[])
         return RunCatchTests();
     } else
     {
+        int nDimensions = 2;
         bool UseAverageTiming = parameter["Use Average timing"];
         int nParticles = parameter["nParticles"];
         if (nParticles != 2 && nParticles != 6 && nParticles != 12 && nParticles != 20)
@@ -97,14 +98,14 @@ int main(int argumentCount, char *argumentVector[])
         if (nParticles == 6 || nParticles == 12 || nParticles == 20)
         {
             std::cout << std::endl;
-            std::cout << "Warning: Only brute force Metropolis is supported for system of {6, 12, 20} electrons." << std::endl;
+            std::cout << "Warning: Only brute force Metropolis is supported for system of {6, 12, 20} electrons. "
+                      << "Importance sampling will not run for these systems." << std::endl;
             std::cout << std::endl;
         }
         int nCycles = parameter["nCycles"];
         double alpha = parameter["alpha"];
         double beta = parameter["beta"];
         double omega = parameter["omega"];
-        double spinParameter = parameter["two electron spin parameter"];
         double stepLength = parameter["stepLength"];
         bool UseImportanceSampling = parameter["Use Importance sampling"];
         double timeStep = parameter["timeStep"];
@@ -137,8 +138,8 @@ int main(int argumentCount, char *argumentVector[])
         /* Run VMC */
         for (int i = 0; i < trials; i++)
         {
-            runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, spinParameter, stepLength, timeStep,
-                                    UseJastrowFactor, UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
+            runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
+                                    UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                                     UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
             runMatrix.insert_rows(i, runVector);
         }
@@ -161,13 +162,12 @@ int main(int argumentCount, char *argumentVector[])
         }
 
         /* Setup for printing to terminal */
-        int nDimensions = 2;
-
         std::string Jastrow;
         UseJastrowFactor ? Jastrow = "On" : Jastrow = "Off";  /* (condition) ? (if_true) : (if_false) */
 
         std::string Importance;
         UseImportanceSampling ? Importance = "On" : Importance = "Off";
+        if (nParticles == 6 || nParticles == 12 || nParticles == 20) { Importance = "Off"; }
 
         std::string Interaction;
         UseFermionInteraction ? Interaction = "On" : Interaction = "Off";
@@ -206,7 +206,7 @@ int main(int argumentCount, char *argumentVector[])
 
 
         std::cout << "Particles "  << " Dimensions " << "    Cycles " << " Alpha " << " Beta " << " Omega "
-                  << " Spin_parameter "  << " Step_length " << " Time_step " << " Time_[sec] " << "      Energy "
+                  << " Step_length " << " Time_step " << " Time_[sec] " << "      Energy "
                   << " Energy_squared " << " Variance "  << " Acceptance_ratio " << std::endl;
 
         std::cout << std::setw(9)  << std::setprecision(3) << nParticles
@@ -215,7 +215,6 @@ int main(int argumentCount, char *argumentVector[])
                   << std::setw(7)  << std::setprecision(3) << alpha
                   << std::setw(6)  << std::setprecision(3) << beta
                   << std::setw(7)  << std::setprecision(3) << omega
-                  << std::setw(16) << std::setprecision(3) << spinParameter
                   << std::setw(13) << std::setprecision(3) << stepLength
                   << std::setw(11) << std::setprecision(6) << timeStep
                   << std::setw(12) << std::setprecision(6) << runTime

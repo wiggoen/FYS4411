@@ -10,8 +10,8 @@ public:
     VariationalMonteCarlo();
     ~VariationalMonteCarlo( void );
     arma::rowvec RunVMC(const int nParticles, const int nCycles, const double alpha, const double beta, const double omega,
-                        const double spinParameter, const double stepLength, const double timeStep,
-                        const bool UseJastrowFactor, const bool UseImportanceSampling, const bool UseFermionInteraction,
+                        const double stepLength, const double timeStep, const bool UseJastrowFactor,
+                        const bool UseImportanceSampling, const bool UseFermionInteraction,
                         const bool UseAnalyticalExpressions, const bool UseNumericalPotentialEnergy,
                         const std::string cycleType, const int cycleStepToFile, const bool UseMPI);
 
@@ -25,10 +25,9 @@ public:
 
     double GaussianRandomNumber( void );
 
-    int PickRandomParticle( void );
-
     void MonteCarloCycles( void );
 
+    int PickRandomParticle( void );
 
     void MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew, const double &waveFunctionOld);
 
@@ -79,8 +78,6 @@ public:
     arma::mat InverseSlaterUpNew;
     arma::mat InverseSlaterDownOld;
     arma::mat InverseSlaterDownNew;
-    arma::mat spinMatrix;
-    arma::mat QuantumNumber;
 
 private:
     arma::mat rOld;                    /* matrix of old position */
@@ -92,7 +89,6 @@ private:
     double alpha;                      /* variational parameter */
     double beta;                       /* variational parameter */
     double omega;
-    double spinParameter;              /* spin parameter a */
     double stepLength;                 /* step length used in brute force sampling */
     double timeStep;                   /* time step used in importance sampling */
     bool UseJastrowFactor;             /* Wave function with/without Jastrow factor */
@@ -105,6 +101,7 @@ private:
     double acceptanceWeight;           /* weight used for accepting or rejecting a move */
     int acceptanceCounter;             /* number of accepted moves */
     int cycleNumber;
+    int terminalizationFactor;
     double slaterRatio;
     double jastrowRatio;
     arma::rowvec hist;
