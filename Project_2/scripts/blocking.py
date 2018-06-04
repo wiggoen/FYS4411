@@ -4,8 +4,7 @@ from time import time
 
 def block(x):
     # preliminaries
-    n = int(len(x)); d = int(log2(n)); s, gamma = zeros(d), zeros(d);
-    print n
+    n = len(x); d = int(log2(n)); s, gamma = zeros(d), zeros(d);
     mu = mean(x); t0 = time()
 
     # estimate the auto-covariance and variances 
@@ -17,8 +16,6 @@ def block(x):
         # estimate variance of x
         s[i] = var(x)
         # perform blocking transformation
-	print x[0::2]
-	print x[1::2]
         x = 0.5*(x[0::2] + x[1::2])
    
     # generate the test observator M_k from the theorem
@@ -40,6 +37,6 @@ def block(x):
     return ans
 
 # input data must be a power of two
-x = loadtxt("../results/oppg2d_energies_ana_IS.txt")
+x = loadtxt("../results/energies.txt")
 
 ans = block(x[:,1])

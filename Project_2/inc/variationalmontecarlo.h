@@ -25,6 +25,8 @@ public:
 
     double GaussianRandomNumber( void );
 
+    int PickRandomParticle( void );
+
     void MonteCarloCycles( void );
 
 

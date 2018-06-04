@@ -148,7 +148,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     double runTime = (std::chrono::duration<double> (end_time - start_time).count());
 
     /* Normalizing */
-    double normalizationFactor = 1.0/(nCycles * nParticles);
+    double normalizationFactor = 1.0/(nCycles-10000);
 
     /* Calculation of averages */
     double energy = energySum * normalizationFactor;
@@ -310,15 +310,15 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
         /* Write to file */
         if (cycleStepToFile != 0 && world_rank == 0 && cycle % cycleStepToFile == 0)
         {
-            if (cycle > 10000)
+            if (cycle >= 10000)
             {
-                outputEnergy << std::setw(10) << cycle << "     " << std::setprecision(6) << energySum/(cycle*nParticles)
+                outputEnergy << std::setw(10) << cycle << "     " << std::setprecision(6) << deltaEnergy
                              << std::endl;
-            }
 
-            double particleDistance = Hamiltonian::ParticleDistance(rNew.row(0), rNew.row(1));
-            outputDistance << std::setw(10) << cycle << "     " << std::setprecision(6)
-                           << particleDistance << std::endl;
+                double particleDistance = Hamiltonian::ParticleDistance(rNew.row(0), rNew.row(1));
+                outputDistance << std::setw(10) << cycle << "     " << std::setprecision(6)
+                               << particleDistance << std::endl;
+            }
         }
     }
     /* Close output file */
@@ -330,12 +330,22 @@ void VariationalMonteCarlo::MonteCarloCycles( void )
 }
 
 
+int VariationalMonteCarlo::PickRandomParticle( void )
+{
+    static std::random_device rd;  /* Initialize the seed for the random number engine */
+    static std::mt19937_64 gen(rd());  /* Call the Mersenne Twister algorithm */
+    static std::uniform_int_distribution<int>dist_int(0,nParticles-1);
+    return dist_int(gen);
+}
+
+
 void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOld, double &waveFunctionNew,
                                                  const double &waveFunctionOld)
 {
     /* New position to test */
-    for (int i = 0; i < nParticles; i++)
-    {
+    //for (int i = 0; i < nParticles; i++)
+    //{
+    int i = PickRandomParticle();
         for (int j = 0; j < nDimensions; j++)
         {
             rNew(i, j) = rOld(i, j) + (UniformRandomNumber() - 0.5) * stepLength;
@@ -361,7 +371,7 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
 
         UpdateEnergies(i);
     }
-}
+
 
 void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat &rOld, arma::mat &QForceNew,
                                                const arma::mat &QForceOld, double &waveFunctionNew,
@@ -519,7 +529,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
             energyVector = Hamiltonian::LocalEnergyMoreParticles(rNew, nParticles, nDimensions, alpha, beta, omega,
                                                                 spinMatrix, UseJastrowFactor, UseFermionInteraction,
                                                                 InverseSlaterUpNew, InverseSlaterDownNew);
-            if (cycleNumber > 10000)
+            if (cycleNumber >= 10000)
             {
                 deltaEnergy         = energyVector.at(0);
                 kineticEnergySum   += energyVector.at(1);
