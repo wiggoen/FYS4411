@@ -1,9 +1,9 @@
 {
     "Run tests": false,
     "Use Average timing": false,
-    "nParticles": 6,
+    "nParticles": 2,
     "nCycles": 1058576,
-    "alpha": 0.99,
+    "alpha": 1.0,
     "beta": 0.47,
     "omega": 1.0,
     "two electron spin parameter": 1.0,

@@ -35,18 +35,18 @@ TEST_CASE("Local energy two electrons", "[Hamiltonian]")
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
     energy = runVector(1);
-    REQUIRE(energy == 2);
+    REQUIRE( energy == Approx( 2.0 ) );
     variance = runVector(3);
-    REQUIRE(variance == 0);
+    REQUIRE( variance == Approx( 0.0 ) );
 
     UseImportanceSampling = true;
     runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
     energy = runVector(1);
-    REQUIRE(energy == 2);
+    REQUIRE( energy == Approx( 2.0 ) );
     variance = runVector(3);
-    REQUIRE(variance == 0);
+    REQUIRE( variance == Approx( 0.0 ) );
 }
 
 
@@ -78,9 +78,9 @@ TEST_CASE("Local energy six electrons", "[Hamiltonian]")
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
     energy = runVector(1);
-    REQUIRE(energy == 10);
+    REQUIRE( energy == Approx( 10.0 ) );
     variance = runVector(3);
-    REQUIRE(variance == 0);
+    REQUIRE( variance == Approx( 0.0 ) );
 }
 
 
@@ -112,9 +112,9 @@ TEST_CASE("Local energy twelve electrons", "[Hamiltonian]")
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
     energy = runVector(1);
-    REQUIRE(energy == 28);
+    REQUIRE( energy == Approx( 28 ) );
     variance = runVector(3);
-    REQUIRE(variance == 0);
+    REQUIRE( variance == Approx( 0.0 ) );
 }
 
 
@@ -146,9 +146,9 @@ TEST_CASE("Local energy twenty electrons", "[Hamiltonian]")
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI);
     energy = runVector(1);
-    REQUIRE(energy == 60);
+    REQUIRE( energy == Approx( 60 ) );
     variance = runVector(3);
-    REQUIRE(variance == 0);
+    REQUIRE( variance == Approx( 0.0 ) );
 }
 
 #endif /* CATCH_HPP */
