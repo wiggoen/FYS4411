@@ -75,7 +75,6 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     slaterRatio           = 0.0;
     jastrowRatio          = 0.0;
     energyVector          = arma::zeros<arma::rowvec>(nDimensions+1);
-    numericalEnergyVector = arma::zeros<arma::rowvec>(nDimensions+1);
     kineticEnergySum      = 0.0;
     potentialEnergySum    = 0.0;
 
@@ -86,15 +85,18 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     rNew = rOld;
 
     /* Initial slater determinants */
-    SlaterUpOld          = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
-    SlaterDownOld        = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
-    SlaterInitialization();
-    SlaterUpNew          = SlaterUpOld;
-    SlaterDownNew        = SlaterDownOld;
-    InverseSlaterUpOld   = inv(SlaterUpOld);
-    InverseSlaterDownOld = inv(SlaterDownOld);
-    InverseSlaterUpNew   = InverseSlaterUpOld;
-    InverseSlaterDownNew = InverseSlaterDownOld;
+    if (UseAnalyticalExpressions)
+    {
+        SlaterUpOld          = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+        SlaterDownOld        = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+        SlaterInitialization();
+        SlaterUpNew          = SlaterUpOld;
+        SlaterDownNew        = SlaterDownOld;
+        InverseSlaterUpOld   = inv(SlaterUpOld);
+        InverseSlaterDownOld = inv(SlaterDownOld);
+        InverseSlaterUpNew   = InverseSlaterUpOld;
+        InverseSlaterDownNew = InverseSlaterDownOld;
+    }
 
     if (UseImportanceSampling)
     {
@@ -513,27 +515,21 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (!UseAnalyticalExpressions)
     {
         /* using numerical expressions */
-        numericalEnergyVector = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega,
-                                                                  UseJastrowFactor, UseFermionInteraction,
-                                                                  UseNumericalPotentialEnergy);
-        if (cycleNumber >= terminalizationFactor)
-        {
-            deltaEnergy         = numericalEnergyVector.at(0);
-            kineticEnergySum   += numericalEnergyVector.at(1);
-            potentialEnergySum += numericalEnergyVector.at(2);
-        }
+        energyVector = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega,
+                                                         UseJastrowFactor, UseFermionInteraction,
+                                                         UseNumericalPotentialEnergy);
     } else
     {
         /* using analytical expressions */
         energyVector = Hamiltonian::LocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega,
                                                 UseJastrowFactor, UseFermionInteraction,
                                                 InverseSlaterUpNew, InverseSlaterDownNew);
-        if (cycleNumber >= terminalizationFactor)
-        {
-            deltaEnergy         = energyVector.at(0);
-            kineticEnergySum   += energyVector.at(1);
-            potentialEnergySum += energyVector.at(2);
-        }
+    }
+    if (cycleNumber >= terminalizationFactor)
+    {
+        deltaEnergy         = energyVector.at(0);
+        kineticEnergySum   += energyVector.at(1);
+        potentialEnergySum += energyVector.at(2);
     }
     energySum        += deltaEnergy;
     energySquaredSum += (deltaEnergy*deltaEnergy);

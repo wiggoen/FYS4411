@@ -8,14 +8,15 @@ VariationalMonteCarlo *VMC = new VariationalMonteCarlo();
 
 TEST_CASE("Local energy two electrons", "[Hamiltonian]")
 {
+    int terminalizationFactor = 10000;
     int nParticles = 2;
-    int nCycles = pow(2, 20);
-    double alpha = 1;
-    double beta = 0;
-    double omega = 1;
-    double stepLength = 1.5;
+    int nCycles = pow(2, 20) + terminalizationFactor;
+    double alpha = 1.0;
+    double beta = 0.0;
+    double omega = 1.0;
+    double stepLength = 0.5;
     bool UseImportanceSampling;
-    double timeStep = 0;
+    double timeStep = 0.001;
     bool UseJastrowFactor = false;
     bool UseFermionInteraction = false;
     bool UseAverageTiming = false;
@@ -24,7 +25,6 @@ TEST_CASE("Local energy two electrons", "[Hamiltonian]")
     std::string cycleType = "MonteCarlo";
     int cycleStepToFile = 0;
     bool UseMPI = false;
-    int terminalizationFactor = 10000;
 
     arma::rowvec runVector;
     double energy;
@@ -52,14 +52,15 @@ TEST_CASE("Local energy two electrons", "[Hamiltonian]")
 
 TEST_CASE("Local energy six electrons", "[Hamiltonian]")
 {
+    int terminalizationFactor = 10000;
     int nParticles = 6;
-    int nCycles = pow(2, 20);
-    double alpha = 1;
-    double beta = 0;
-    double omega = 1;
+    int nCycles = pow(2, 20) + terminalizationFactor;
+    double alpha = 1.0;
+    double beta = 0.0;
+    double omega = 1.0;
     double stepLength = 0.5;
-    bool UseImportanceSampling = false;
-    double timeStep = 0;
+    bool UseImportanceSampling;
+    double timeStep = 0.001;
     bool UseJastrowFactor = false;
     bool UseFermionInteraction = false;
     bool UseAverageTiming = false;
@@ -68,13 +69,22 @@ TEST_CASE("Local energy six electrons", "[Hamiltonian]")
     std::string cycleType = "MonteCarlo";
     int cycleStepToFile = 0;
     bool UseMPI = false;
-    int terminalizationFactor = 10000;
 
 
     arma::rowvec runVector;
     double energy;
     double variance;
 
+    UseImportanceSampling = false;
+    runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
+                            UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
+                            UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
+    energy = runVector(1);
+    REQUIRE( energy == Approx( 10.0 ) );
+    variance = runVector(3);
+    REQUIRE( variance == Approx( 0.0 ) );
+
+    UseImportanceSampling = true;
     runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
@@ -87,14 +97,15 @@ TEST_CASE("Local energy six electrons", "[Hamiltonian]")
 
 TEST_CASE("Local energy twelve electrons", "[Hamiltonian]")
 {
+    int terminalizationFactor = 10000;
     int nParticles = 12;
-    int nCycles = pow(2, 20);
-    double alpha = 1;
-    double beta = 0;
-    double omega = 1;
+    int nCycles = pow(2, 20) + terminalizationFactor;
+    double alpha = 1.0;
+    double beta = 0.0;
+    double omega = 1.0;
     double stepLength = 0.5;
-    bool UseImportanceSampling = false;
-    double timeStep = 0;
+    bool UseImportanceSampling;
+    double timeStep = 0.001;
     bool UseJastrowFactor = false;
     bool UseFermionInteraction = false;
     bool UseAverageTiming = false;
@@ -103,18 +114,27 @@ TEST_CASE("Local energy twelve electrons", "[Hamiltonian]")
     std::string cycleType = "MonteCarlo";
     int cycleStepToFile = 0;
     bool UseMPI = false;
-    int terminalizationFactor = 10000;
 
 
     arma::rowvec runVector;
     double energy;
     double variance;
 
+    UseImportanceSampling = false;
     runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
     energy = runVector(1);
-    REQUIRE( energy == Approx( 28 ) );
+    REQUIRE( energy == Approx( 28.0 ) );
+    variance = runVector(3);
+    REQUIRE( variance == Approx( 0.0 ) );
+
+    UseImportanceSampling = true;
+    runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
+                            UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
+                            UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
+    energy = runVector(1);
+    REQUIRE( energy == Approx( 28.0 ) );
     variance = runVector(3);
     REQUIRE( variance == Approx( 0.0 ) );
 }
@@ -122,14 +142,15 @@ TEST_CASE("Local energy twelve electrons", "[Hamiltonian]")
 
 TEST_CASE("Local energy twenty electrons", "[Hamiltonian]")
 {
+    int terminalizationFactor = 10000;
     int nParticles = 20;
-    int nCycles = pow(2, 20);
-    double alpha = 1;
-    double beta = 0;
-    double omega = 1;
+    int nCycles = pow(2, 20) + terminalizationFactor;
+    double alpha = 1.0;
+    double beta = 0.0;
+    double omega = 1.0;
     double stepLength = 0.5;
-    bool UseImportanceSampling = false;
-    double timeStep = 0;
+    bool UseImportanceSampling;
+    double timeStep = 0.001;
     bool UseJastrowFactor = false;
     bool UseFermionInteraction = false;
     bool UseAverageTiming = false;
@@ -138,18 +159,27 @@ TEST_CASE("Local energy twenty electrons", "[Hamiltonian]")
     std::string cycleType = "MonteCarlo";
     int cycleStepToFile = 0;
     bool UseMPI = false;
-    int terminalizationFactor = 10000;
 
 
     arma::rowvec runVector;
     double energy;
     double variance;
 
+    UseImportanceSampling = false;
     runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
                             UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
                             UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
     energy = runVector(1);
-    REQUIRE( energy == Approx( 60 ) );
+    REQUIRE( energy == Approx( 60.0 ) );
+    variance = runVector(3);
+    REQUIRE( variance == Approx( 0.0 ) );
+
+    UseImportanceSampling = true;
+    runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
+                            UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
+                            UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
+    energy = runVector(1);
+    REQUIRE( energy == Approx( 60.0 ) );
     variance = runVector(3);
     REQUIRE( variance == Approx( 0.0 ) );
 }
