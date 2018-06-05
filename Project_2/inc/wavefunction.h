@@ -39,8 +39,8 @@ public:
 
     static double DerivativePsiManyOfBeta(const arma::mat &r, const int &nParticles, const double &beta);
 
-    static double TrialWaveFunction(const arma::mat &r, const double &alpha, const double &beta,
-                                    const double &omega, const bool &UseJastrowFactor);
+    static double NumericalTrialWaveFunction(const arma::mat &r, const int &nParticles, const double &alpha,
+                                             const double &beta, const double &omega, const bool &UseJastrowFactor);
 
     static void NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
                                       const int &nDimensions, const double &alpha, const double &beta,

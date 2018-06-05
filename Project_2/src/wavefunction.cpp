@@ -244,56 +244,93 @@ double Wavefunction::DerivativePsiManyOfBeta(const arma::mat &r, const int &nPar
 }
 
 
-//double Wavefunction::TrialWaveFunction(const arma::mat &r, const double &alpha, const double &beta, const double &omega,
-//                                       const bool &UseJastrowFactor)
-//{
-//    double spinParameter = 1.0;
-//
-//    /* Two electrons */
-//    double r_1Squared  = r(0, 0)*r(0, 0) + r(0, 1)*r(0, 1);
-//    double r_2Squared  = r(1, 0)*r(1, 0) + r(1, 1)*r(1, 1);
-//    double unperturbed = -0.5*alpha*omega*(r_1Squared + r_2Squared);
-//
-//    if (!UseJastrowFactor) {
-//        /* Without Jastrow factor */
-//        return exp(unperturbed);
-//    } else {
-//        /* With Jastrow factor */
-//        double r_12 = arma::norm(r.row(0) - r.row(1));
-//        double jastrow = (spinParameter*r_12)/(1 + beta*r_12);
-//        return exp(unperturbed + jastrow);
-//    }
-//}
+double Wavefunction::NumericalTrialWaveFunction(const arma::mat &r, const int &nParticles, const double &alpha,
+                                                const double &beta, const double &omega, const bool &UseJastrowFactor)
+{
+    arma::mat QuantumNumber = Hermite::QuantumNumbers();
+
+    arma::mat slaterMatrixUp   = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+    arma::mat slaterMatrixDown = arma::zeros<arma::mat>(nParticles/2, nParticles/2);
+
+    /* Slater matrix up */
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            double phi = Wavefunction::phi(r, alpha, omega, nx, ny, i);
+            slaterMatrixUp(j, i) = phi;
+        }
+    }
+    /* Slater matrix down */
+    for (int i = 0; i < nParticles/2; i++)
+    {
+        for (int j = 0; j < nParticles/2; j++)
+        {
+            int nx = QuantumNumber(j, 0);
+            int ny = QuantumNumber(j, 1);
+            double phi = Wavefunction::phi(r, alpha, omega, nx, ny, i + nParticles/2);
+            slaterMatrixDown(j, i) = phi;
+        }
+    }
+
+    double jastrowFactor = 1.0;
+    if (UseJastrowFactor)
+    {
+        double jastrowExponential = 0.0;
+        for (int k = 0; k < nParticles; k++)
+        {
+            for (int j = 0; j < nParticles; j++)
+            {
+                if (j != k)
+                {
+                    double distanceRkj   = Hamiltonian::ParticleDistance(r.row(k), r.row(j));
+                    double denominator   = (1 + beta*distanceRkj);
+                    double spinParameter = Hamiltonian::getSpinParameter(nParticles, k, j);
+                    jastrowExponential  += spinParameter * distanceRkj / (denominator*denominator);
+                }
+            }
+            jastrowFactor = exp(jastrowExponential);
+        }
+
+    }
+
+    double slaterDeterminantUp   = arma::det(slaterMatrixUp);
+    double slaterDeterminantDown = arma::det(slaterMatrixDown);
+
+    return slaterDeterminantUp * slaterDeterminantDown * jastrowFactor;
+}
 
 
-//void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
-//                                         const int &nDimensions, const double &alpha, const double &beta,
-//                                         const double &omega, const bool &UseJastrowFactor)
-//{
-//    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
-//    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
-//
-//    rPlus  = r;
-//    rMinus = r;
-//
-//    double waveFunctionMinus   = 0.0;
-//    double waveFunctionPlus    = 0.0;
-//    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, UseJastrowFactor);
-//
-//    double h = 1e-4;
-//
-//    for (int i = 0; i < nParticles; i++)
-//    {
-//        for (int j = 0; j < nDimensions; j++)
-//        {
-//            rPlus(i, j)  += h;
-//            rMinus(i, j) -= h;
-//            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, UseJastrowFactor);
-//            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, UseJastrowFactor);
-//            QForce(i, j) = (waveFunctionPlus - waveFunctionMinus);
-//            rPlus(i, j)  = r(i, j);
-//            rMinus(i, j) = r(i, j);
-//        }
-//    }
-//    QForce = QForce / (waveFunctionCurrent * h);
-//}
+void Wavefunction::NumericalQuantumForce(const arma::mat &r, arma::mat &QForce, const int &nParticles,
+                                         const int &nDimensions, const double &alpha, const double &beta,
+                                         const double &omega, const bool &UseJastrowFactor)
+{
+    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
+    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
+
+    rPlus  = r;
+    rMinus = r;
+
+    double waveFunctionMinus   = 0.0;
+    double waveFunctionPlus    = 0.0;
+    double waveFunctionCurrent = Wavefunction::NumericalTrialWaveFunction(r, nParticles, alpha, beta, omega, UseJastrowFactor);
+
+    double h = 1e-4;
+
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rPlus(i, j)  += h;
+            rMinus(i, j) -= h;
+            waveFunctionMinus = Wavefunction::NumericalTrialWaveFunction(rMinus, nParticles, alpha, beta, omega, UseJastrowFactor);
+            waveFunctionPlus  = Wavefunction::NumericalTrialWaveFunction(rPlus, nParticles, alpha, beta, omega, UseJastrowFactor);
+            QForce(i, j) = (waveFunctionPlus - waveFunctionMinus);
+            rPlus(i, j)  = r(i, j);
+            rMinus(i, j) = r(i, j);
+        }
+    }
+    QForce = QForce / (waveFunctionCurrent * h);
+}

@@ -62,10 +62,10 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         QForceOld = arma::zeros<arma::mat>(nParticles, nDimensions);
         QForceNew = arma::zeros<arma::mat>(nParticles, nDimensions);
     }
-    if (!UseAnalyticalExpressions)                                          /* FOR NUMERICAL DERIVATION */
+    if (!UseAnalyticalExpressions)
     {
-        //waveFunctionOld = 0.0;
-        //waveFunctionNew = 0.0;
+        waveFunctionOld = 0.0;
+        waveFunctionNew = 0.0;
     }
     energySum             = 0.0;
     energySquaredSum      = 0.0;
@@ -98,11 +98,21 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
 
     if (UseImportanceSampling)
     {
-        for (int i = 0; i < nParticles; i++)
+        if (!UseAnalyticalExpressions)
         {
-            /* Initialize quantum force */
-            Wavefunction::QuantumForce(rOld, QForceOld, nParticles, nDimensions, alpha, beta, omega, UseJastrowFactor,
-                                       InverseSlaterUpOld, InverseSlaterDownOld, i);
+            /* Store the current value of the wave function and quantum force */
+            waveFunctionOld = Wavefunction::NumericalTrialWaveFunction(rOld, nParticles, alpha, beta, omega, UseJastrowFactor);
+
+            Wavefunction::NumericalQuantumForce(rOld, QForceOld, nParticles, nDimensions, alpha, beta, omega,
+                                                UseJastrowFactor);
+        } else
+        {
+            for (int i = 0; i < nParticles; i++)
+            {
+                /* Initialize quantum force */
+                Wavefunction::QuantumForce(rOld, QForceOld, nParticles, nDimensions, alpha, beta, omega, UseJastrowFactor,
+                                           InverseSlaterUpOld, InverseSlaterDownOld, i);
+            }
         }
         QForceNew = QForceOld;
     }
@@ -326,17 +336,27 @@ void VariationalMonteCarlo::MetropolisBruteForce(arma::mat &rNew, arma::mat &rOl
     {
         rNew(i, j) = rOld(i, j) + (UniformRandomNumber() - 0.5) * stepLength;
     }
-                                                                                                        /*  ADD NUMERICAL OPTION */
+
     /* Recalculate the value of the wave function ratio */
-    slaterRatio = Wavefunction::SlaterRatio(rNew, nParticles, alpha, omega, InverseSlaterUpOld, InverseSlaterDownOld, i);
-
-    jastrowRatio = 1.0;
-    if (UseJastrowFactor)
+    if (!UseAnalyticalExpressions)
     {
-        jastrowRatio = Wavefunction::JastrowRatio(rNew, rOld, nParticles, beta);
-    }
+        /* using numerical expressions */
+        waveFunctionNew = Wavefunction::NumericalTrialWaveFunction(rNew, nParticles, alpha, beta, omega, UseJastrowFactor);
 
-    acceptanceWeight = slaterRatio*slaterRatio * jastrowRatio*jastrowRatio;
+        acceptanceWeight = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+    } else
+    {
+        /* using analytical expressions */
+        slaterRatio = Wavefunction::SlaterRatio(rNew, nParticles, alpha, omega, InverseSlaterUpOld, InverseSlaterDownOld, i);
+
+        jastrowRatio = 1.0;
+        if (UseJastrowFactor)
+        {
+            jastrowRatio = Wavefunction::JastrowRatio(rNew, rOld, nParticles, beta);
+        }
+
+        acceptanceWeight = slaterRatio*slaterRatio * jastrowRatio*jastrowRatio;
+    }
 
     UpdateEnergies(i);
 }
@@ -357,11 +377,13 @@ void VariationalMonteCarlo::ImportanceSampling(arma::mat &rNew, const arma::mat 
     if (!UseAnalyticalExpressions)
     {
         /* using numerical expressions */
-        //Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, beta, omega,
-        //                                    UseJastrowFactor);
-        //double wavefunctionRatio = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
-        //double greensRatio = GreensRatio(rNew, rOld, QForceNew, QForceOld, diffusionCoefficient, timeStep, i);
-        //acceptanceWeight = greensRatio * wavefunctionRatio;
+        waveFunctionNew = Wavefunction::NumericalTrialWaveFunction(rNew, nParticles, alpha, beta, omega, UseJastrowFactor);
+        Wavefunction::NumericalQuantumForce(rNew, QForceNew, nParticles, nDimensions, alpha, beta, omega,
+                                            UseJastrowFactor);
+
+        double wavefunctionRatio = (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+        double greensRatio = GreensRatio(rNew, rOld, QForceNew, QForceOld, diffusionCoefficient, timeStep, i);
+        acceptanceWeight = greensRatio * wavefunctionRatio;
     } else
     {
         /* using analytical expressions */
@@ -472,39 +494,34 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
     if (UniformRandomNumber() <= acceptanceWeight)
     {
         rOld.row(i) = rNew.row(i);
-        if (UseImportanceSampling)
-        {
-            QForceOld.row(i)   = QForceNew.row(i);
-        }
-        UpdateInverseSlater(i);
-        if (cycleNumber >= terminalizationFactor)
-        {
-            acceptanceCounter += 1;
-        }
+        if (UseImportanceSampling)    { QForceOld.row(i) = QForceNew.row(i); }
+        if (UseAnalyticalExpressions) { UpdateInverseSlater(i); }
+        else                          { waveFunctionOld = waveFunctionNew; }
+        if (cycleNumber >= terminalizationFactor) { acceptanceCounter += 1; }
     } else
     {
         rNew.row(i) = rOld.row(i);
-        if (UseImportanceSampling)
+        if (UseImportanceSampling)    { QForceNew.row(i) = QForceOld.row(i); }
+        if (UseAnalyticalExpressions)
         {
-            QForceNew.row(i) = QForceOld.row(i);
+            if (i < nParticles/2) { InverseSlaterUpNew.col(i)                = InverseSlaterUpOld.col(i); }
+            else                  { InverseSlaterDownNew.col(i-nParticles/2) = InverseSlaterDownOld.col(i-nParticles/2); }
         }
-        if (i < nParticles/2) { InverseSlaterUpNew.col(i)                = InverseSlaterUpOld.col(i); }
-        else                  { InverseSlaterDownNew.col(i-nParticles/2) = InverseSlaterDownOld.col(i-nParticles/2); }
     }
 
     /* Update energies */
     if (!UseAnalyticalExpressions)
     {
         /* using numerical expressions */
-        //numericalEnergyVector = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega,
-        //                                                          UseJastrowFactor, UseFermionInteraction,
-        //                                                          UseNumericalPotentialEnergy);
-        //if (cycleNumber >= terminalizationFactor)
-        //{
-        //deltaEnergy         = numericalEnergyVector.at(0);
-        //kineticEnergySum   += numericalEnergyVector.at(1);
-        //potentialEnergySum += numericalEnergyVector.at(2);
-        //}
+        numericalEnergyVector = Hamiltonian::NumericalLocalEnergy(rNew, nParticles, nDimensions, alpha, beta, omega,
+                                                                  UseJastrowFactor, UseFermionInteraction,
+                                                                  UseNumericalPotentialEnergy);
+        if (cycleNumber >= terminalizationFactor)
+        {
+            deltaEnergy         = numericalEnergyVector.at(0);
+            kineticEnergySum   += numericalEnergyVector.at(1);
+            potentialEnergySum += numericalEnergyVector.at(2);
+        }
     } else
     {
         /* using analytical expressions */

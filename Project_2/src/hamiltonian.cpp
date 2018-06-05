@@ -178,10 +178,10 @@ arma::mat Hamiltonian::JastrowGradient(const arma::mat &r, const int &nParticles
         {
             if (j != k)
             {
-                double distanceRkj = ParticleDistance(r.row(k), r.row(j));
-                double denominator = (1 + beta*distanceRkj);
-                double spinParameter = getSpinParameter(nParticles, k, j);
-                double fraction = spinParameter / (denominator*denominator);
+                double distanceRkj      = ParticleDistance(r.row(k), r.row(j));
+                double denominator      = (1 + beta*distanceRkj);
+                double spinParameter    = getSpinParameter(nParticles, k, j);
+                double fraction         = spinParameter / (denominator*denominator);
                 jastrowGradient.row(k) += ( ((r.row(k) - r.row(j)) / distanceRkj ) * fraction );
             }
         }
@@ -228,78 +228,86 @@ double Hamiltonian::JastrowLaplacian(const arma::mat &r, const int &nParticles, 
 }
 
 
-//arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
-//                                               const double &alpha, const double &beta, const double &omega,
-//                                               const bool &UseJastrowFactor, const bool &UseFermionInteraction,
-//                                               const bool &UseNumericalPotentialEnergy)
-//{
-//    arma::rowvec energyVector = arma::zeros<arma::rowvec>(nDimensions+1);
-//
-//    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
-//    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
-//
-//    rPlus  = r;
-//    rMinus = r;
-//
-//    double waveFunctionMinus   = 0.0;
-//    double waveFunctionPlus    = 0.0;
-//    double waveFunctionCurrent = Wavefunction::TrialWaveFunction(r, alpha, beta, omega, UseJastrowFactor);
-//
-//    double h = 1e-4;
-//    double hSquared = h*h;
-//
-//    /* Kinetic energy */
-//    double kineticEnergy = 0.0;
-//    for (int i = 0; i < nParticles; i++)
-//    {
-//        for (int j = 0; j < nDimensions; j++)
-//        {
-//            rPlus(i, j)  += h;
-//            rMinus(i, j) -= h;
-//            waveFunctionMinus = Wavefunction::TrialWaveFunction(rMinus, alpha, beta, omega, UseJastrowFactor);
-//            waveFunctionPlus  = Wavefunction::TrialWaveFunction(rPlus, alpha, beta, omega, UseJastrowFactor);
-//            kineticEnergy -= (waveFunctionPlus + waveFunctionMinus - 2.0 * waveFunctionCurrent);
-//            rPlus(i, j)  = r(i, j);
-//            rMinus(i, j) = r(i, j);
-//        }
-//    }
-//    kineticEnergy = 0.5 * kineticEnergy / (waveFunctionCurrent * hSquared);
-//
-//    if (!UseNumericalPotentialEnergy)
-//    {
-//        energyVector.at(0) = kineticEnergy;
-//        energyVector.at(1) = kineticEnergy;
-//        energyVector.at(2) = 0;
-//        return energyVector;
-//    } else
-//    {
-//        /* External potential */
-//        double externalPotential = 0.0;
-//        double rSquared = 0.0;
-//        for (int i = 0; i < nParticles; i++)
-//        {
-//            rSquared = 0.0;
-//            for (int j = 0; j < nDimensions; j++)
-//            {
-//                rSquared += r(i, j) * r(i, j);
-//            }
-//            externalPotential += 0.5 * omega*omega * rSquared;
-//        }
-//        energyVector.at(0) = kineticEnergy + externalPotential;
-//        energyVector.at(1) = kineticEnergy;
-//        energyVector.at(2) = externalPotential;
-//        if (!UseFermionInteraction)
-//        {
-//            /* Without interaction */
-//            return energyVector;
-//        } else
-//        {
-//            /* With interaction */
-//            double r_12Squared = (r(0, 0)-r(1, 0))*(r(0, 0)-r(1, 0)) + (r(0, 1)-r(1, 1))*(r(0, 1)-r(1, 1));
-//            double numericalExternalPotential = 1.0/sqrt(r_12Squared);
-//            energyVector.at(0) += numericalExternalPotential;
-//            energyVector.at(2) += numericalExternalPotential;
-//            return energyVector;
-//        }
-//    }
-//}
+arma::rowvec Hamiltonian::NumericalLocalEnergy(const arma::mat &r, const int &nParticles, const int &nDimensions,
+                                               const double &alpha, const double &beta, const double &omega,
+                                               const bool &UseJastrowFactor, const bool &UseFermionInteraction,
+                                               const bool &UseNumericalPotentialEnergy)
+{
+    arma::rowvec energyVector = arma::zeros<arma::rowvec>(nDimensions+1);
+
+    arma::mat rPlus  = arma::zeros<arma::mat>(nParticles, nDimensions);
+    arma::mat rMinus = arma::zeros<arma::mat>(nParticles, nDimensions);
+
+    rPlus  = r;
+    rMinus = r;
+
+    double waveFunctionMinus   = 0.0;
+    double waveFunctionPlus    = 0.0;
+    double waveFunctionCurrent = Wavefunction::NumericalTrialWaveFunction(r, nParticles, alpha, beta, omega, UseJastrowFactor);
+
+    double h = 1e-4;
+    double hSquared = h*h;
+
+    /* Kinetic energy */
+    double kineticEnergy = 0.0;
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rPlus(i, j)  += h;
+            rMinus(i, j) -= h;
+            waveFunctionMinus = Wavefunction::NumericalTrialWaveFunction(rMinus, nParticles, alpha, beta, omega, UseJastrowFactor);
+            waveFunctionPlus  = Wavefunction::NumericalTrialWaveFunction(rPlus, nParticles, alpha, beta, omega, UseJastrowFactor);
+            kineticEnergy -= (waveFunctionPlus + waveFunctionMinus - 2.0 * waveFunctionCurrent);
+            rPlus(i, j)  = r(i, j);
+            rMinus(i, j) = r(i, j);
+        }
+    }
+    kineticEnergy = 0.5 * kineticEnergy / (waveFunctionCurrent * hSquared);
+
+    if (!UseNumericalPotentialEnergy)
+    {
+        energyVector.at(0) = kineticEnergy;
+        energyVector.at(1) = kineticEnergy;
+        energyVector.at(2) = 0;
+        return energyVector;
+    } else
+    {
+        /* External potential */
+        double externalPotential = 0.0;
+        double rSquared = 0.0;
+        for (int i = 0; i < nParticles; i++)
+        {
+            rSquared = 0.0;
+            for (int j = 0; j < nDimensions; j++)
+            {
+                rSquared += r(i, j) * r(i, j);
+            }
+            externalPotential += 0.5 * omega*omega * rSquared;
+        }
+        energyVector.at(0) = kineticEnergy + externalPotential;
+        energyVector.at(1) = kineticEnergy;
+        energyVector.at(2) = externalPotential;
+        if (!UseFermionInteraction)
+        {
+            /* Without interaction */
+            return energyVector;
+        } else
+        {
+            /* With interaction */
+            double numericalExternalPotential = 0.0;
+            for (int i = 0; i < nParticles; i++)
+            {
+                for (int j = i + 1; j < nParticles; j++)
+                {
+                    double xij = r(i, 0) - r(j, 0);
+                    double yij = r(i, 1) - r(j, 1);
+                    numericalExternalPotential += 1.0/sqrt( xij*xij + yij*yij );
+                }
+            }
+            energyVector.at(0) += numericalExternalPotential;
+            energyVector.at(2) += numericalExternalPotential;
+            return energyVector;
+        }
+    }
+}
