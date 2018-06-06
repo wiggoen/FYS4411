@@ -4,10 +4,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-Int_J_path = "../results/histogram-Int-J-2p-2up27-w01.txt"
-Int_noJ_path = "../results/histogram-Int-noJ-2p-2up27-w01.txt"
-noInt_J_path = "../results/histogram-noInt-J-2p-2up27-w01.txt"
-noInt_noJ_path = "../results/histogram-noInt-noJ-2p-2up27-w01.txt"
+Int_J_path = "../results/histogram-Int-J-2p-w1-new.txt"
+Int_noJ_path = "../results/histogram-Int-noJ-2p-w1-new.txt"
+noInt_J_path = "../results/histogram-noInt-J-2p-w1-new.txt"
+noInt_noJ_path = "../results/histogram-noInt-noJ-2p-w1-new.txt"
 
 Int_J = np.loadtxt(Int_J_path)
 Int_noJ = np.loadtxt(Int_noJ_path)

@@ -175,7 +175,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     double acceptanceRatio = acceptanceCounter * normalizationFactor;
 
 
-    if (cycleType == "OneBodyDensity")                                      /* SHOULD THERE BE A TERMINALIZATION FACTOR HERE??? */
+    if (cycleType == "OneBodyDensity")
     {
         for (int i = 0; i < nBins; i++)
         {
@@ -561,7 +561,7 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         }
     }
 
-    if (cycleType == "OneBodyDensity")
+    if (cycleType == "OneBodyDensity" && cycleNumber >= terminalizationFactor)
     {
         OneBodyDensity();
     }
