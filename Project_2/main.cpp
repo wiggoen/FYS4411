@@ -12,6 +12,8 @@ int RunCatchTests()
 }
 
 
+
+
 int main(int argumentCount, char *argumentVector[])
 {
     /* Allocating input file for parameters */
