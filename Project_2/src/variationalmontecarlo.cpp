@@ -539,17 +539,26 @@ void VariationalMonteCarlo::UpdateEnergies(const int &i)
         if (nParticles == 2)
         {
             dPsiOfAlpha  = Wavefunction::DerivativePsiOfAlpha(rNew, omega);
-            dPsiOfBeta   = Wavefunction::DerivativePsiOfBeta(rNew, beta);
+            if (UseJastrowFactor)
+            {
+                dPsiOfBeta   = Wavefunction::DerivativePsiOfBeta(rNew, beta);
+            }
         } else
         {
             dPsiOfAlpha  = Wavefunction::DerivativePsiManyOfAlpha(rNew, nParticles, alpha, omega);
-            dPsiOfBeta   = Wavefunction::DerivativePsiManyOfBeta(rNew, nParticles, beta);
+            if (UseJastrowFactor)
+            {
+                dPsiOfBeta   = Wavefunction::DerivativePsiManyOfBeta(rNew, nParticles, beta);
+            }
         }
 
         psiSumAlpha += dPsiOfAlpha;
-        psiSumBeta  += dPsiOfBeta;
         psiOfAlphaTimesEnergySum += dPsiOfAlpha*deltaEnergy;
-        psiOfBetaTimesEnergySum  += dPsiOfBeta*deltaEnergy;
+        if (UseJastrowFactor)
+        {
+            psiSumBeta  += dPsiOfBeta;
+            psiOfBetaTimesEnergySum  += dPsiOfBeta*deltaEnergy;
+        }
     }
 
     if (cycleType == "OneBodyDensity")
@@ -573,7 +582,15 @@ void VariationalMonteCarlo::SteepestDescent( void )
     double averagePsiOfAlphaTimesEnergy = 0.0;
     double averagePsiOfBetaTimesEnergy  = 0.0;
 
-    std::cout << "Iteration " << " New_alpha " << " New_beta " << "   Energy " << std::endl;
+    if (UseJastrowFactor)
+    {
+        std::cout << "Iteration " << " New_alpha " << " New_beta " << "   Energy " << std::endl;
+    } else
+    {
+        std::cout << "Iteration " << " New_alpha " << "   Energy " << std::endl;
+    }
+
+
     /* Loop over number of alphas */
     for (int i = 0; i < nAlpha; i++)
     {
@@ -585,21 +602,27 @@ void VariationalMonteCarlo::SteepestDescent( void )
         deltaEnergy       = 0.0;
         acceptanceWeight  = 0.0;
         psiSumAlpha       = 0.0;
-        psiSumBeta        = 0.0;
         psiOfAlphaTimesEnergySum = 0.0;
-        psiOfBetaTimesEnergySum  = 0.0;
+        if (UseJastrowFactor)
+        {
+            psiSumBeta        = 0.0;
+            psiOfBetaTimesEnergySum  = 0.0;
+        }
 
         /* Run Monte Carlo cycles */
         MonteCarloCycles();
 
         /* Update energies */
         averagePsiAlpha = psiSumAlpha*scalingFactor;
-        averagePsiBeta  = psiSumBeta*scalingFactor;
         averageEnergy   = energySum*scalingFactor;
         averagePsiOfAlphaTimesEnergy = psiOfAlphaTimesEnergySum*scalingFactor;
-        averagePsiOfBetaTimesEnergy  = psiOfBetaTimesEnergySum*scalingFactor;
         alphaEnergyDerivative = 2.0*(averagePsiOfAlphaTimesEnergy - averagePsiAlpha*averageEnergy);
-        betaEnergyDerivative  = 2.0*(averagePsiOfBetaTimesEnergy - averagePsiBeta*averageEnergy);
+        if (UseJastrowFactor)
+        {
+            averagePsiBeta  = psiSumBeta*scalingFactor;
+            averagePsiOfBetaTimesEnergy  = psiOfBetaTimesEnergySum*scalingFactor;
+            betaEnergyDerivative  = 2.0*(averagePsiOfBetaTimesEnergy - averagePsiBeta*averageEnergy);
+        }
 
         if (alphaEnergyDerivative == 0 && betaEnergyDerivative == 0 && i>10)
         {
@@ -609,10 +632,17 @@ void VariationalMonteCarlo::SteepestDescent( void )
 
         /* Calculate alpha and beta */
         alpha -= eta * alphaEnergyDerivative;
-        beta  -= eta * betaEnergyDerivative;
+        if (UseJastrowFactor)
+        {
+            beta  -= eta * betaEnergyDerivative;
 
-        std::cout << std::setw(9) << i << std::setw(11) << alpha << std::setw(10) << beta
-                  << std::setw(10) << averageEnergy << std::endl;
+            std::cout << std::setw(9) << i << std::setw(11) << alpha << std::setw(10) << beta
+                      << std::setw(10) << averageEnergy << std::endl;
+        } else
+        {
+            std::cout << std::setw(9) << i << std::setw(11) << alpha
+                      << std::setw(10) << averageEnergy << std::endl;
+        }
     }
 }
 
