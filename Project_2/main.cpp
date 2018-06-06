@@ -12,13 +12,13 @@ int RunCatchTests()
 }
 
 
-
-
 int main(int argumentCount, char *argumentVector[])
 {
     /* Allocating input file for parameters */
     std::ifstream inputFile;
 
+    /* Output argument number and argument to terminal */
+    std::cout << "Arg. num " << "  Argument" << std::endl;
     for (int i = 0; i < argumentCount; i++)
     {
         std::cout << i << "          " << argumentVector[i] << std::endl;
@@ -110,7 +110,6 @@ int main(int argumentCount, char *argumentVector[])
         bool UseNumericalPotentialEnergy = parameter["Use numerical potential energy"];
         std::string cycleType = parameter["Cycle type"];
         int cycleStepToFile = parameter["Cycle step to file"];
-        bool UseMPI = parameter["Use MPI"];
         int terminalizationFactor = parameter["Terminalization factor"];
 
 
@@ -136,7 +135,7 @@ int main(int argumentCount, char *argumentVector[])
         {
             runVector = VMC->RunVMC(nParticles, nCycles, alpha, beta, omega, stepLength, timeStep, UseJastrowFactor,
                                     UseImportanceSampling, UseFermionInteraction, UseAnalyticalExpressions,
-                                    UseNumericalPotentialEnergy, cycleType, cycleStepToFile, UseMPI, terminalizationFactor);
+                                    UseNumericalPotentialEnergy, cycleType, cycleStepToFile, terminalizationFactor);
             runMatrix.insert_rows(i, runVector);
         }
 
@@ -164,9 +163,6 @@ int main(int argumentCount, char *argumentVector[])
         std::string Interaction;
         UseFermionInteraction ? Interaction = "On" : Interaction = "Off";
 
-        std::string Parallel;
-        UseMPI ? Parallel = "On" : Parallel = "Off";
-
         std::string Timing;
         UseAverageTiming ? Timing = "On" : Timing = "Off";
 
@@ -182,14 +178,13 @@ int main(int argumentCount, char *argumentVector[])
 
         /* Write to terminal */
         std::cout << std::endl;
-        std::cout << "Jastrow_factor "  << " Importance_sampling " << " Fermion_interaction " << " MPI " << " Average_timing "
+        std::cout << "Jastrow_factor "  << " Importance_sampling " << " Fermion_interaction " << " Average_timing "
                   << " Analytical_expressions " << " Numerical_potential_energy " << "      Cycle_type " << " Write_to_file "
                   << std::endl;
 
         std::cout << std::setw(14) << Jastrow
                   << std::setw(21) << Importance
                   << std::setw(21) << Interaction
-                  << std::setw(5)  << Parallel
                   << std::setw(16) << Timing
                   << std::setw(24) << AnalyticExpressions
                   << std::setw(28) << NumericalPotentialEnergy

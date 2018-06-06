@@ -13,7 +13,7 @@ public:
                         const double stepLength, const double timeStep, const bool UseJastrowFactor,
                         const bool UseImportanceSampling, const bool UseFermionInteraction,
                         const bool UseAnalyticalExpressions, const bool UseNumericalPotentialEnergy,
-                        const std::string cycleType, const int cycleStepToFile, const bool UseMPI, int terminalizationFactor);
+                        const std::string cycleType, const int cycleStepToFile, int terminalizationFactor);
 
     void InitialTrialPositionsBruteForce(arma::mat &r);
 

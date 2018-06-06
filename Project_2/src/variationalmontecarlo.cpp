@@ -34,7 +34,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
                                            const bool UseJastrowFactor, const bool UseImportanceSampling,
                                            const bool UseFermionInteraction, const bool UseAnalyticalExpressions,
                                            bool UseNumericalPotentialEnergy, std::string cycleType,
-                                           const int cycleStepToFile, bool UseMPI, int terminalizationFactor)
+                                           const int cycleStepToFile, int terminalizationFactor)
 {
     /* Adding variables to member variables */
     this->nParticles                  = nParticles;
@@ -122,7 +122,6 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
 
     /* MPI */
 #ifdef MPI_ON
-    if (UseMPI)
     {
         /* Initialize the MPI environment */
         MPI_Init(NULL, NULL);
@@ -199,7 +198,7 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
 
     /* Finalize the MPI environment */
 #ifdef MPI_ON
-    if (UseMPI) { MPI_Finalize(); }
+    MPI_Finalize();
 #endif
 
     return runDetails;
