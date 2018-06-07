@@ -3,6 +3,9 @@
 #include "inc/catch.hpp"
 #include "inc/json.hpp"
 
+#ifdef MPI_ON
+#include <mpi.h>
+#endif
 
 using json = nlohmann::json; /* for convenience */
 

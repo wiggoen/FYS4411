@@ -11,10 +11,6 @@
 #include <cmath>
 #include <stdlib.h>  /* Exit failure, to force the program to stop: exit(EXIT_FAILURE); */
 
-#ifdef MPI_ON
-#include <mpi.h>
-#endif
-
 
 VariationalMonteCarlo::VariationalMonteCarlo() :
     nDimensions(2)
