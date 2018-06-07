@@ -16,5 +16,5 @@
     "Use numerical potential energy": false,
     "Cycle type": "MonteCarlo",
     "Cycle step to file": 0,
-    "Use MPI": true
+    "Use MPI": false
 }
