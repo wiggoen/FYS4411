@@ -22,7 +22,7 @@ Most of the parameter file is self-explanatory, but there are some hidden option
 
 **NOTE!** If you don't have the folder 'results' in the project folder (Project_2), the files won't be written. Make sure to make the directory before you try to write to file.
 
-If you run the script with 'UseMPI': true, the program will include MPI for the calculations. But keep in mind that for now MPI only runs the same parameter file for all processors.
+If you run the script with <"UseMPI": true,> the program will include MPI for the calculations. But keep in mind that for now MPI only runs the same parameter file for all processors.
 
 ## Running automatic tests of the code
 Change the first line in [parameters.json](parameters.json) [relative link] file to <"Run tests": true,>.
