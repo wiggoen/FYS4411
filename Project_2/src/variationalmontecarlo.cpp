@@ -119,31 +119,6 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
         QForceNew = QForceOld;
     }
 
-
-    /* MPI */
-#ifdef MPI_ON
-    {
-        /* Initialize the MPI environment */
-        MPI_Init(NULL, NULL);
-
-        /* Get number of processes */
-        int world_size;
-        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-        /* Get the rank of the process */
-        MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-        /* Get the name of the processor */
-        char processor_name[MPI_MAX_PROCESSOR_NAME];
-        int name_len;
-        MPI_Get_processor_name(processor_name, &name_len);
-
-        /* Print off a hello world message */
-        std::cout << "Hello world from processor " << processor_name << ", rank " << world_rank
-                  << " out of " << world_size << " processors." << std::endl;
-    }
-#endif
-
     /* Start timing */
     auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -195,11 +170,6 @@ arma::rowvec VariationalMonteCarlo::RunVMC(const int nParticles, const int nCycl
     /* Vector containing the results of the run */
     arma::rowvec runDetails;
     runDetails << runTime << energy << energySquared << variance << acceptanceRatio << kineticEnergy << potentialEnergy;
-
-    /* Finalize the MPI environment */
-#ifdef MPI_ON
-    MPI_Finalize();
-#endif
 
     return runDetails;
 }

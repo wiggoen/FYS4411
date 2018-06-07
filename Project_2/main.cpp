@@ -130,6 +130,30 @@ int main(int argumentCount, char *argumentVector[])
             trials = 10;
         }
 
+        /* MPI */
+#ifdef MPI_ON
+        {
+            /* Initialize the MPI environment */
+            MPI_Init(NULL, NULL);
+
+            /* Get number of processes */
+            int world_size;
+            MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+            /* Get the rank of the process */
+            MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+            /* Get the name of the processor */
+            char processor_name[MPI_MAX_PROCESSOR_NAME];
+            int name_len;
+            MPI_Get_processor_name(processor_name, &name_len);
+
+            /* Print off a hello world message */
+            std::cout << "Hello world from processor " << processor_name << ", rank " << world_rank
+                      << " out of " << world_size << " processors." << std::endl;
+        }
+#endif
+
         /* Run VMC */
         for (int i = 0; i < trials; i++)
         {
@@ -214,7 +238,12 @@ int main(int argumentCount, char *argumentVector[])
         std::cout << "Kinetic_energy "  << " Potential_energy " << std::endl;
 
         std::cout << std::setw(14) << std::setprecision(6) << kineticEnergy
-                      << std::setw(18) << std::setprecision(6) << potentialEnergy << std::endl;
+                  << std::setw(18) << std::setprecision(6) << potentialEnergy << std::endl;
+
+        /* Finalize the MPI environment */
+#ifdef MPI_ON
+        MPI_Finalize();
+#endif
 
         return 0;
     }
