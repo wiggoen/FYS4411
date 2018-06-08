@@ -23,14 +23,18 @@ noInt_J = noInt_J*norm
 noInt_noJ = noInt_noJ*norm
 
 fig = plt.figure()
-plt.plot(distance[1:], Int_J/sum(Int_J), linestyle='None', marker='o',
-         markersize=0.6, label="Interaction on, Jastrow on")
-plt.plot(distance[1:], Int_noJ/sum(Int_noJ), linestyle='None', marker='o',
-         markersize=0.6, label="Interaction on, Jastrow off")
-plt.plot(distance[1:], noInt_J/sum(noInt_J), linestyle='None', marker='o',
-         markersize=0.6, label="Interaction off, Jastrow on")
+
 plt.plot(distance[1:], noInt_noJ/sum(noInt_noJ), linestyle='None', marker='o',
          markersize=0.6, label="Interaction off, Jastrow off")
+
+plt.plot(distance[1:], noInt_J/sum(noInt_J), linestyle='None', marker='o',
+         markersize=0.6, label="Interaction off, Jastrow on")
+
+plt.plot(distance[1:], Int_noJ/sum(Int_noJ), linestyle='None', marker='o',
+         markersize=0.6, label="Interaction on, Jastrow off")
+
+plt.plot(distance[1:], Int_J/sum(Int_J), linestyle='None', marker='o',
+         markersize=0.6, label="Interaction on, Jastrow on")
 
 plt.xlabel(r"$|\mathbf{r}|$", fontsize=15)
 plt.ylabel(r"$\rho(\mathbf{r})$", fontsize=15)
