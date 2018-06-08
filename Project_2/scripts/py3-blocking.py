@@ -43,7 +43,7 @@ def block(x):
     return ans
 
 # input data must be a power of two
-x = loadtxt("../results/oppg2d_energies_ana_IS.txt")
+x = loadtxt("../results/energies.txt")
 
 ans = block(x[:,1])
 
