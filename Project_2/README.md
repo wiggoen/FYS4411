@@ -27,3 +27,6 @@ If you run the script with <"UseMPI": true,> the program will include MPI for th
 ## Running automatic tests of the code
 Change the first line in [parameters.json](parameters.json) [relative link] file to <"Run tests": true,>.
 The program will run the tests when executed.
+
+## Bug in the code
+There's a bug in the code somewhere. You can read more about it in the report in section 5.1.
